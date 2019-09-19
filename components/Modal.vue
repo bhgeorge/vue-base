@@ -20,7 +20,7 @@
 
 <script>
 import ally from 'ally.js';
-import Icon from '@/components/Icon';
+import Icon from './Icon';
 
 export default {
   props: {
