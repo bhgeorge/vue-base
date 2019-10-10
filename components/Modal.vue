@@ -8,7 +8,7 @@
               <Icon type="close" />
               <span class="u-visually-hidden">Close modal</span>
             </button>
-            <div class="u-p-xl u-bg-white">
+            <div class="u-p-xl u-bg-theme-background">
               <slot></slot>
             </div>
           </div>
