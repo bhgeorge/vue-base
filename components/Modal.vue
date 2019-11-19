@@ -1,11 +1,28 @@
 <template lang="html">
   <portal :to="portal">
-    <transition name="u-trans-pop-in" @after-enter="handleEnter">
-      <div class="o-modal" @click.self="closeModal" tabindex="-1" role="dialog" ref="modal">
-        <div :class="classNames" role="document">
+    <transition
+      @after-enter="handleEnter"
+      name="u-trans-pop-in"
+    >
+      <div
+        @click.self="closeModal"
+        class="o-modal"
+        ref="modal"
+        role="dialog"
+        tabindex="-1"
+      >
+        <div
+          :class="classNames"
+          role="document"
+        >
           <div class="o-modal__container">
-            <button v-if="hasClose" class="o-modal__close" @click="closeModal" tabindex="0">
-              <Icon type="close" />
+            <button
+              v-if="hasClose"
+              @click="closeModal"
+              class="o-modal__close"
+              tabindex="0"
+            >
+              <Icon :type="CLOSE" />
               <span class="u-visually-hidden">Close modal</span>
             </button>
             <div class="u-p-xl u-bg-theme-background">
@@ -21,6 +38,7 @@
 <script>
 import ally from 'ally.js';
 import Icon from './Icon';
+import { CLOSE } from '@/constants/components/Icon';
 
 export default {
   props: {
