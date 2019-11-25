@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import ally from 'ally.js';
+import { maintain } from 'ally.js';
 import Icon from './Icon';
 import { CLOSE } from './../constants/components/Icon';
 
@@ -61,7 +61,8 @@ export default {
   data() {
     return {
       initialEl: null,
-      handle: null,
+      tabFocusHandle: null,
+      disabledHandle: null,
     };
   },
   computed: {
@@ -87,8 +88,11 @@ export default {
       }
     },
     handleEnter() {
-      this.handle = ally.maintain.tabFocus({
+      this.tabFocusHandle = maintain.tabFocus({
         context: this.$refs.modal,
+      });
+      this.disabledHandle = maintain.disabled({
+        filter: this.$refs.modal,
       });
       window.addEventListener('keydown', this.handleKeyboard);
       this.$refs.modal.focus();
@@ -97,18 +101,13 @@ export default {
   created() {
     // Remove non-modal content from readability
     this.initialEl = document.activeElement;
-    const globalContainer = document.getElementById('site-main');
     document.body.classList.add('no-scroll');
-    globalContainer.setAttribute('tabindex', -1);
-    globalContainer.setAttribute('aria-hidden', true);
   },
   beforeDestroy() {
     // Return non-modal content to readability
-    const globalContainer = document.getElementById('site-main');
+    this.tabFocusHandle.disengage();
+    this.disabledHandle.disengage();
     document.body.classList.remove('no-scroll');
-    globalContainer.removeAttribute('tabindex');
-    globalContainer.removeAttribute('aria-hidden');
-    this.handle.disengage();
     window.removeEventListener('keydown', this.handleKeyboard);
     this.initialEl.focus();
   },
