@@ -22,7 +22,7 @@
               class="o-modal__close"
               tabindex="0"
             >
-              <Icon :type="CLOSE" />
+              <Icon type="close" />
               <span class="u-visually-hidden">Close modal</span>
             </button>
             <div class="u-p-xl u-bg-theme-background">
@@ -38,7 +38,6 @@
 <script>
 import { maintain } from 'ally.js';
 import Icon from './Icon';
-import { CLOSE } from './../constants/components/Icon';
 
 export default {
   props: {
