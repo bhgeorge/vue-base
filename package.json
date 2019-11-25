@@ -1,6 +1,6 @@
 {
   "name": "vue-base",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Boilerplate Vue components",
   "main": "index.js",
   "scripts": {

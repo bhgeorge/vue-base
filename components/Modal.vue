@@ -38,7 +38,7 @@
 <script>
 import ally from 'ally.js';
 import Icon from './Icon';
-import { CLOSE } from '@/constants/components/Icon';
+import { CLOSE } from './../constants/components/Icon';
 
 export default {
   props: {

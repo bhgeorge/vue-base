@@ -1,4 +1,4 @@
-import { generateRandomId } from './../../mixins/generateRandomId';
+import { generateRandomId } from './../../../mixins/randomId';
 import * as types from './mutation-types';
 
 export const closeAlert = ({ commit }, index) => {
