@@ -37,6 +37,7 @@
 
 <script>
 import { maintain } from 'ally.js';
+import { Portal } from 'portal-vue';
 import Icon from './Icon';
 
 export default {
@@ -45,18 +46,23 @@ export default {
       type: Array,
       required: false,
     },
+
     hasClose: {
       type: Boolean,
       default: true,
     },
+
     portal: {
       type: String,
       default: 'modal',
     },
   },
+
   components: {
     Icon,
+    Portal,
   },
+
   data() {
     return {
       initialEl: null,
@@ -64,6 +70,7 @@ export default {
       disabledHandle: null,
     };
   },
+
   computed: {
     classNames() {
       if (this.modifiers && this.modifiers.length > 0) {
@@ -72,12 +79,14 @@ export default {
       return ['o-modal__dialog'];
     },
   },
+
   methods: {
     closeModal() {
       if (this.hasClose) {
         this.$emit('emitClose');
       }
     },
+
     handleKeyboard(event) {
       // Close on escape if user can close
       if (this.hasClose) {
@@ -86,6 +95,7 @@ export default {
         }
       }
     },
+
     handleEnter() {
       this.tabFocusHandle = maintain.tabFocus({
         context: this.$refs.modal,
@@ -97,11 +107,13 @@ export default {
       this.$refs.modal.focus();
     },
   },
+
   created() {
     // Remove non-modal content from readability
     this.initialEl = document.activeElement;
     document.body.classList.add('no-scroll');
   },
+  
   beforeDestroy() {
     // Return non-modal content to readability
     this.tabFocusHandle.disengage();
