@@ -37,6 +37,7 @@
 
 <script>
 import { maintain } from 'ally.js';
+// TODO: Include this into vue when we extend this component
 import { Portal } from 'portal-vue';
 import Icon from './Icon';
 
@@ -113,7 +114,7 @@ export default {
     this.initialEl = document.activeElement;
     document.body.classList.add('no-scroll');
   },
-  
+
   beforeDestroy() {
     // Return non-modal content to readability
     this.tabFocusHandle.disengage();
