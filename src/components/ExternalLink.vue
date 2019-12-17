@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import Icon from './Icon';
+import Icon from '@/components/icons/Icon';
 
 export default {
   props: {

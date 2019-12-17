@@ -1,18 +1,18 @@
 <template lang="html">
   <portal :to="portal">
-    <transition
-      @after-enter="handleEnter"
-      name="u-trans-pop-in"
-    >
+    <transition name="u-trans-pop-in">
       <div
         @click.self="closeModal"
         class="o-modal"
-        ref="modal"
+        ref="dialog"
         role="dialog"
         tabindex="-1"
       >
         <div
+          :aria-describedby="!!describedby ? describedby : false"
+          :aria-labelledby="!!labelledby ? labelledby : false"
           :class="classNames"
+          ref="document"
           role="document"
         >
           <div class="o-modal__container">
@@ -36,10 +36,13 @@
 </template>
 
 <script>
+import Vue from 'vue';
 import { maintain } from 'ally.js';
-// TODO: Include this into vue when we extend this component
-import { Portal } from 'portal-vue';
-import Icon from './Icon';
+import { Portal, PortalTarget } from 'portal-vue';
+import Icon from '@/components/icons/Icon';
+
+Vue.component('Portal', Portal);
+Vue.component('PortalTarget', PortalTarget);
 
 export default {
   props: {
@@ -56,6 +59,16 @@ export default {
     portal: {
       type: String,
       default: 'modal',
+    },
+
+    describedby: {
+      type: String,
+      required: false,
+    },
+
+    labelledby: {
+      type: String,
+      required: false,
     },
   },
 
@@ -96,23 +109,25 @@ export default {
         }
       }
     },
-
-    handleEnter() {
-      this.tabFocusHandle = maintain.tabFocus({
-        context: this.$refs.modal,
-      });
-      this.disabledHandle = maintain.disabled({
-        filter: this.$refs.modal,
-      });
-      window.addEventListener('keydown', this.handleKeyboard);
-      this.$refs.modal.focus();
-    },
   },
 
   created() {
     // Remove non-modal content from readability
     this.initialEl = document.activeElement;
     document.body.classList.add('no-scroll');
+  },
+
+  mounted() {
+    window.addEventListener('keydown', this.handleKeyboard);
+    window.requestAnimationFrame(() => {
+      this.tabFocusHandle = maintain.tabFocus({
+        context: this.$refs.dialog,
+      });
+      this.disabledHandle = maintain.disabled({
+        filter: this.$refs.dialog,
+      });
+      this.$refs.document.focus();
+    });
   },
 
   beforeDestroy() {

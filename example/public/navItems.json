@@ -1,0 +1,29 @@
+{
+  "text": [
+    {
+      "text": "Alert",
+      "name": "alert"
+    },
+    {
+      "text": "Forms",
+      "name": "forms",
+      "sub": [
+        {
+          "text": "Simple Form",
+          "name": "forms"
+        }
+      ]
+    },
+    {
+      "text": "Modal",
+      "name": "modal"
+    }
+  ],
+  "icon": [
+    {
+      "href": "https://github.com/bhgeorge/vue-base",
+      "text": "View this repository on Github",
+      "type": "Github"
+    }
+  ]
+}

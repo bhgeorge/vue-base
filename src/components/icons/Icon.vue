@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import paths from './icons.json';
+import paths from './constants/types.json';
 
 export default {
   props: {

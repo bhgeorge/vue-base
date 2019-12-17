@@ -13,22 +13,24 @@ module.exports = {
   themeConfig: {
     repo: 'https://github.com/bhgeorge/vue-base',
     repoLabel: 'GitHub',
+    lastUpdated: true,
     nav: [
       {
         text: 'Components',
         items: [
           { text: 'External Link', link: '/components/externalLink' },
-          { text: 'Forms', link: '/components/forms' },
+          { text: 'Forms', link: '/components/forms/' },
           { text: 'Icon', link: '/components/icon' },
           { text: 'Modal', link: '/components/modal' },
         ],
       },
       {
-        text: 'Styleguide',
+        text: 'Layouts',
         items: [
-          { text: 'Colors', link: '/styleguide/colors' },
+          { text: 'Sidebar Layout', link: '/layouts/sidebarLayout' }
         ],
       },
+      { text: 'Utils', link: '/utils/' },
     ],
   },
 };
