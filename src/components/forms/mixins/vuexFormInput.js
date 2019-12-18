@@ -1,7 +1,7 @@
 import { debounce } from 'lodash';
 import { mapState, mapActions, mapMutations } from 'vuex';
-import { SET_IS_VALID, UPDATE_FIELD_VALUE } from './../constants/mutation-types';
-import { isNotEmpty } from './../utils/validations';
+import { SET_IS_VALID, UPDATE_FIELD_VALUE } from '../constants/mutation-types';
+import { isNotEmpty } from '../utils/validations';
 
 export default {
   props: {

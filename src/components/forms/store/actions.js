@@ -57,11 +57,6 @@ export const registerForm = ({ commit, state }, data) => {
     const fields = [];
     const prereqMap = {};
     data.fields.forEach((field) => {
-      // Register any new components
-      if (!state.registeredComponents.includes(field.component)) {
-        Vue.component(field.component, () => import(/* webpackChunkName: "field" */ `../fields/${field.component}`));
-        commit(types.ADD_REGISTERED_COMPONENT, field.component);
-      }
       // Store references for visibility
       if (field.prereqs) {
         field.prereqs.forEach((prereq) => {

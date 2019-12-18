@@ -63,8 +63,27 @@
 </template>
 
 <script>
+import Vue from 'vue';
 import { mapActions } from 'vuex';
 import formsStore from './store';
+// Globally register all fields
+// They are already included in the JS bundle and rollup doesn't like dynamic imports
+// Makes it easier to add your own field components too.
+import InputCheckbox from './fields/InputCheckbox.vue';
+import InputRadio from './fields/InputRadio.vue';
+import InputSelect from './fields/InputSelect.vue';
+import InputText from './fields/InputText.vue';
+import InputTextarea from './fields/InputTextarea.vue';
+import KeyValuePair from './fields/KeyValuePair.vue';
+import QuillRTE from './fields/QuillRTE.vue';
+
+Vue.component('InputCheckbox', InputCheckbox);
+Vue.component('InputRadio', InputRadio);
+Vue.component('InputSelect', InputSelect);
+Vue.component('InputText', InputText);
+Vue.component('InputTextarea', InputTextarea);
+Vue.component('KeyValuePair', KeyValuePair);
+Vue.component('QuillRTE', QuillRTE);
 
 export default {
   props: {

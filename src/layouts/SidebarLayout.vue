@@ -113,7 +113,7 @@
 </template>
 
 <script>
-import AlertList from '@/components/alerts/AlertList';
+import AlertList from '@/components/alerts/AlertList.vue';
 
 export default {
   props: {

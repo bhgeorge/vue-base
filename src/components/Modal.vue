@@ -39,7 +39,7 @@
 import Vue from 'vue';
 import { maintain } from 'ally.js';
 import { Portal, PortalTarget } from 'portal-vue';
-import Icon from '@/components/icons/Icon';
+import Icon from '@/components/icons/Icon.vue';
 
 Vue.component('Portal', Portal);
 Vue.component('PortalTarget', PortalTarget);

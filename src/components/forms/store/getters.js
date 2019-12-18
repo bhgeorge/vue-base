@@ -6,7 +6,7 @@ export default {
    *
    * @returns {Boolean} isValid.
    */
-  isFormValid: state => (id) => {
+  isFormValid: (state) => (id) => {
     for (let i = 0; i < state.forms[id].fields.length; i += 1) {
       const fieldId = state.forms[id].fields[i];
       if (state.fields[fieldId].isVisible && !state.fields[fieldId].isValid) {
@@ -23,7 +23,7 @@ export default {
    *
    * @returns {Object[]} The error information.
    */
-  compileFormErrors: state => (id) => {
+  compileFormErrors: (state) => (id) => {
     const errors = [];
     state.forms[id].fields.forEach((fieldId) => {
       const field = state.fields[fieldId];
@@ -44,7 +44,7 @@ export default {
    *
    * @returns {Object} The form data object for submission.
    */
-  compileFormData: state => (id) => {
+  compileFormData: (state) => (id) => {
     const data = {};
     state.forms[id].fields.forEach((field) => {
       const f = state.fields[field];

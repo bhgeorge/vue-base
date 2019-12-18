@@ -1,4 +1,3 @@
-export const ADD_REGISTERED_COMPONENT = 'addRegisteredComponent';
 export const CREATE_FIELD = 'createField';
 export const CREATE_FORM = 'createForm';
 export const REGISTER_FIELDS = 'registerFields';
@@ -8,7 +7,6 @@ export const SET_IS_VISIBLE = 'setIsVisible';
 export const UPDATE_FIELD_VALUE = 'updateFieldValue';
 
 export default {
-  ADD_REGISTERED_COMPONENT,
   CREATE_FIELD,
   CREATE_FORM,
   REGISTER_FIELDS,

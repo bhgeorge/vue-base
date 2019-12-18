@@ -21,7 +21,7 @@
 
 <script>
 import { mapState, mapMutations } from 'vuex';
-import Alert from './Alert';
+import Alert from './Alert.vue';
 import { CLOSE } from './constants/mutation-types';
 import alertStore from './store';
 

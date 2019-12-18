@@ -10,4 +10,4 @@ export default {
   EVAL_IS_ONE_OF,
   EVAL_IS,
   EVAL_NOT,
-}
+};

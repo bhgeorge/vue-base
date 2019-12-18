@@ -1,5 +1,5 @@
 import { KEY_VALUE_PAIR } from '../../constants/fieldTypes';
-import getMachineSafeStr from '@/utils/getMachineSafeStr';
+import getMachineSafeStr from '@/utils/getMachineSafeStr.js';
 
 const baseValue = (field) => field.value;
 

@@ -25,11 +25,11 @@
 
 <script>
 import { mapActions } from 'vuex';
-import Icon from '@/components/icons/Icon';
-import getUniqueId from '@/utils/getUniqueId';
-import InputText from './InputText';
-import { isMachineSafeStr } from '../utils/validations';
-import vuexFormInput from '../mixins/vuexFormInput';
+import Icon from '@/components/icons/Icon.vue';
+import getUniqueId from '@/utils/getUniqueId.js';
+import InputText from './InputText.vue';
+import { isMachineSafeStr } from '../utils/validations.js';
+import vuexFormInput from '../mixins/vuexFormInput.js';
 
 export default {
   props: {

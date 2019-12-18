@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import {
-  ADD_REGISTERED_COMPONENT,
   CREATE_FORM,
   REGISTER_FIELDS,
   RESET_FORM,
@@ -58,10 +57,6 @@ export default {
 
   [SET_IS_VISIBLE](state, obj) {
     state.fields[obj.id].isVisible = obj.bool;
-  },
-
-  [ADD_REGISTERED_COMPONENT](state, str) {
-    state.registeredComponents.push(str);
   },
 
   [UPDATE_FIELD_VALUE](state, obj) {
