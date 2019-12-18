@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <a :href="link" target="_blank" rel="noopener">
     <span>{{ text }}</span>
     <span class="u-visually-hidden">(opens in a new tab)</span>

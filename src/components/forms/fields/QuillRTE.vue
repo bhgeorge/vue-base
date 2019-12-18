@@ -9,17 +9,6 @@
     >
       {{ field.label }}<sup v-if="field.required">*</sup>
     </label>
-    <!-- <input
-      :aria-describedby="showError ? `vf-${reference}__error` : false"
-      :aria-required="field.required"
-      :autocomplete="field.autocomplete || false"
-      :id="`vf-${reference}`"
-      :name="field.name"
-      @blur="validateField"
-      class="c-input__input"
-      type="text"
-      v-model="fieldVal"
-    /> -->
     <div
       :id="`vf-${reference}__quill-container`"
       class="c-quill"
@@ -78,7 +67,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="css">
 /*!
 * Quill Editor v1.3.6
 * https://quilljs.com/
@@ -86,42 +75,42 @@ export default {
 * Copyright (c) 2013, salesforce.com
 */
 .ql-container {
-box-sizing: border-box;
-font-family: Helvetica, Arial, sans-serif;
-font-size: 13px;
-height: 100%;
-margin: 0px;
-position: relative;
+  box-sizing: border-box;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  height: 100%;
+  margin: 0px;
+  position: relative;
 }
 .ql-container.ql-disabled .ql-tooltip {
-visibility: hidden;
+  visibility: hidden;
 }
 .ql-container.ql-disabled .ql-editor ul[data-checked] > li::before {
-pointer-events: none;
+  pointer-events: none;
 }
 .ql-clipboard {
-left: -100000px;
-height: 1px;
-overflow-y: hidden;
-position: absolute;
-top: 50%;
+  left: -100000px;
+  height: 1px;
+  overflow-y: hidden;
+  position: absolute;
+  top: 50%;
 }
 .ql-clipboard p {
-margin: 0;
-padding: 0;
+  margin: 0;
+  padding: 0;
 }
 .ql-editor {
-box-sizing: border-box;
-line-height: 1.42;
-height: 100%;
-outline: none;
-overflow-y: auto;
-padding: 12px 15px;
-tab-size: 4;
--moz-tab-size: 4;
-text-align: left;
-white-space: pre-wrap;
-word-wrap: break-word;
+  box-sizing: border-box;
+  line-height: 1.42;
+  height: 100%;
+  outline: none;
+  overflow-y: auto;
+  padding: 12px 15px;
+  tab-size: 4;
+  -moz-tab-size: 4;
+  text-align: left;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 .ql-editor > * {
 cursor: text;
