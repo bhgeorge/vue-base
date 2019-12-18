@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <portal :to="portal">
     <transition name="u-trans-pop-in">
       <div

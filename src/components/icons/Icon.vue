@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <svg :class="classNames" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" focusable="false" role="presentation">
     <path :d="path" fill="currentColor" />
   </svg>

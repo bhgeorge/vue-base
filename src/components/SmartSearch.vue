@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div class="c-input c-smart-search">
     <label
       class="c-input__label"

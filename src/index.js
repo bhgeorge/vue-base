@@ -7,7 +7,7 @@ import SmartSearch from './components/SmartSearch';
 import VuexForm from './components/forms/VuexForm';
 
 // Constants
-import constants from './constants';
+import constants from './constants/';
 
 export default {
   install(Vue, options = {

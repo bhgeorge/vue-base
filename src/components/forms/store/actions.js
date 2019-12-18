@@ -59,8 +59,7 @@ export const registerForm = ({ commit, state }, data) => {
     data.fields.forEach((field) => {
       // Register any new components
       if (!state.registeredComponents.includes(field.component)) {
-        Vue.component(field.component, () => import(`../fields/${field.component}`));
-        console.log(Vue.options.components);
+        Vue.component(field.component, () => import(/* webpackChunkName: "field" */ `../fields/${field.component}`));
         commit(types.ADD_REGISTERED_COMPONENT, field.component);
       }
       // Store references for visibility
