@@ -918,7 +918,12 @@ var __vue_render__$5 = function() {
         )
       ]),
       _vm._v(" "),
-      _c("main", { attrs: { id: "site-main" } }, [_c("router-view")], 1),
+      _c(
+        "main",
+        { staticClass: "c-site-main", attrs: { id: "site-main" } },
+        [_c("router-view")],
+        1
+      ),
       _vm._v(" "),
       _c("AlertList"),
       _vm._v(" "),
