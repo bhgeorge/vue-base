@@ -6,8 +6,9 @@ import SidebarLayout from './layouts/SidebarLayout';
 import SmartSearch from './components/SmartSearch';
 import VuexForm from './components/forms/VuexForm';
 
-// Constants
+// JS goodies
 import constants from './constants/';
+import utils from './utils/';
 
 export default {
   install(Vue, options = {
@@ -30,4 +31,5 @@ export {
   SmartSearch,
   VuexForm,
   constants,
+  utils,
 };
