@@ -102,7 +102,10 @@
       </nav>
     </header>
     <!-- Site Main -->
-    <main id="site-main">
+    <main
+      id="site-main"
+      class="c-site-main"
+    >
       <router-view />
     </main>
     <!-- Alerts -->
