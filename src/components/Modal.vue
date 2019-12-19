@@ -38,11 +38,10 @@
 <script>
 import Vue from 'vue';
 import { maintain } from 'ally.js';
-import { Portal, PortalTarget } from 'portal-vue';
+import { Portal } from 'portal-vue';
 import Icon from '@/components/icons/Icon.vue';
 
 Vue.component('Portal', Portal);
-Vue.component('PortalTarget', PortalTarget);
 
 export default {
   props: {

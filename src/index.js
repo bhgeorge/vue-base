@@ -20,6 +20,13 @@ export default {
     Vue.component(`${options.prefix}SidebarLayout`, SidebarLayout);
     Vue.component(`${options.prefix}SmartSearch`, SmartSearch);
     Vue.component(`${options.prefix}VuexForm`, VuexForm);
+    Vue.component(`${options.prefix}InputCheckbox`, InputCheckbox);
+    Vue.component(`${options.prefix}InputRadio`, InputRadio);
+    Vue.component(`${options.prefix}InputSelect`, InputSelect);
+    Vue.component(`${options.prefix}InputText`, InputText);
+    Vue.component(`${options.prefix}InputTextarea`, InputTextarea);
+    Vue.component(`${options.prefix}KeyValuePair`, KeyValuePair);
+    Vue.component(`${options.prefix}QuillRTE`, QuillRTE);
   },
 };
 

@@ -116,7 +116,11 @@
 </template>
 
 <script>
+import Vue from 'vue';
 import AlertList from '@/components/alerts/AlertList.vue';
+import { PortalTarget } from 'portal-vue';
+
+Vue.component('PortalTarget', PortalTarget);
 
 export default {
   props: {
@@ -129,6 +133,7 @@ export default {
 
   components: {
     AlertList,
+    PortalTarget,
   },
 
   data() {
