@@ -41,8 +41,6 @@ import { maintain } from 'ally.js';
 import { Portal } from 'portal-vue';
 import Icon from '@/components/icons/Icon.vue';
 
-Vue.component('Portal', Portal);
-
 export default {
   props: {
     modifiers: {
