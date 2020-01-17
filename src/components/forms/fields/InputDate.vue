@@ -9,36 +9,17 @@
     >
       {{ field.label }}<sup v-if="field.required">*</sup>
     </label>
-    <select
+    <input
       :aria-describedby="showError ? `vf-${reference}__error` : false"
       :aria-required="field.required"
       :autocomplete="field.autocomplete || false"
       :id="`vf-${reference}`"
       :name="field.name"
       @blur="validateField"
-      class="c-input__input c-input__input--select"
+      class="c-input__input"
+      type="date"
       v-model="fieldVal"
-    >
-      <option
-        v-for="option in field.options"
-        :key="option.value"
-        :value="option.value"
-      >
-        {{ option.text }}
-      </option>
-      <optgroup
-        v-for="optgroup in field.optgroups"
-        :key="optgroup.text"
-      >
-        <option
-          v-for="option in optgroup.options"
-          :key="option.value"
-          :value="option.value"
-        >
-          {{ option.text }}
-        </option>
-      </optgroup>
-    </select>
+    />
     <p
       :id="`vf-${reference}__error`"
       class="c-input__error"
@@ -63,7 +44,7 @@ export default {
         return this.field.value;
       },
       set(val) {
-        return this.debouncedUpdateFieldValue({ id: this.reference, val });
+        this.debouncedUpdateFieldValue({ id: this.reference, val });
       },
     },
   },

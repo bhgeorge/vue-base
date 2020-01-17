@@ -19,11 +19,11 @@
       "name": "modal"
     }
   ],
-  "icon": [
+  "icons": [
     {
       "href": "https://github.com/bhgeorge/vue-base",
       "text": "View this repository on Github",
-      "type": "Github"
+      "type": "github"
     }
   ]
 }

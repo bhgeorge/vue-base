@@ -19,13 +19,13 @@
             <button
               v-if="hasClose"
               @click="closeModal"
-              class="o-modal__close"
+              class="c-btn c-btn--icon c-btn--close"
               tabindex="0"
             >
               <Icon type="close" />
               <span class="u-visually-hidden">Close modal</span>
             </button>
-            <div class="u-p-xl u-bg-theme-background">
+            <div class="u-p-xl u-bg-theme-bg">
               <slot></slot>
             </div>
           </div>
@@ -36,7 +36,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { maintain } from 'ally.js';
 import { Portal } from 'portal-vue';
 import Icon from '@/components/icons/Icon.vue';

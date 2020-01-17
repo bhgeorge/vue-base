@@ -42,32 +42,34 @@ export default {
     };
   },
 
-  // TODO: Look at ways to integrate with Quill to pass this value every so often
   methods: {
     setFieldVal() {
       this.debouncedUpdateFieldValue({
         id: this.reference,
-        val: this.quill.getContents,
+        val: this.quill.getContents(),
       });
     },
   },
 
   mounted() {
     this.quill = new Quill(`#vf-${this.reference}`, {
-      modules: {
-        toolbar: [
-          [{ header: [2, 3, 4, false] }],
-          ['bold', 'italic', 'underline'],
-        ],
-        scrollingContainer: `#vf-${this.reference}__quill-container`,
-        theme: 'snow',
-      },
+      toolbar: [
+        [{ header: [2, 3, 4, false] }],
+        ['bold', 'italic', 'underline'],
+      ],
+      scrollingContainer: `#vf-${this.reference}__quill-container`,
+      theme: 'snow',
+    });
+
+    // Update stored value on debounced text change
+    this.quill.on('text-change', () => {
+      this.setFieldVal();
     });
   },
 };
 </script>
 
-<style lang="css">
+<style lang="scss">
 /*!
 * Quill Editor v1.3.6
 * https://quilljs.com/
@@ -936,7 +938,7 @@ color: #06c;
 .ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke.ql-fill,
 .ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke.ql-fill,
 .ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke.ql-fill {
-fill: #06c;
+fill: color('theme-interaction', 'hover');
 }
 .ql-snow.ql-toolbar button:hover .ql-stroke,
 .ql-snow .ql-toolbar button:hover .ql-stroke,

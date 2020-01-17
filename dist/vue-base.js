@@ -4,13 +4,14 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var portalVue = require('portal-vue');
 var vueRuntimeHelpers = require('vue-runtime-helpers');
-var Vue = _interopDefault(require('vue'));
 var ally_js = require('ally.js');
+var portalVue = require('portal-vue');
 var vuex = require('vuex');
 var lodash = require('lodash');
+var Vue = _interopDefault(require('vue'));
 var Quill = _interopDefault(require('quill'));
+var Draggable = _interopDefault(require('vuedraggable'));
 
 var add = "M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z";
 var close = "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z";
@@ -369,7 +370,7 @@ var __vue_render__$2 = function() {
                     ? _c(
                         "button",
                         {
-                          staticClass: "o-modal__close",
+                          staticClass: "c-btn c-btn--icon c-btn--close",
                           attrs: { tabindex: "0" },
                           on: { click: _vm.closeModal }
                         },
@@ -386,7 +387,7 @@ var __vue_render__$2 = function() {
                   _vm._v(" "),
                   _c(
                     "div",
-                    { staticClass: "u-p-xl u-bg-theme-background" },
+                    { staticClass: "u-p-xl u-bg-theme-bg" },
                     [_vm._t("default")],
                     2
                   )
@@ -438,7 +439,7 @@ var isValidHeadingTag = (str) => ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(s
 
 var script$3 = {
   props: {
-    type: {
+    state: {
       type: String,
       default: 'neutral',
     },
@@ -454,6 +455,11 @@ var script$3 = {
       validator: (value) => isValidHeadingTag(value),
     },
 
+    text: {
+      type: String,
+      required: false,
+    },
+
     hasClose: {
       type: Boolean,
       default: false,
@@ -463,24 +469,53 @@ var script$3 = {
   components: {
     Icon: __vue_component__,
   },
+
+  data() {
+    return {
+      timer: null,
+    };
+  },
+
+  methods: {
+    closeAlert() {
+      this.$emit('emitClose');
+    },
+  },
+
+  created() {
+    if (this.hasClose) {
+      this.timer = setTimeout(() => {
+        this.closeAlert();
+      }, 2000);
+    }
+  },
+
+  beforeDestroy() {
+    if (this.timer) {
+      clearTimeout(this.timer);
+    }
+  },
 };
 
 /* script */
 const __vue_script__$3 = script$3;
 
 /* template */
-var __vue_render__$3 = function(_h, _vm) {
-  var _c = _vm._c;
+var __vue_render__$3 = function() {
+  var _vm = this;
+  var _h = _vm.$createElement;
+  var _c = _vm._self._c || _h;
   return _c(
     "div",
-    { class: ["c-alert", "c-alert--" + _vm.type] },
+    { class: ["c-alert", "c-alert--" + _vm.state] },
     [
       _vm.hasClose
         ? _c(
             "button",
             {
-              staticClass: "c-alert__close",
-              attrs: { type: "button", name: "closeAlert" }
+              staticClass: "c-btn c-btn--s c-btn--icon c-btn--close",
+              attrs: { type: "button", name: "closeAlert" },
+              on: { click: _vm.closeAlert }
             },
             [
               _c("Icon", { attrs: { type: "close" } }),
@@ -518,7 +553,7 @@ __vue_render__$3._withStripped = true;
   /* module identifier */
   const __vue_module_identifier__$3 = undefined;
   /* functional template */
-  const __vue_is_functional_template__$3 = true;
+  const __vue_is_functional_template__$3 = false;
   /* style inject */
   
   /* style inject SSR */
@@ -596,7 +631,9 @@ var script$4 = {
   },
 
   methods: {
-    ...vuex.mapMutations('alerts', [CLOSE]),
+    ...vuex.mapMutations('alerts', {
+      closeAlert: CLOSE,
+    }),
   },
 
   created() {
@@ -625,22 +662,28 @@ var __vue_render__$4 = function() {
           attrs: { mode: "out-in", name: "c-alert-trans", tag: "div" }
         },
         _vm._l(_vm.alerts, function(alert, index) {
-          return _c("Alert", {
-            key: alert.id,
-            attrs: {
-              hasClose: true,
-              text: alert.text,
-              title: alert.title,
-              type: alert.type
-            },
-            on: {
-              emitClose: function($event) {
-                return _vm.closeAlert(index)
-              }
-            }
-          })
+          return _c(
+            "div",
+            { key: alert.id, staticClass: "u-m-bot-xs" },
+            [
+              _c("Alert", {
+                attrs: {
+                  hasClose: true,
+                  text: alert.text,
+                  title: alert.title,
+                  state: alert.state
+                },
+                on: {
+                  emitClose: function($event) {
+                    return _vm.closeAlert(index)
+                  }
+                }
+              })
+            ],
+            1
+          )
         }),
-        1
+        0
       )
     ],
     1
@@ -721,6 +764,14 @@ var script$5 = {
     },
   },
 
+  watch: {
+    $route() {
+      if (this.isNavOpen) {
+        this.isNavOpen = false;
+      }
+    },
+  },
+
   methods: {
     getNavItemClasses(item) {
       const classes = ['o-list-bare__item', 'c-site-nav__item'];
@@ -752,7 +803,7 @@ var __vue_render__$5 = function() {
         "a",
         {
           staticClass:
-            "u-visually-hidden u-visually-hidden--focus u-bg-red-dark u-c-white u-p",
+            "u-visually-hidden u-visually-hidden--focus u-bg-theme-interaction-accent u-c-theme-interaction u-p",
           attrs: { href: "#site-main", id: "skip-link" }
         },
         [_vm._v("\n    Skip to content\n  ")]
@@ -762,7 +813,7 @@ var __vue_render__$5 = function() {
         _c(
           "button",
           {
-            staticClass: "c-site-nav-toggle u-d-none@m",
+            staticClass: "c-site-nav-toggle c-btn c-btn--icon u-d-none@m",
             attrs: { name: "toggleNav", type: "button" },
             on: { click: _vm.toggleNav }
           },
@@ -782,7 +833,10 @@ var __vue_render__$5 = function() {
           [
             _c(
               "router-link",
-              { attrs: { to: { name: "home" } } },
+              {
+                staticClass: "u-bg-theme-nav-bg",
+                attrs: { to: { name: "home" } }
+              },
               [_vm._t("navLogo")],
               2
             ),
@@ -870,43 +924,47 @@ var __vue_render__$5 = function() {
             _vm._v(" "),
             _vm._t("navActions"),
             _vm._v(" "),
-            _c("hr"),
-            _vm._v(" "),
-            _c(
-              "ul",
-              { staticClass: "o-list-inline u-p-s" },
-              _vm._l(_vm.navItems.icons, function(icon) {
-                return _c(
-                  "li",
-                  { key: icon.type, staticClass: "o-list-inline__item" },
-                  [
-                    _c(
-                      "a",
-                      {
-                        attrs: {
-                          href: icon.href,
-                          rel: "noreferrer noopener",
-                          target: "_blank"
-                        }
-                      },
-                      [
-                        _c("Icon", { attrs: { type: icon.type } }),
-                        _vm._v(" "),
-                        _c("span", { staticClass: "u-visually-hidden" }, [
-                          _vm._v(
-                            "\n              " +
-                              _vm._s(icon.text) +
-                              " (opens in a new tab)\n            "
+            _vm.navItems.icons
+              ? _c("div", { staticClass: "u-bg-theme-nav-bg" }, [
+                  _c("hr", { staticClass: "u-w-100" }),
+                  _vm._v(" "),
+                  _c(
+                    "ul",
+                    { staticClass: "o-list-inline u-p-s" },
+                    _vm._l(_vm.navItems.icons, function(icon) {
+                      return _c(
+                        "li",
+                        { key: icon.type, staticClass: "o-list-inline__item" },
+                        [
+                          _c(
+                            "a",
+                            {
+                              attrs: {
+                                href: icon.href,
+                                rel: "noreferrer noopener",
+                                target: "_blank"
+                              }
+                            },
+                            [
+                              _c("Icon", { attrs: { type: icon.type } }),
+                              _vm._v(" "),
+                              _c("span", { staticClass: "u-visually-hidden" }, [
+                                _vm._v(
+                                  "\n                " +
+                                    _vm._s(icon.text) +
+                                    " (opens in a new tab)\n              "
+                                )
+                              ])
+                            ],
+                            1
                           )
-                        ])
-                      ],
-                      1
-                    )
-                  ]
-                )
-              }),
-              0
-            ),
+                        ]
+                      )
+                    }),
+                    0
+                  )
+                ])
+              : _vm._e(),
             _vm._v(" "),
             _vm._t("misc"),
             _vm._v(" "),
@@ -974,163 +1032,27 @@ __vue_render__$5._withStripped = true;
   );
 
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 var script$6 = {
   props: {
-    inputId: {
-      type: String,
-      required: true,
-    },
-    label: {
-      type: String,
-      required: true,
-    },
-    dataset: {
-      type: Array,
-      required: true,
-    },
-    searchKey: {
-      type: String,
-      required: false,
-    },
-    searchExact: {
+    active: {
       type: Boolean,
       default: false,
     },
-    resetOnSelect: {
-      type: Boolean,
-      default: true,
-    },
-    canAddNew: {
-      type: Boolean,
-      default: false,
-    },
-    modifiers: {
-      type: Array,
-      required: false,
+
+    result: {
+      type: Object,
+      required: true,
     },
   },
-  data() {
-    return {
-      query: '',
-      activeIndex: 0,
-      maxResults: 8,
-      resLen: 0,
-      showResults: false,
-      results: [],
-    };
+
+  components: {
+    Icon: __vue_component__,
   },
-  computed: {
-    inputClassNames() {
-      let classNames = ['c-input__input'];
-      if (this.modifiers) {
-        classNames = classNames.concat(this.modifiers);
-      }
-      return classNames;
-    },
-  },
+
   methods: {
-    matchExact(a, b) {
-      // NOTE: This is more performant than a "starts with" regex
-      return a.substr(0, b.length).toLowerCase() === b;
-    },
-    matchLoose(a, b) {
-      return a.toLowerCase().includes(b);
-    },
-    searchResults() {
-      const arr = [];
-      const isFlat = !this.searchKey;
-      const searchMethod = this.searchExact ? this.matchExact : this.matchLoose;
-      if (this.query !== '') {
-        const searchQuery = this.query.toLowerCase();
-
-        for (let i = 0; i < this.dataset.length; i += 1) {
-          const item = this.dataset[i];
-          const key = isFlat ? item : item[this.searchKey];
-          if (searchMethod(key, searchQuery)) {
-            arr.push(item);
-
-            if (arr.length === this.maxResults) {
-              break;
-            }
-          }
-        }
-      }
-      this.results = arr;
-      this.resLen = arr.length === 0 ? 0 : arr.length - 1;
-      if (this.activeIndex > this.resLen) {
-        this.activeIndex = 0;
-      }
-    },
-    incrementActive() {
-      this.activeIndex = this.activeIndex + 1;
-      if (this.activeIndex > this.resLen) {
-        this.activeIndex = 0;
-      }
-    },
-    decrementActive() {
-      this.activeIndex = this.activeIndex - 1;
-      if (this.activeIndex < 0) {
-        this.activeIndex = this.resLen;
-      }
-    },
-    selectItem(index) {
-      if (this.results.length > 0) {
-        this.$emit('emitSelect', this.results[index]);
-        if (this.resetOnSelect) {
-          this.query = '';
-        }
-      } else if (this.canAddNew) {
-        this.$emit('emitAddNew', this.query);
-      }
-    },
-    handleBlur() {
-      const that = this;
-      // NOTE: This is to allow click events on results to fire before we hide them
-      setTimeout(() => {
-        that.showResults = false;
-      }, 150);
-    },
-  },
-  watch: {
-    query() {
-      this.searchResults();
+    emitSelect() {
+      this.$emit('emitSelect', this.result);
     },
   },
 };
@@ -1143,117 +1065,51 @@ var __vue_render__$6 = function() {
   var _vm = this;
   var _h = _vm.$createElement;
   var _c = _vm._self._c || _h;
-  return _c("div", { staticClass: "c-input c-smart-search" }, [
-    _c(
-      "label",
-      { staticClass: "c-input__label", attrs: { for: _vm.inputId } },
-      [_vm._v("\n    " + _vm._s(_vm.label) + "\n  ")]
-    ),
-    _vm._v(" "),
-    _c("input", {
-      directives: [
-        {
-          name: "model",
-          rawName: "v-model",
-          value: _vm.query,
-          expression: "query"
-        }
-      ],
-      class: _vm.inputClassNames,
-      attrs: {
-        id: _vm.inputId,
-        type: "search",
-        name: _vm.inputId,
-        placeholder: "Search",
-        autocomplete: "off"
-      },
-      domProps: { value: _vm.query },
-      on: {
-        focus: function($event) {
-          _vm.showResults = true;
-        },
-        blur: _vm.handleBlur,
-        keydown: [
-          function($event) {
-            if (
-              !$event.type.indexOf("key") &&
-              _vm._k($event.keyCode, "up", 38, $event.key, ["Up", "ArrowUp"])
-            ) {
-              return null
-            }
-            return _vm.decrementActive($event)
-          },
-          function($event) {
-            if (
-              !$event.type.indexOf("key") &&
-              _vm._k($event.keyCode, "down", 40, $event.key, [
-                "Down",
-                "ArrowDown"
-              ])
-            ) {
-              return null
-            }
-            return _vm.incrementActive($event)
-          },
-          function($event) {
-            if (
-              !$event.type.indexOf("key") &&
-              _vm._k($event.keyCode, "enter", 13, $event.key, "Enter")
-            ) {
-              return null
-            }
-            return _vm.selectItem(_vm.activeIndex)
-          }
-        ],
-        input: function($event) {
-          if ($event.target.composing) {
-            return
-          }
-          _vm.query = $event.target.value;
-        }
-      }
-    }),
-    _vm._v(" "),
-    _c(
-      "div",
-      {
-        directives: [
-          {
-            name: "show",
-            rawName: "v-show",
-            value: _vm.showResults,
-            expression: "showResults"
-          }
-        ],
-        staticClass: "c-smart-search__results"
-      },
-      [
-        _c(
-          "ul",
-          { staticClass: "o-list-bare" },
-          _vm._l(_vm.results, function(item, index) {
-            return _c(
-              "li",
-              {
-                key: item,
-                class: {
-                  "c-smart-search__results-item": true,
-                  active: index === _vm.activeIndex
-                },
-                on: {
-                  click: function($event) {
-                    return _vm.selectItem(index)
-                  }
+  return _c(
+    "li",
+    {
+      staticClass:
+        "c-search-result o-list-bare__item o-cover-link u-d-flex u-f-align-center",
+      class: { active: _vm.active }
+    },
+    [
+      _vm.result.icon
+        ? _c(
+            "div",
+            { staticClass: "u-f-1-auto u-p-left-s" },
+            [
+              _c("Icon", {
+                attrs: {
+                  type: _vm.result.icon,
+                  modifiers: ["o-icon--l", "u-font-vert-mid"]
                 }
-              },
-              [_vm._v("\n        " + _vm._s(item) + "\n      ")]
+              })
+            ],
+            1
+          )
+        : _vm._e(),
+      _vm._v(" "),
+      _c("div", { staticClass: "u-p-xs" }, [
+        _c(
+          "button",
+          {
+            staticClass: "c-search-result__name o-cover-link__item",
+            attrs: { name: "selectResult", tabindex: "-1", type: "button" },
+            on: { click: _vm.emitSelect }
+          },
+          [_vm._v("\n      " + _vm._s(_vm.result.name) + "\n    ")]
+        ),
+        _vm._v(" "),
+        _vm.result.desc
+          ? _c(
+              "p",
+              { staticClass: "u-font-xs u-c-theme-text-alt u-m-left-xs" },
+              [_vm._v("\n      " + _vm._s(_vm.result.desc) + "\n    ")]
             )
-          }),
-          0
-        )
-      ]
-    )
-  ])
+          : _vm._e()
+      ])
+    ]
+  )
 };
 var __vue_staticRenderFns__$6 = [];
 __vue_render__$6._withStripped = true;
@@ -1287,22 +1143,286 @@ __vue_render__$6._withStripped = true;
     undefined
   );
 
+//
+
+const MAX_RESULTS = 8;
+
+var script$7 = {
+  props: {
+    dataset: {
+      type: Array,
+      required: true,
+    },
+
+    label: {
+      type: String,
+      required: true,
+    },
+
+    searchExact: {
+      type: Boolean,
+      default: false,
+    },
+
+    searchKey: {
+      type: String,
+      default: 'name',
+    },
+  },
+
+  components: {
+    SearchResult: __vue_component__$6,
+  },
+
+  data() {
+    return {
+      activeResultIndex: 0,
+      debouncedFilterResults: lodash.debounce(this.filterResults, 250),
+      id: getUniqueId(),
+      query: '',
+      results: [],
+      showResults: false,
+    };
+  },
+
+  methods: {
+    matchExact(a, b) {
+      // NOTE: This is more performant than a "starts with" regex
+      return a.substr(0, b.length).toLowerCase() === b;
+    },
+
+    matchLoose(a, b) {
+      return a.toLowerCase().includes(b);
+    },
+
+    getFilteredResults() {
+      if (!this.query) {
+        return [];
+      }
+
+      const results = [];
+      const query = this.query.toLowerCase();
+      const isMatch = this.searchExact ? this.matchExact : this.matchLoose;
+
+      for (let i = 0; i < this.dataset.length; i += 1) {
+        const item = this.dataset[i];
+        if (isMatch(item[this.searchKey], query)) {
+          results.push(item);
+
+          if (results.length === MAX_RESULTS) {
+            return results;
+          }
+        }
+      }
+
+      return results;
+    },
+
+    filterResults() {
+      this.results = this.getFilteredResults();
+      if (this.activeResultIndex > this.results.length - 1) {
+        this.activeResultIndex = 0;
+      }
+    },
+
+    incrementActiveResultIndex() {
+      this.activeResultIndex += 1;
+      if (this.activeResultIndex === this.results.length) {
+        this.activeResultIndex = 0;
+      }
+    },
+
+    decrementActiveResultIndex() {
+      this.activeResultIndex -= 1;
+      if (this.activeResultIndex < 0) {
+        this.activeResultIndex = this.results.length - 1;
+      }
+    },
+
+    resetLocalState() {
+      this.query = '';
+      this.results = [];
+    },
+
+    selectItem(result = null) {
+      const obj = result || this.results[this.activeResultIndex];
+      this.$emit('emitSelect', obj);
+      this.resetLocalState();
+    },
+
+    handleBlur() {
+      setTimeout(() => {
+        this.showResults = false;
+      }, 150);
+    },
+  },
+};
+
+/* script */
+const __vue_script__$7 = script$7;
+
+/* template */
+var __vue_render__$7 = function() {
+  var _vm = this;
+  var _h = _vm.$createElement;
+  var _c = _vm._self._c || _h;
+  return _c("div", { staticClass: "c-input c-autocomplete" }, [
+    _c("label", { staticClass: "c-input__label", attrs: { for: _vm.id } }, [
+      _vm._v("\n    " + _vm._s(_vm.label) + "\n  ")
+    ]),
+    _vm._v(" "),
+    _c("input", {
+      directives: [
+        {
+          name: "model",
+          rawName: "v-model",
+          value: _vm.query,
+          expression: "query"
+        }
+      ],
+      staticClass: "c-input__input",
+      attrs: {
+        id: _vm.id,
+        autocomplete: "off",
+        name: "search",
+        type: "search"
+      },
+      domProps: { value: _vm.query },
+      on: {
+        change: _vm.debouncedFilterResults,
+        keyup: _vm.debouncedFilterResults,
+        focus: function($event) {
+          _vm.showResults = true;
+        },
+        blur: _vm.handleBlur,
+        keydown: [
+          function($event) {
+            if (
+              !$event.type.indexOf("key") &&
+              _vm._k($event.keyCode, "up", 38, $event.key, ["Up", "ArrowUp"])
+            ) {
+              return null
+            }
+            return _vm.decrementActiveResultIndex($event)
+          },
+          function($event) {
+            if (
+              !$event.type.indexOf("key") &&
+              _vm._k($event.keyCode, "down", 40, $event.key, [
+                "Down",
+                "ArrowDown"
+              ])
+            ) {
+              return null
+            }
+            return _vm.incrementActiveResultIndex($event)
+          },
+          function($event) {
+            if (
+              !$event.type.indexOf("key") &&
+              _vm._k($event.keyCode, "enter", 13, $event.key, "Enter")
+            ) {
+              return null
+            }
+            return _vm.selectItem()
+          }
+        ],
+        input: function($event) {
+          if ($event.target.composing) {
+            return
+          }
+          _vm.query = $event.target.value;
+        }
+      }
+    }),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        directives: [
+          {
+            name: "show",
+            rawName: "v-show",
+            value: _vm.showResults,
+            expression: "showResults"
+          }
+        ],
+        staticClass: "c-autocomplete__results"
+      },
+      [
+        _c(
+          "ul",
+          { staticClass: "o-list-bare" },
+          _vm._l(_vm.results, function(result, index) {
+            return _c("SearchResult", {
+              key: result.id,
+              attrs: {
+                active: index === _vm.activeResultIndex,
+                result: result
+              },
+              on: { emitSelect: _vm.selectItem }
+            })
+          }),
+          1
+        )
+      ]
+    )
+  ])
+};
+var __vue_staticRenderFns__$7 = [];
+__vue_render__$7._withStripped = true;
+
+  /* style */
+  const __vue_inject_styles__$7 = undefined;
+  /* scoped */
+  const __vue_scope_id__$7 = undefined;
+  /* module identifier */
+  const __vue_module_identifier__$7 = undefined;
+  /* functional template */
+  const __vue_is_functional_template__$7 = false;
+  /* style inject */
+  
+  /* style inject SSR */
+  
+  /* style inject shadow dom */
+  
+
+  
+  const __vue_component__$7 = vueRuntimeHelpers.normalizeComponent(
+    { render: __vue_render__$7, staticRenderFns: __vue_staticRenderFns__$7 },
+    __vue_inject_styles__$7,
+    __vue_script__$7,
+    __vue_scope_id__$7,
+    __vue_is_functional_template__$7,
+    __vue_module_identifier__$7,
+    false,
+    undefined,
+    undefined,
+    undefined
+  );
+
 const CHECKBOX = 'InputCheckbox';
+const DATE = 'InputDate';
+const FILE = 'InputFile';
 const KEY_VALUE_PAIR = 'KeyValuePair';
+const QUILL_RTE = 'QuillRTE';
 const RADIO = 'InputRadio';
+const REPEATER = 'FieldRepeater';
 const SELECT = 'InputSelect';
 const TEXT = 'InputText';
 const TEXTAREA = 'InputTextarea';
-const QUILL_RTE = 'QuillRTE';
 
 var fieldTypes = {
   CHECKBOX,
+  DATE,
+  FILE,
   KEY_VALUE_PAIR,
+  QUILL_RTE,
   RADIO,
+  REPEATER,
   SELECT,
   TEXT,
   TEXTAREA,
-  QUILL_RTE,
 };
 
 var getMachineSafeStr = (str) => {
@@ -1310,7 +1430,15 @@ var getMachineSafeStr = (str) => {
   return str.replace(re, '_');
 };
 
-const baseValue = (field) => field.value;
+const baseValue = (field) => {
+  if (Array.isArray(field.value)) {
+    return field.value.slice(0);
+  }
+  if (typeof field.value === 'object') {
+    return { ...field.value };
+  }
+  return field.value;
+};
 
 const compileKeyValuePairs = (field, state) => {
   const pairs = [];
@@ -1324,8 +1452,22 @@ const compileKeyValuePairs = (field, state) => {
   return pairs;
 };
 
+const compileRepeater = (field, state) => {
+  if (!field.value || field.value.length === 0) {
+    return [];
+  }
+  return field.value.map((item) => {
+    const f = state.fields[item.id];
+    return {
+      name: f.name,
+      value: f.getValue(f, state),
+    };
+  });
+};
+
 const map = {
   [KEY_VALUE_PAIR]: compileKeyValuePairs,
+  [REPEATER]: compileRepeater,
 };
 
 var getValueMethod = (type) => map[type] || baseValue;
@@ -1346,6 +1488,7 @@ var prereqs = {
 
 const CREATE_FORM = 'createForm';
 const REGISTER_FIELDS = 'registerFields';
+const DEREGISTER_FIELDS = 'deregisterFields';
 const RESET_FORM = 'resetForm';
 const SET_IS_VALID = 'setIsValid';
 const SET_IS_VISIBLE = 'setIsVisible';
@@ -1357,7 +1500,7 @@ const UPDATE_FIELD_VALUE = 'updateFieldValue';
  * @param {Object} field The field's pertinent data.
  */
 const createFieldData = (field) => ({
-  value: null,
+  value: field.defaultValue ? field.defaultValue : null,
   isValid: !field.required,
   hasValidated: false,
   getValue: getValueMethod(field.component),
@@ -1463,6 +1606,14 @@ const evalPrereq = (state, data) => {
   }
 };
 
+/**
+ * Sets the visibility of a field based on its prerequisites.
+ *
+ * @param {Object} state The current state.
+ * @param {String} id The id of the field to check visibility of.
+ *
+ * @returns {Boolean} Visibility state.
+ */
 const checkIfVisible = (state, id) => {
   const field = state.fields[id];
   let hasOr = false;
@@ -1624,9 +1775,19 @@ var mutations$1 = {
   },
 
   [REGISTER_FIELDS](state, obj) {
-    obj.fields.forEach((f) => {
-      Vue.set(state.fields, f.id, f);
-      state.forms[obj.form].fields.push(f.id);
+    obj.fields.forEach((field) => {
+      Vue.set(state.fields, field.id, field);
+      state.forms[obj.form].fields.push(field.id);
+    });
+  },
+
+  [DEREGISTER_FIELDS](state, obj) {
+    obj.fields.forEach((field) => {
+      Vue.delete(state.fields, field);
+      const index = lodash.findIndex(state.forms[obj.form].fields, (item) => item.id === field);
+      if (index !== -1) {
+        state.forms[obj.form].fields.splice(index, 1);
+      }
     });
   },
 };
@@ -1647,7 +1808,7 @@ var formsStore = {
 
 //
 
-var script$7 = {
+var script$8 = {
   props: {
     formStructure: {
       type: Object,
@@ -1684,6 +1845,12 @@ var script$7 = {
       }
       return this.$store.getters['forms/compileFormErrors'](this.formStructure.id);
     },
+
+    groups() {
+      return this.formStructure.groups
+        ? this.formStructure.groups
+        : [{ fields: this.formStructure.fields }];
+    },
   },
 
   methods: {
@@ -1695,19 +1862,21 @@ var script$7 = {
 
     handleSubmit() {
       this.hasBeenValidated = true;
+      // Run validation on all non-validated fields
+      this.$refs.field.forEach((field) => {
+        // Revalidate each field to ensure that we hit child fields
+        field.validateField(true);
+      });
+
       if (this.isValid) {
         const data = this.$store.getters['forms/compileFormData'](this.formStructure.id);
         this.formStructure.onSubmit(data);
         return;
       }
 
-      // Run validation on all non-validated fields
-      this.$refs.field.forEach((field) => {
-        if (!field.field.hasValidated) {
-          field.validateField();
-        }
+      window.requestAnimationFrame(() => {
+        this.$refs.errorBox.$el.focus();
       });
-      this.$refs.errorBox.focus();
     },
   },
 
@@ -1720,10 +1889,10 @@ var script$7 = {
 };
 
 /* script */
-const __vue_script__$7 = script$7;
+const __vue_script__$8 = script$8;
 
 /* template */
-var __vue_render__$7 = function() {
+var __vue_render__$8 = function() {
   var _vm = this;
   var _h = _vm.$createElement;
   var _c = _vm._self._c || _h;
@@ -1742,14 +1911,14 @@ var __vue_render__$7 = function() {
       _c(
         "p",
         {
-          staticClass: "u-font-xs",
+          staticClass: "u-font-xs u-m-bot",
           attrs: { id: _vm.formStructure.id + "__required-msg" }
         },
         [_vm._v("\n    * Required Fields\n  ")]
       ),
       _vm._v(" "),
       _c(
-        "div",
+        "Alert",
         {
           directives: [
             {
@@ -1760,27 +1929,16 @@ var __vue_render__$7 = function() {
             }
           ],
           ref: "errorBox",
-          staticClass: "c-alert c-alert--error",
           attrs: {
             "aria-labelledby": _vm.formStructure.id + "__error__title",
-            id: _vm.formStructure.id + "__error"
+            id: _vm.formStructure.id + "__error",
+            state: "error",
+            tabindex: "-1",
+            title: "There are issues with the following fields:",
+            titleTag: "h3"
           }
         },
         [
-          _c(
-            _vm.formStructure.errorHeadingTag || "h3",
-            {
-              tag: "h3",
-              staticClass: "c-alert__title",
-              attrs: { id: _vm.formStructure.id + "__error__title" }
-            },
-            [
-              _vm._v(
-                "\n      There are issues with the following fields:\n    "
-              )
-            ]
-          ),
-          _vm._v(" "),
           _c("div", { staticClass: "c-typography" }, [
             _c(
               "ul",
@@ -1790,7 +1948,7 @@ var __vue_render__$7 = function() {
                   _c(
                     "button",
                     {
-                      staticClass: "c-btn--text",
+                      staticClass: "c-btn--text c-link--white",
                       attrs: { type: "button" },
                       on: {
                         click: function($event) {
@@ -1809,53 +1967,82 @@ var __vue_render__$7 = function() {
               0
             )
           ])
-        ],
-        1
+        ]
       ),
       _vm._v(" "),
-      _vm._l(_vm.formStructure.fields, function(field) {
+      _vm._l(_vm.groups, function(group, index) {
         return _c(
           "div",
-          { key: field.id, staticClass: "u-m-bot" },
+          {
+            key: index,
+            staticClass: "c-card",
+            class: { "c-card--outline": group.title }
+          },
           [
-            _c(field.component, {
-              ref: "field",
-              refInFor: true,
-              tag: "component",
-              attrs: { reference: field.id, formId: _vm.formStructure.id }
-            })
-          ],
-          1
+            group.title
+              ? _c("h4", { staticClass: "c-card__title" }, [
+                  _vm._v("\n      " + _vm._s(group.title) + "\n    ")
+                ])
+              : _vm._e(),
+            _vm._v(" "),
+            _c(
+              "div",
+              { staticClass: "c-card__body" },
+              _vm._l(group.fields, function(field) {
+                return _c(
+                  "div",
+                  { key: field.id, staticClass: "u-m-bot" },
+                  [
+                    _c(field.component, {
+                      ref: "field",
+                      refInFor: true,
+                      tag: "component",
+                      attrs: {
+                        reference: field.id,
+                        formId: _vm.formStructure.id
+                      }
+                    })
+                  ],
+                  1
+                )
+              }),
+              0
+            )
+          ]
         )
       }),
       _vm._v(" "),
-      _c(
-        "button",
-        {
-          staticClass: "c-btn c-btn--primary",
-          attrs: { name: "formSubmit", type: "submit" }
-        },
-        [
-          _vm._v(
-            "\n    " + _vm._s(_vm.formStructure.submitText || "Submit") + "\n  "
-          )
-        ]
-      )
+      _c("div", { staticClass: "c-card__body" }, [
+        _c(
+          "button",
+          {
+            staticClass: "c-btn c-btn--primary",
+            attrs: { name: "formSubmit", type: "submit" }
+          },
+          [
+            _vm._v(
+              "\n      " +
+                _vm._s(_vm.formStructure.submitText || "Submit") +
+                "\n    "
+            )
+          ]
+        )
+      ])
     ],
     2
   )
 };
-var __vue_staticRenderFns__$7 = [];
-__vue_render__$7._withStripped = true;
+var __vue_staticRenderFns__$8 = [];
+__vue_render__$8._withStripped = true;
 
   /* style */
-  const __vue_inject_styles__$7 = undefined;
+  const __vue_inject_styles__$8 = undefined;
   /* scoped */
-  const __vue_scope_id__$7 = undefined;
+  const __vue_scope_id__$8 = undefined;
   /* module identifier */
-  const __vue_module_identifier__$7 = undefined;
+  const __vue_module_identifier__$8 = undefined;
   /* functional template */
-  const __vue_is_functional_template__$7 = false;
+  const __vue_is_functional_template__$8 = false;
   /* style inject */
   
   /* style inject SSR */
@@ -1864,13 +2051,13 @@ __vue_render__$7._withStripped = true;
   
 
   
-  const __vue_component__$7 = vueRuntimeHelpers.normalizeComponent(
-    { render: __vue_render__$7, staticRenderFns: __vue_staticRenderFns__$7 },
-    __vue_inject_styles__$7,
-    __vue_script__$7,
-    __vue_scope_id__$7,
-    __vue_is_functional_template__$7,
-    __vue_module_identifier__$7,
+  const __vue_component__$8 = vueRuntimeHelpers.normalizeComponent(
+    { render: __vue_render__$8, staticRenderFns: __vue_staticRenderFns__$8 },
+    __vue_inject_styles__$8,
+    __vue_script__$8,
+    __vue_scope_id__$8,
+    __vue_is_functional_template__$8,
+    __vue_module_identifier__$8,
     false,
     undefined,
     undefined,
@@ -1882,12 +2069,33 @@ const isNotEmpty = {
   errorText(label) { return `${label} must not be empty.`; },
 };
 
+const isEmail = {
+  test(val) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+  },
+  errorText() { return 'Enter a valid email address in the format username@domain.com'; },
+};
+
 const isMachineSafeStr = {
   test(val) {
     const re = /^[A-Za-z0-9_]*$/g;
     return re.test(val);
   },
   errorText() { return 'Enter a machine safe string that contains only letters, numbers, and underscores (_).'; },
+};
+
+const isValidDate = {
+  test(val) {
+    return typeof new Date(val).getMonth === 'function';
+  },
+  errorText() { return 'Enter a valid date.'; },
+};
+
+var formValidations = {
+  isNotEmpty,
+  isEmail,
+  isMachineSafeStr,
+  isValidDate,
 };
 
 var vuexFormInput = {
@@ -1941,17 +2149,25 @@ var vuexFormInput = {
       setIsValid: SET_IS_VALID,
     }),
 
-    validateField() {
+    // TODO: Look at moving this to the store module
+    validateField(isFromSubmit = false) {
+      // Run validation on children
+      if (isFromSubmit && !!this.$refs.fields) {
+        this.$refs.fields.forEach((field) => {
+          field.validateField();
+        });
+      }
+      // Add required validation or skip if null
       const validators = this.field.validation ? this.field.validation.slice(0) : [];
       if (this.field.required) {
         validators.unshift(isNotEmpty);
-      } else if (!isNotEmpty.test(this.field.value)) {
-        // We are valid but this is empty.
-        // TODO: Reset the hasBeenValidated && isValid flag
+      } else if (!this.field.value) {
+        this.setIsValid({ id: this.reference, bool: true });
         return;
       }
       // Ensure that a value is populated
       this.debouncedUpdateFieldValue.flush();
+      // TODO: Handle async validation within a synchronous order
       for (let i = 0; i < validators.length; i += 1) {
         const validation = validators[i];
         if (!validation.test(this.field.value)) {
@@ -1967,7 +2183,7 @@ var vuexFormInput = {
 
 //
 
-var script$8 = {
+var script$9 = {
   mixins: [
     vuexFormInput,
   ],
@@ -1990,10 +2206,10 @@ var script$8 = {
 };
 
 /* script */
-const __vue_script__$8 = script$8;
+const __vue_script__$9 = script$9;
 
 /* template */
-var __vue_render__$8 = function() {
+var __vue_render__$9 = function() {
   var _vm = this;
   var _h = _vm.$createElement;
   var _c = _vm._self._c || _h;
@@ -2092,17 +2308,17 @@ var __vue_render__$8 = function() {
     2
   )
 };
-var __vue_staticRenderFns__$8 = [];
-__vue_render__$8._withStripped = true;
+var __vue_staticRenderFns__$9 = [];
+__vue_render__$9._withStripped = true;
 
   /* style */
-  const __vue_inject_styles__$8 = undefined;
+  const __vue_inject_styles__$9 = undefined;
   /* scoped */
-  const __vue_scope_id__$8 = undefined;
+  const __vue_scope_id__$9 = undefined;
   /* module identifier */
-  const __vue_module_identifier__$8 = undefined;
+  const __vue_module_identifier__$9 = undefined;
   /* functional template */
-  const __vue_is_functional_template__$8 = false;
+  const __vue_is_functional_template__$9 = false;
   /* style inject */
   
   /* style inject SSR */
@@ -2111,13 +2327,13 @@ __vue_render__$8._withStripped = true;
   
 
   
-  const __vue_component__$8 = vueRuntimeHelpers.normalizeComponent(
-    { render: __vue_render__$8, staticRenderFns: __vue_staticRenderFns__$8 },
-    __vue_inject_styles__$8,
-    __vue_script__$8,
-    __vue_scope_id__$8,
-    __vue_is_functional_template__$8,
-    __vue_module_identifier__$8,
+  const __vue_component__$9 = vueRuntimeHelpers.normalizeComponent(
+    { render: __vue_render__$9, staticRenderFns: __vue_staticRenderFns__$9 },
+    __vue_inject_styles__$9,
+    __vue_script__$9,
+    __vue_scope_id__$9,
+    __vue_is_functional_template__$9,
+    __vue_module_identifier__$9,
     false,
     undefined,
     undefined,
@@ -2126,7 +2342,250 @@ __vue_render__$8._withStripped = true;
 
 //
 
-var script$9 = {
+var script$a = {
+  mixins: [
+    vuexFormInput,
+  ],
+
+  computed: {
+    fieldVal: {
+      get() {
+        return this.field.value;
+      },
+      set(val) {
+        this.debouncedUpdateFieldValue({ id: this.reference, val });
+      },
+    },
+  },
+};
+
+/* script */
+const __vue_script__$a = script$a;
+
+/* template */
+var __vue_render__$a = function() {
+  var _vm = this;
+  var _h = _vm.$createElement;
+  var _c = _vm._self._c || _h;
+  return _c(
+    "div",
+    {
+      directives: [
+        {
+          name: "show",
+          rawName: "v-show",
+          value: _vm.field.isVisible,
+          expression: "field.isVisible"
+        }
+      ],
+      class: _vm.classNames
+    },
+    [
+      _c(
+        "label",
+        {
+          staticClass: "c-input__label",
+          attrs: { for: "vf-" + _vm.reference }
+        },
+        [
+          _vm._v("\n    " + _vm._s(_vm.field.label)),
+          _vm.field.required ? _c("sup", [_vm._v("*")]) : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c("input", {
+        directives: [
+          {
+            name: "model",
+            rawName: "v-model",
+            value: _vm.fieldVal,
+            expression: "fieldVal"
+          }
+        ],
+        staticClass: "c-input__input",
+        attrs: {
+          "aria-describedby": _vm.showError
+            ? "vf-" + _vm.reference + "__error"
+            : false,
+          "aria-required": _vm.field.required,
+          autocomplete: _vm.field.autocomplete || false,
+          id: "vf-" + _vm.reference,
+          name: _vm.field.name,
+          type: "date"
+        },
+        domProps: { value: _vm.fieldVal },
+        on: {
+          blur: _vm.validateField,
+          input: function($event) {
+            if ($event.target.composing) {
+              return
+            }
+            _vm.fieldVal = $event.target.value;
+          }
+        }
+      }),
+      _vm._v(" "),
+      _vm.showError
+        ? _c(
+            "p",
+            {
+              staticClass: "c-input__error",
+              attrs: { id: "vf-" + _vm.reference + "__error" }
+            },
+            [_vm._v("\n    " + _vm._s(_vm.errorText) + "\n  ")]
+          )
+        : _vm._e()
+    ]
+  )
+};
+var __vue_staticRenderFns__$a = [];
+__vue_render__$a._withStripped = true;
+
+  /* style */
+  const __vue_inject_styles__$a = undefined;
+  /* scoped */
+  const __vue_scope_id__$a = undefined;
+  /* module identifier */
+  const __vue_module_identifier__$a = undefined;
+  /* functional template */
+  const __vue_is_functional_template__$a = false;
+  /* style inject */
+  
+  /* style inject SSR */
+  
+  /* style inject shadow dom */
+  
+
+  
+  const __vue_component__$a = vueRuntimeHelpers.normalizeComponent(
+    { render: __vue_render__$a, staticRenderFns: __vue_staticRenderFns__$a },
+    __vue_inject_styles__$a,
+    __vue_script__$a,
+    __vue_scope_id__$a,
+    __vue_is_functional_template__$a,
+    __vue_module_identifier__$a,
+    false,
+    undefined,
+    undefined,
+    undefined
+  );
+
+//
+
+var script$b = {
+  mixins: [
+    vuexFormInput,
+  ],
+
+  methods: {
+    handleInputUpload() {
+      this.debouncedUpdateFieldValue({ id: this.reference, val: this.$refs.input.files });
+    },
+  },
+};
+
+/* script */
+const __vue_script__$b = script$b;
+
+/* template */
+var __vue_render__$b = function() {
+  var _vm = this;
+  var _h = _vm.$createElement;
+  var _c = _vm._self._c || _h;
+  return _c(
+    "div",
+    {
+      directives: [
+        {
+          name: "show",
+          rawName: "v-show",
+          value: _vm.field.isVisible,
+          expression: "field.isVisible"
+        }
+      ],
+      class: _vm.classNames
+    },
+    [
+      _c(
+        "label",
+        {
+          staticClass: "c-input__label",
+          attrs: { for: "vf-" + _vm.reference }
+        },
+        [
+          _vm._v("\n    " + _vm._s(_vm.field.label)),
+          _vm.field.required ? _c("sup", [_vm._v("*")]) : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c("input", {
+        ref: "input",
+        staticClass: "c-input__input c-input__input--file",
+        attrs: {
+          accept: _vm.field.acceptFileTypes
+            ? _vm.field.acceptFileTypes.join(",")
+            : false,
+          "aria-describedby": _vm.showError
+            ? "vf-" + _vm.reference + "__error"
+            : false,
+          "aria-required": _vm.field.required,
+          autocomplete: _vm.field.autocomplete || false,
+          id: "vf-" + _vm.reference,
+          multiple: !!_vm.field.multipleFiles,
+          name: _vm.field.name,
+          type: "file"
+        },
+        on: { blur: _vm.validateField, change: _vm.handleInputUpload }
+      }),
+      _vm._v(" "),
+      _vm.showError
+        ? _c(
+            "p",
+            {
+              staticClass: "c-input__error",
+              attrs: { id: "vf-" + _vm.reference + "__error" }
+            },
+            [_vm._v("\n    " + _vm._s(_vm.errorText) + "\n  ")]
+          )
+        : _vm._e()
+    ]
+  )
+};
+var __vue_staticRenderFns__$b = [];
+__vue_render__$b._withStripped = true;
+
+  /* style */
+  const __vue_inject_styles__$b = undefined;
+  /* scoped */
+  const __vue_scope_id__$b = undefined;
+  /* module identifier */
+  const __vue_module_identifier__$b = undefined;
+  /* functional template */
+  const __vue_is_functional_template__$b = false;
+  /* style inject */
+  
+  /* style inject SSR */
+  
+  /* style inject shadow dom */
+  
+
+  
+  const __vue_component__$b = vueRuntimeHelpers.normalizeComponent(
+    { render: __vue_render__$b, staticRenderFns: __vue_staticRenderFns__$b },
+    __vue_inject_styles__$b,
+    __vue_script__$b,
+    __vue_scope_id__$b,
+    __vue_is_functional_template__$b,
+    __vue_module_identifier__$b,
+    false,
+    undefined,
+    undefined,
+    undefined
+  );
+
+//
+
+var script$c = {
   mixins: [
     vuexFormInput,
   ],
@@ -2144,10 +2603,10 @@ var script$9 = {
 };
 
 /* script */
-const __vue_script__$9 = script$9;
+const __vue_script__$c = script$c;
 
 /* template */
-var __vue_render__$9 = function() {
+var __vue_render__$c = function() {
   var _vm = this;
   var _h = _vm.$createElement;
   var _c = _vm._self._c || _h;
@@ -2228,17 +2687,17 @@ var __vue_render__$9 = function() {
     2
   )
 };
-var __vue_staticRenderFns__$9 = [];
-__vue_render__$9._withStripped = true;
+var __vue_staticRenderFns__$c = [];
+__vue_render__$c._withStripped = true;
 
   /* style */
-  const __vue_inject_styles__$9 = undefined;
+  const __vue_inject_styles__$c = undefined;
   /* scoped */
-  const __vue_scope_id__$9 = undefined;
+  const __vue_scope_id__$c = undefined;
   /* module identifier */
-  const __vue_module_identifier__$9 = undefined;
+  const __vue_module_identifier__$c = undefined;
   /* functional template */
-  const __vue_is_functional_template__$9 = false;
+  const __vue_is_functional_template__$c = false;
   /* style inject */
   
   /* style inject SSR */
@@ -2247,13 +2706,13 @@ __vue_render__$9._withStripped = true;
   
 
   
-  const __vue_component__$9 = vueRuntimeHelpers.normalizeComponent(
-    { render: __vue_render__$9, staticRenderFns: __vue_staticRenderFns__$9 },
-    __vue_inject_styles__$9,
-    __vue_script__$9,
-    __vue_scope_id__$9,
-    __vue_is_functional_template__$9,
-    __vue_module_identifier__$9,
+  const __vue_component__$c = vueRuntimeHelpers.normalizeComponent(
+    { render: __vue_render__$c, staticRenderFns: __vue_staticRenderFns__$c },
+    __vue_inject_styles__$c,
+    __vue_script__$c,
+    __vue_scope_id__$c,
+    __vue_is_functional_template__$c,
+    __vue_module_identifier__$c,
     false,
     undefined,
     undefined,
@@ -2262,7 +2721,7 @@ __vue_render__$9._withStripped = true;
 
 //
 
-var script$a = {
+var script$d = {
   mixins: [
     vuexFormInput,
   ],
@@ -2273,17 +2732,17 @@ var script$a = {
         return this.field.value;
       },
       set(val) {
-        return this.updateFieldValue({ id: this.reference, val });
+        return this.debouncedUpdateFieldValue({ id: this.reference, val });
       },
     },
   },
 };
 
 /* script */
-const __vue_script__$a = script$a;
+const __vue_script__$d = script$d;
 
 /* template */
-var __vue_render__$a = function() {
+var __vue_render__$d = function() {
   var _vm = this;
   var _h = _vm.$createElement;
   var _c = _vm._self._c || _h;
@@ -2351,14 +2810,31 @@ var __vue_render__$a = function() {
             }
           }
         },
-        _vm._l(_vm.field.options, function(option) {
-          return _c(
-            "option",
-            { key: option.value, domProps: { value: option.value } },
-            [_vm._v("\n      " + _vm._s(option.text) + "\n    ")]
-          )
-        }),
-        0
+        [
+          _vm._l(_vm.field.options, function(option) {
+            return _c(
+              "option",
+              { key: option.value, domProps: { value: option.value } },
+              [_vm._v("\n      " + _vm._s(option.text) + "\n    ")]
+            )
+          }),
+          _vm._v(" "),
+          _vm._l(_vm.field.optgroups, function(optgroup) {
+            return _c(
+              "optgroup",
+              { key: optgroup.text },
+              _vm._l(optgroup.options, function(option) {
+                return _c(
+                  "option",
+                  { key: option.value, domProps: { value: option.value } },
+                  [_vm._v("\n        " + _vm._s(option.text) + "\n      ")]
+                )
+              }),
+              0
+            )
+          })
+        ],
+        2
       ),
       _vm._v(" "),
       _vm.showError
@@ -2374,17 +2850,17 @@ var __vue_render__$a = function() {
     ]
   )
 };
-var __vue_staticRenderFns__$a = [];
-__vue_render__$a._withStripped = true;
+var __vue_staticRenderFns__$d = [];
+__vue_render__$d._withStripped = true;
 
   /* style */
-  const __vue_inject_styles__$a = undefined;
+  const __vue_inject_styles__$d = undefined;
   /* scoped */
-  const __vue_scope_id__$a = undefined;
+  const __vue_scope_id__$d = undefined;
   /* module identifier */
-  const __vue_module_identifier__$a = undefined;
+  const __vue_module_identifier__$d = undefined;
   /* functional template */
-  const __vue_is_functional_template__$a = false;
+  const __vue_is_functional_template__$d = false;
   /* style inject */
   
   /* style inject SSR */
@@ -2393,13 +2869,13 @@ __vue_render__$a._withStripped = true;
   
 
   
-  const __vue_component__$a = vueRuntimeHelpers.normalizeComponent(
-    { render: __vue_render__$a, staticRenderFns: __vue_staticRenderFns__$a },
-    __vue_inject_styles__$a,
-    __vue_script__$a,
-    __vue_scope_id__$a,
-    __vue_is_functional_template__$a,
-    __vue_module_identifier__$a,
+  const __vue_component__$d = vueRuntimeHelpers.normalizeComponent(
+    { render: __vue_render__$d, staticRenderFns: __vue_staticRenderFns__$d },
+    __vue_inject_styles__$d,
+    __vue_script__$d,
+    __vue_scope_id__$d,
+    __vue_is_functional_template__$d,
+    __vue_module_identifier__$d,
     false,
     undefined,
     undefined,
@@ -2408,7 +2884,7 @@ __vue_render__$a._withStripped = true;
 
 //
 
-var script$b = {
+var script$e = {
   mixins: [
     vuexFormInput,
   ],
@@ -2426,10 +2902,10 @@ var script$b = {
 };
 
 /* script */
-const __vue_script__$b = script$b;
+const __vue_script__$e = script$e;
 
 /* template */
-var __vue_render__$b = function() {
+var __vue_render__$e = function() {
   var _vm = this;
   var _h = _vm.$createElement;
   var _c = _vm._self._c || _h;
@@ -2504,17 +2980,17 @@ var __vue_render__$b = function() {
     ]
   )
 };
-var __vue_staticRenderFns__$b = [];
-__vue_render__$b._withStripped = true;
+var __vue_staticRenderFns__$e = [];
+__vue_render__$e._withStripped = true;
 
   /* style */
-  const __vue_inject_styles__$b = undefined;
+  const __vue_inject_styles__$e = undefined;
   /* scoped */
-  const __vue_scope_id__$b = undefined;
+  const __vue_scope_id__$e = undefined;
   /* module identifier */
-  const __vue_module_identifier__$b = undefined;
+  const __vue_module_identifier__$e = undefined;
   /* functional template */
-  const __vue_is_functional_template__$b = false;
+  const __vue_is_functional_template__$e = false;
   /* style inject */
   
   /* style inject SSR */
@@ -2523,13 +2999,13 @@ __vue_render__$b._withStripped = true;
   
 
   
-  const __vue_component__$b = vueRuntimeHelpers.normalizeComponent(
-    { render: __vue_render__$b, staticRenderFns: __vue_staticRenderFns__$b },
-    __vue_inject_styles__$b,
-    __vue_script__$b,
-    __vue_scope_id__$b,
-    __vue_is_functional_template__$b,
-    __vue_module_identifier__$b,
+  const __vue_component__$e = vueRuntimeHelpers.normalizeComponent(
+    { render: __vue_render__$e, staticRenderFns: __vue_staticRenderFns__$e },
+    __vue_inject_styles__$e,
+    __vue_script__$e,
+    __vue_scope_id__$e,
+    __vue_is_functional_template__$e,
+    __vue_module_identifier__$e,
     false,
     undefined,
     undefined,
@@ -2538,7 +3014,7 @@ __vue_render__$b._withStripped = true;
 
 //
 
-var script$c = {
+var script$f = {
   mixins: [
     vuexFormInput,
   ],
@@ -2556,10 +3032,10 @@ var script$c = {
 };
 
 /* script */
-const __vue_script__$c = script$c;
+const __vue_script__$f = script$f;
 
 /* template */
-var __vue_render__$c = function() {
+var __vue_render__$f = function() {
   var _vm = this;
   var _h = _vm.$createElement;
   var _c = _vm._self._c || _h;
@@ -2632,17 +3108,17 @@ var __vue_render__$c = function() {
     ]
   )
 };
-var __vue_staticRenderFns__$c = [];
-__vue_render__$c._withStripped = true;
+var __vue_staticRenderFns__$f = [];
+__vue_render__$f._withStripped = true;
 
   /* style */
-  const __vue_inject_styles__$c = undefined;
+  const __vue_inject_styles__$f = undefined;
   /* scoped */
-  const __vue_scope_id__$c = undefined;
+  const __vue_scope_id__$f = undefined;
   /* module identifier */
-  const __vue_module_identifier__$c = undefined;
+  const __vue_module_identifier__$f = undefined;
   /* functional template */
-  const __vue_is_functional_template__$c = false;
+  const __vue_is_functional_template__$f = false;
   /* style inject */
   
   /* style inject SSR */
@@ -2651,13 +3127,13 @@ __vue_render__$c._withStripped = true;
   
 
   
-  const __vue_component__$c = vueRuntimeHelpers.normalizeComponent(
-    { render: __vue_render__$c, staticRenderFns: __vue_staticRenderFns__$c },
-    __vue_inject_styles__$c,
-    __vue_script__$c,
-    __vue_scope_id__$c,
-    __vue_is_functional_template__$c,
-    __vue_module_identifier__$c,
+  const __vue_component__$f = vueRuntimeHelpers.normalizeComponent(
+    { render: __vue_render__$f, staticRenderFns: __vue_staticRenderFns__$f },
+    __vue_inject_styles__$f,
+    __vue_script__$f,
+    __vue_scope_id__$f,
+    __vue_is_functional_template__$f,
+    __vue_module_identifier__$f,
     false,
     undefined,
     undefined,
@@ -2666,7 +3142,7 @@ __vue_render__$c._withStripped = true;
 
 //
 
-var script$d = {
+var script$g = {
   props: {
     formId: {
       type: String,
@@ -2680,7 +3156,7 @@ var script$d = {
 
   components: {
     Icon: __vue_component__,
-    InputText: __vue_component__$b,
+    InputText: __vue_component__$e,
   },
 
   data() {
@@ -2694,17 +3170,19 @@ var script$d = {
 
     addNewItem() {
       const idA = getUniqueId();
-      const fieldA = {
+      let fieldA = {
         id: idA,
         name: 'option_key',
         label: 'Option Name',
         required: true,
         computeValue: false,
-        ...this.field.fieldA,
       };
+      if (this.fields && this.fields.fieldA) {
+        fieldA = { ...fieldA, ...this.fields.fieldA };
+      }
 
       const idB = getUniqueId();
-      const fieldB = {
+      let fieldB = {
         id: idB,
         name: 'option_val',
         label: 'Option Value',
@@ -2713,23 +3191,40 @@ var script$d = {
         validation: [
           isMachineSafeStr,
         ],
-        ...this.field.fieldB,
       };
+      if (this.fields && this.fields.fieldB) {
+        fieldB = { ...fieldB, ...this.fields.fieldB };
+      }
 
       this.registerFields({ form: this.formId, fields: [fieldA, fieldB] });
       this.pairs.push({ key: idA, val: idB });
       this.updateFieldValue({ id: this.reference, val: this.pairs.slice(0) });
       this.validateField();
     },
-    // TODO: Add a delete pair method that deregisters fields and potentially sets invalid
+
+    deleteItem(index) {
+      // Deregister the pair
+      const item = this.pairs[index];
+      this.deregisterFields({
+        fields: [item.key, item.val],
+        form: this.formId,
+      });
+      // Update the field value
+      this.paris.splice(index, 1);
+      this.updateFieldValue({ id: this.reference, val: this.pairs.slice(0) });
+      // Wait for the component to be rendered before we access $refs
+      window.requestAnimationFrame(() => {
+        this.validateField();
+      });
+    },
   },
 };
 
 /* script */
-const __vue_script__$d = script$d;
+const __vue_script__$g = script$g;
 
 /* template */
-var __vue_render__$d = function() {
+var __vue_render__$g = function() {
   var _vm = this;
   var _h = _vm.$createElement;
   var _c = _vm._self._c || _h;
@@ -2752,18 +3247,51 @@ var __vue_render__$d = function() {
       ]),
       _vm._v(" "),
       _vm._l(_vm.pairs, function(pair) {
-        return _c("div", { key: pair.key, staticClass: "u-m-bot-xs" }, [
-          _c(
-            "div",
-            { staticClass: "o-grid o-grid--6-6" },
-            [
-              _c("InputText", { attrs: { reference: pair.key } }),
-              _vm._v(" "),
-              _c("InputText", { attrs: { reference: pair.val } })
-            ],
-            1
-          )
-        ])
+        return _c(
+          "div",
+          { key: pair.key, staticClass: "u-m-bot-xs u-d-flex" },
+          [
+            _c(
+              "button",
+              {
+                staticClass: "c-btn--ui o-cover-link__item",
+                attrs: { type: "button", name: "deleteField" },
+                on: {
+                  click: function($event) {
+                    return _vm.deleteItem(_vm.index)
+                  }
+                }
+              },
+              [
+                _c("Icon", { attrs: { type: "close" } }),
+                _vm._v(" "),
+                _c("span", { staticClass: "u-visually-hidden" }, [
+                  _vm._v("Remove pair")
+                ])
+              ],
+              1
+            ),
+            _vm._v(" "),
+            _c(
+              "div",
+              { staticClass: "o-grid o-grid--6-6" },
+              [
+                _c("InputText", {
+                  ref: "fields",
+                  refInFor: true,
+                  attrs: { reference: pair.key }
+                }),
+                _vm._v(" "),
+                _c("InputText", {
+                  ref: "fields",
+                  refInFor: true,
+                  attrs: { reference: pair.val }
+                })
+              ],
+              1
+            )
+          ]
+        )
       }),
       _vm._v(" "),
       _c(
@@ -2783,17 +3311,17 @@ var __vue_render__$d = function() {
     2
   )
 };
-var __vue_staticRenderFns__$d = [];
-__vue_render__$d._withStripped = true;
+var __vue_staticRenderFns__$g = [];
+__vue_render__$g._withStripped = true;
 
   /* style */
-  const __vue_inject_styles__$d = undefined;
+  const __vue_inject_styles__$g = undefined;
   /* scoped */
-  const __vue_scope_id__$d = undefined;
+  const __vue_scope_id__$g = undefined;
   /* module identifier */
-  const __vue_module_identifier__$d = undefined;
+  const __vue_module_identifier__$g = undefined;
   /* functional template */
-  const __vue_is_functional_template__$d = false;
+  const __vue_is_functional_template__$g = false;
   /* style inject */
   
   /* style inject SSR */
@@ -2802,13 +3330,13 @@ __vue_render__$d._withStripped = true;
   
 
   
-  const __vue_component__$d = vueRuntimeHelpers.normalizeComponent(
-    { render: __vue_render__$d, staticRenderFns: __vue_staticRenderFns__$d },
-    __vue_inject_styles__$d,
-    __vue_script__$d,
-    __vue_scope_id__$d,
-    __vue_is_functional_template__$d,
-    __vue_module_identifier__$d,
+  const __vue_component__$g = vueRuntimeHelpers.normalizeComponent(
+    { render: __vue_render__$g, staticRenderFns: __vue_staticRenderFns__$g },
+    __vue_inject_styles__$g,
+    __vue_script__$g,
+    __vue_scope_id__$g,
+    __vue_is_functional_template__$g,
+    __vue_module_identifier__$g,
     false,
     undefined,
     undefined,
@@ -2817,7 +3345,7 @@ __vue_render__$d._withStripped = true;
 
 //
 
-var script$e = {
+var script$h = {
   mixins: [
     vuexFormInput,
   ],
@@ -2828,35 +3356,37 @@ var script$e = {
     };
   },
 
-  // TODO: Look at ways to integrate with Quill to pass this value every so often
   methods: {
     setFieldVal() {
       this.debouncedUpdateFieldValue({
         id: this.reference,
-        val: this.quill.getContents,
+        val: this.quill.getContents(),
       });
     },
   },
 
   mounted() {
     this.quill = new Quill(`#vf-${this.reference}`, {
-      modules: {
-        toolbar: [
-          [{ header: [2, 3, 4, false] }],
-          ['bold', 'italic', 'underline'],
-        ],
-        scrollingContainer: `#vf-${this.reference}__quill-container`,
-        theme: 'snow',
-      },
+      toolbar: [
+        [{ header: [2, 3, 4, false] }],
+        ['bold', 'italic', 'underline'],
+      ],
+      scrollingContainer: `#vf-${this.reference}__quill-container`,
+      theme: 'snow',
+    });
+
+    // Update stored value on debounced text change
+    this.quill.on('text-change', () => {
+      this.setFieldVal();
     });
   },
 };
 
 /* script */
-const __vue_script__$e = script$e;
+const __vue_script__$h = script$h;
 
 /* template */
-var __vue_render__$e = function() {
+var __vue_render__$h = function() {
   var _vm = this;
   var _h = _vm.$createElement;
   var _c = _vm._self._c || _h;
@@ -2908,36 +3438,297 @@ var __vue_render__$e = function() {
     ]
   )
 };
-var __vue_staticRenderFns__$e = [];
-__vue_render__$e._withStripped = true;
+var __vue_staticRenderFns__$h = [];
+__vue_render__$h._withStripped = true;
 
   /* style */
-  const __vue_inject_styles__$e = function (inject) {
+  const __vue_inject_styles__$h = function (inject) {
     if (!inject) return
-    inject("data-v-1c558098_0", { source: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*!\n* Quill Editor v1.3.6\n* https://quilljs.com/\n* Copyright (c) 2014, Jason Chen\n* Copyright (c) 2013, salesforce.com\n*/\n.ql-container {\n  box-sizing: border-box;\n  font-family: Helvetica, Arial, sans-serif;\n  font-size: 13px;\n  height: 100%;\n  margin: 0px;\n  position: relative;\n}\n.ql-container.ql-disabled .ql-tooltip {\n  visibility: hidden;\n}\n.ql-container.ql-disabled .ql-editor ul[data-checked] > li::before {\n  pointer-events: none;\n}\n.ql-clipboard {\n  left: -100000px;\n  height: 1px;\n  overflow-y: hidden;\n  position: absolute;\n  top: 50%;\n}\n.ql-clipboard p {\n  margin: 0;\n  padding: 0;\n}\n.ql-editor {\n  box-sizing: border-box;\n  line-height: 1.42;\n  height: 100%;\n  outline: none;\n  overflow-y: auto;\n  padding: 12px 15px;\n  tab-size: 4;\n  -moz-tab-size: 4;\n  text-align: left;\n  white-space: pre-wrap;\n  word-wrap: break-word;\n}\n.ql-editor > * {\ncursor: text;\n}\n.ql-editor p,\n.ql-editor ol,\n.ql-editor ul,\n.ql-editor pre,\n.ql-editor blockquote,\n.ql-editor h1,\n.ql-editor h2,\n.ql-editor h3,\n.ql-editor h4,\n.ql-editor h5,\n.ql-editor h6 {\nmargin: 0;\npadding: 0;\ncounter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol,\n.ql-editor ul {\npadding-left: 1.5em;\n}\n.ql-editor ol > li,\n.ql-editor ul > li {\nlist-style-type: none;\n}\n.ql-editor ul > li::before {\ncontent: '\\2022';\n}\n.ql-editor ul[data-checked=true],\n.ql-editor ul[data-checked=false] {\npointer-events: none;\n}\n.ql-editor ul[data-checked=true] > li *,\n.ql-editor ul[data-checked=false] > li * {\npointer-events: all;\n}\n.ql-editor ul[data-checked=true] > li::before,\n.ql-editor ul[data-checked=false] > li::before {\ncolor: #777;\ncursor: pointer;\npointer-events: all;\n}\n.ql-editor ul[data-checked=true] > li::before {\ncontent: '\\2611';\n}\n.ql-editor ul[data-checked=false] > li::before {\ncontent: '\\2610';\n}\n.ql-editor li::before {\ndisplay: inline-block;\nwhite-space: nowrap;\nwidth: 1.2em;\n}\n.ql-editor li:not(.ql-direction-rtl)::before {\nmargin-left: -1.5em;\nmargin-right: 0.3em;\ntext-align: right;\n}\n.ql-editor li.ql-direction-rtl::before {\nmargin-left: 0.3em;\nmargin-right: -1.5em;\n}\n.ql-editor ol li:not(.ql-direction-rtl),\n.ql-editor ul li:not(.ql-direction-rtl) {\npadding-left: 1.5em;\n}\n.ql-editor ol li.ql-direction-rtl,\n.ql-editor ul li.ql-direction-rtl {\npadding-right: 1.5em;\n}\n.ql-editor ol li {\ncounter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\ncounter-increment: list-0;\n}\n.ql-editor ol li:before {\ncontent: counter(list-0, decimal) '. ';\n}\n.ql-editor ol li.ql-indent-1 {\ncounter-increment: list-1;\n}\n.ql-editor ol li.ql-indent-1:before {\ncontent: counter(list-1, lower-alpha) '. ';\n}\n.ql-editor ol li.ql-indent-1 {\ncounter-reset: list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-2 {\ncounter-increment: list-2;\n}\n.ql-editor ol li.ql-indent-2:before {\ncontent: counter(list-2, lower-roman) '. ';\n}\n.ql-editor ol li.ql-indent-2 {\ncounter-reset: list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-3 {\ncounter-increment: list-3;\n}\n.ql-editor ol li.ql-indent-3:before {\ncontent: counter(list-3, decimal) '. ';\n}\n.ql-editor ol li.ql-indent-3 {\ncounter-reset: list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-4 {\ncounter-increment: list-4;\n}\n.ql-editor ol li.ql-indent-4:before {\ncontent: counter(list-4, lower-alpha) '. ';\n}\n.ql-editor ol li.ql-indent-4 {\ncounter-reset: list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-5 {\ncounter-increment: list-5;\n}\n.ql-editor ol li.ql-indent-5:before {\ncontent: counter(list-5, lower-roman) '. ';\n}\n.ql-editor ol li.ql-indent-5 {\ncounter-reset: list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-6 {\ncounter-increment: list-6;\n}\n.ql-editor ol li.ql-indent-6:before {\ncontent: counter(list-6, decimal) '. ';\n}\n.ql-editor ol li.ql-indent-6 {\ncounter-reset: list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-7 {\ncounter-increment: list-7;\n}\n.ql-editor ol li.ql-indent-7:before {\ncontent: counter(list-7, lower-alpha) '. ';\n}\n.ql-editor ol li.ql-indent-7 {\ncounter-reset: list-8 list-9;\n}\n.ql-editor ol li.ql-indent-8 {\ncounter-increment: list-8;\n}\n.ql-editor ol li.ql-indent-8:before {\ncontent: counter(list-8, lower-roman) '. ';\n}\n.ql-editor ol li.ql-indent-8 {\ncounter-reset: list-9;\n}\n.ql-editor ol li.ql-indent-9 {\ncounter-increment: list-9;\n}\n.ql-editor ol li.ql-indent-9:before {\ncontent: counter(list-9, decimal) '. ';\n}\n.ql-editor .ql-indent-1:not(.ql-direction-rtl) {\npadding-left: 3em;\n}\n.ql-editor li.ql-indent-1:not(.ql-direction-rtl) {\npadding-left: 4.5em;\n}\n.ql-editor .ql-indent-1.ql-direction-rtl.ql-align-right {\npadding-right: 3em;\n}\n.ql-editor li.ql-indent-1.ql-direction-rtl.ql-align-right {\npadding-right: 4.5em;\n}\n.ql-editor .ql-indent-2:not(.ql-direction-rtl) {\npadding-left: 6em;\n}\n.ql-editor li.ql-indent-2:not(.ql-direction-rtl) {\npadding-left: 7.5em;\n}\n.ql-editor .ql-indent-2.ql-direction-rtl.ql-align-right {\npadding-right: 6em;\n}\n.ql-editor li.ql-indent-2.ql-direction-rtl.ql-align-right {\npadding-right: 7.5em;\n}\n.ql-editor .ql-indent-3:not(.ql-direction-rtl) {\npadding-left: 9em;\n}\n.ql-editor li.ql-indent-3:not(.ql-direction-rtl) {\npadding-left: 10.5em;\n}\n.ql-editor .ql-indent-3.ql-direction-rtl.ql-align-right {\npadding-right: 9em;\n}\n.ql-editor li.ql-indent-3.ql-direction-rtl.ql-align-right {\npadding-right: 10.5em;\n}\n.ql-editor .ql-indent-4:not(.ql-direction-rtl) {\npadding-left: 12em;\n}\n.ql-editor li.ql-indent-4:not(.ql-direction-rtl) {\npadding-left: 13.5em;\n}\n.ql-editor .ql-indent-4.ql-direction-rtl.ql-align-right {\npadding-right: 12em;\n}\n.ql-editor li.ql-indent-4.ql-direction-rtl.ql-align-right {\npadding-right: 13.5em;\n}\n.ql-editor .ql-indent-5:not(.ql-direction-rtl) {\npadding-left: 15em;\n}\n.ql-editor li.ql-indent-5:not(.ql-direction-rtl) {\npadding-left: 16.5em;\n}\n.ql-editor .ql-indent-5.ql-direction-rtl.ql-align-right {\npadding-right: 15em;\n}\n.ql-editor li.ql-indent-5.ql-direction-rtl.ql-align-right {\npadding-right: 16.5em;\n}\n.ql-editor .ql-indent-6:not(.ql-direction-rtl) {\npadding-left: 18em;\n}\n.ql-editor li.ql-indent-6:not(.ql-direction-rtl) {\npadding-left: 19.5em;\n}\n.ql-editor .ql-indent-6.ql-direction-rtl.ql-align-right {\npadding-right: 18em;\n}\n.ql-editor li.ql-indent-6.ql-direction-rtl.ql-align-right {\npadding-right: 19.5em;\n}\n.ql-editor .ql-indent-7:not(.ql-direction-rtl) {\npadding-left: 21em;\n}\n.ql-editor li.ql-indent-7:not(.ql-direction-rtl) {\npadding-left: 22.5em;\n}\n.ql-editor .ql-indent-7.ql-direction-rtl.ql-align-right {\npadding-right: 21em;\n}\n.ql-editor li.ql-indent-7.ql-direction-rtl.ql-align-right {\npadding-right: 22.5em;\n}\n.ql-editor .ql-indent-8:not(.ql-direction-rtl) {\npadding-left: 24em;\n}\n.ql-editor li.ql-indent-8:not(.ql-direction-rtl) {\npadding-left: 25.5em;\n}\n.ql-editor .ql-indent-8.ql-direction-rtl.ql-align-right {\npadding-right: 24em;\n}\n.ql-editor li.ql-indent-8.ql-direction-rtl.ql-align-right {\npadding-right: 25.5em;\n}\n.ql-editor .ql-indent-9:not(.ql-direction-rtl) {\npadding-left: 27em;\n}\n.ql-editor li.ql-indent-9:not(.ql-direction-rtl) {\npadding-left: 28.5em;\n}\n.ql-editor .ql-indent-9.ql-direction-rtl.ql-align-right {\npadding-right: 27em;\n}\n.ql-editor li.ql-indent-9.ql-direction-rtl.ql-align-right {\npadding-right: 28.5em;\n}\n.ql-editor .ql-video {\ndisplay: block;\nmax-width: 100%;\n}\n.ql-editor .ql-video.ql-align-center {\nmargin: 0 auto;\n}\n.ql-editor .ql-video.ql-align-right {\nmargin: 0 0 0 auto;\n}\n.ql-editor .ql-bg-black {\nbackground-color: #000;\n}\n.ql-editor .ql-bg-red {\nbackground-color: #e60000;\n}\n.ql-editor .ql-bg-orange {\nbackground-color: #f90;\n}\n.ql-editor .ql-bg-yellow {\nbackground-color: #ff0;\n}\n.ql-editor .ql-bg-green {\nbackground-color: #008a00;\n}\n.ql-editor .ql-bg-blue {\nbackground-color: #06c;\n}\n.ql-editor .ql-bg-purple {\nbackground-color: #93f;\n}\n.ql-editor .ql-color-white {\ncolor: #fff;\n}\n.ql-editor .ql-color-red {\ncolor: #e60000;\n}\n.ql-editor .ql-color-orange {\ncolor: #f90;\n}\n.ql-editor .ql-color-yellow {\ncolor: #ff0;\n}\n.ql-editor .ql-color-green {\ncolor: #008a00;\n}\n.ql-editor .ql-color-blue {\ncolor: #06c;\n}\n.ql-editor .ql-color-purple {\ncolor: #93f;\n}\n.ql-editor .ql-font-serif {\nfont-family: Georgia, Times New Roman, serif;\n}\n.ql-editor .ql-font-monospace {\nfont-family: Monaco, Courier New, monospace;\n}\n.ql-editor .ql-size-small {\nfont-size: 0.75em;\n}\n.ql-editor .ql-size-large {\nfont-size: 1.5em;\n}\n.ql-editor .ql-size-huge {\nfont-size: 2.5em;\n}\n.ql-editor .ql-direction-rtl {\ndirection: rtl;\ntext-align: inherit;\n}\n.ql-editor .ql-align-center {\ntext-align: center;\n}\n.ql-editor .ql-align-justify {\ntext-align: justify;\n}\n.ql-editor .ql-align-right {\ntext-align: right;\n}\n.ql-editor.ql-blank::before {\ncolor: rgba(0,0,0,0.6);\ncontent: attr(data-placeholder);\nfont-style: italic;\nleft: 15px;\npointer-events: none;\nposition: absolute;\nright: 15px;\n}\n/*!\n* Quill Editor v1.3.6\n* https://quilljs.com/\n* Copyright (c) 2014, Jason Chen\n* Copyright (c) 2013, salesforce.com\n*/\n.ql-container {\nbox-sizing: border-box;\nfont-family: Helvetica, Arial, sans-serif;\nfont-size: 13px;\nheight: 100%;\nmargin: 0px;\nposition: relative;\n}\n.ql-container.ql-disabled .ql-tooltip {\nvisibility: hidden;\n}\n.ql-container.ql-disabled .ql-editor ul[data-checked] > li::before {\npointer-events: none;\n}\n.ql-clipboard {\nleft: -100000px;\nheight: 1px;\noverflow-y: hidden;\nposition: absolute;\ntop: 50%;\n}\n.ql-clipboard p {\nmargin: 0;\npadding: 0;\n}\n.ql-editor {\nbox-sizing: border-box;\nline-height: 1.42;\nheight: 100%;\noutline: none;\noverflow-y: auto;\npadding: 12px 15px;\ntab-size: 4;\n-moz-tab-size: 4;\ntext-align: left;\nwhite-space: pre-wrap;\nword-wrap: break-word;\n}\n.ql-editor > * {\ncursor: text;\n}\n.ql-editor p,\n.ql-editor ol,\n.ql-editor ul,\n.ql-editor pre,\n.ql-editor blockquote,\n.ql-editor h1,\n.ql-editor h2,\n.ql-editor h3,\n.ql-editor h4,\n.ql-editor h5,\n.ql-editor h6 {\nmargin: 0;\npadding: 0;\ncounter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol,\n.ql-editor ul {\npadding-left: 1.5em;\n}\n.ql-editor ol > li,\n.ql-editor ul > li {\nlist-style-type: none;\n}\n.ql-editor ul > li::before {\ncontent: '\\2022';\n}\n.ql-editor ul[data-checked=true],\n.ql-editor ul[data-checked=false] {\npointer-events: none;\n}\n.ql-editor ul[data-checked=true] > li *,\n.ql-editor ul[data-checked=false] > li * {\npointer-events: all;\n}\n.ql-editor ul[data-checked=true] > li::before,\n.ql-editor ul[data-checked=false] > li::before {\ncolor: #777;\ncursor: pointer;\npointer-events: all;\n}\n.ql-editor ul[data-checked=true] > li::before {\ncontent: '\\2611';\n}\n.ql-editor ul[data-checked=false] > li::before {\ncontent: '\\2610';\n}\n.ql-editor li::before {\ndisplay: inline-block;\nwhite-space: nowrap;\nwidth: 1.2em;\n}\n.ql-editor li:not(.ql-direction-rtl)::before {\nmargin-left: -1.5em;\nmargin-right: 0.3em;\ntext-align: right;\n}\n.ql-editor li.ql-direction-rtl::before {\nmargin-left: 0.3em;\nmargin-right: -1.5em;\n}\n.ql-editor ol li:not(.ql-direction-rtl),\n.ql-editor ul li:not(.ql-direction-rtl) {\npadding-left: 1.5em;\n}\n.ql-editor ol li.ql-direction-rtl,\n.ql-editor ul li.ql-direction-rtl {\npadding-right: 1.5em;\n}\n.ql-editor ol li {\ncounter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\ncounter-increment: list-0;\n}\n.ql-editor ol li:before {\ncontent: counter(list-0, decimal) '. ';\n}\n.ql-editor ol li.ql-indent-1 {\ncounter-increment: list-1;\n}\n.ql-editor ol li.ql-indent-1:before {\ncontent: counter(list-1, lower-alpha) '. ';\n}\n.ql-editor ol li.ql-indent-1 {\ncounter-reset: list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-2 {\ncounter-increment: list-2;\n}\n.ql-editor ol li.ql-indent-2:before {\ncontent: counter(list-2, lower-roman) '. ';\n}\n.ql-editor ol li.ql-indent-2 {\ncounter-reset: list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-3 {\ncounter-increment: list-3;\n}\n.ql-editor ol li.ql-indent-3:before {\ncontent: counter(list-3, decimal) '. ';\n}\n.ql-editor ol li.ql-indent-3 {\ncounter-reset: list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-4 {\ncounter-increment: list-4;\n}\n.ql-editor ol li.ql-indent-4:before {\ncontent: counter(list-4, lower-alpha) '. ';\n}\n.ql-editor ol li.ql-indent-4 {\ncounter-reset: list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-5 {\ncounter-increment: list-5;\n}\n.ql-editor ol li.ql-indent-5:before {\ncontent: counter(list-5, lower-roman) '. ';\n}\n.ql-editor ol li.ql-indent-5 {\ncounter-reset: list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-6 {\ncounter-increment: list-6;\n}\n.ql-editor ol li.ql-indent-6:before {\ncontent: counter(list-6, decimal) '. ';\n}\n.ql-editor ol li.ql-indent-6 {\ncounter-reset: list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-7 {\ncounter-increment: list-7;\n}\n.ql-editor ol li.ql-indent-7:before {\ncontent: counter(list-7, lower-alpha) '. ';\n}\n.ql-editor ol li.ql-indent-7 {\ncounter-reset: list-8 list-9;\n}\n.ql-editor ol li.ql-indent-8 {\ncounter-increment: list-8;\n}\n.ql-editor ol li.ql-indent-8:before {\ncontent: counter(list-8, lower-roman) '. ';\n}\n.ql-editor ol li.ql-indent-8 {\ncounter-reset: list-9;\n}\n.ql-editor ol li.ql-indent-9 {\ncounter-increment: list-9;\n}\n.ql-editor ol li.ql-indent-9:before {\ncontent: counter(list-9, decimal) '. ';\n}\n.ql-editor .ql-indent-1:not(.ql-direction-rtl) {\npadding-left: 3em;\n}\n.ql-editor li.ql-indent-1:not(.ql-direction-rtl) {\npadding-left: 4.5em;\n}\n.ql-editor .ql-indent-1.ql-direction-rtl.ql-align-right {\npadding-right: 3em;\n}\n.ql-editor li.ql-indent-1.ql-direction-rtl.ql-align-right {\npadding-right: 4.5em;\n}\n.ql-editor .ql-indent-2:not(.ql-direction-rtl) {\npadding-left: 6em;\n}\n.ql-editor li.ql-indent-2:not(.ql-direction-rtl) {\npadding-left: 7.5em;\n}\n.ql-editor .ql-indent-2.ql-direction-rtl.ql-align-right {\npadding-right: 6em;\n}\n.ql-editor li.ql-indent-2.ql-direction-rtl.ql-align-right {\npadding-right: 7.5em;\n}\n.ql-editor .ql-indent-3:not(.ql-direction-rtl) {\npadding-left: 9em;\n}\n.ql-editor li.ql-indent-3:not(.ql-direction-rtl) {\npadding-left: 10.5em;\n}\n.ql-editor .ql-indent-3.ql-direction-rtl.ql-align-right {\npadding-right: 9em;\n}\n.ql-editor li.ql-indent-3.ql-direction-rtl.ql-align-right {\npadding-right: 10.5em;\n}\n.ql-editor .ql-indent-4:not(.ql-direction-rtl) {\npadding-left: 12em;\n}\n.ql-editor li.ql-indent-4:not(.ql-direction-rtl) {\npadding-left: 13.5em;\n}\n.ql-editor .ql-indent-4.ql-direction-rtl.ql-align-right {\npadding-right: 12em;\n}\n.ql-editor li.ql-indent-4.ql-direction-rtl.ql-align-right {\npadding-right: 13.5em;\n}\n.ql-editor .ql-indent-5:not(.ql-direction-rtl) {\npadding-left: 15em;\n}\n.ql-editor li.ql-indent-5:not(.ql-direction-rtl) {\npadding-left: 16.5em;\n}\n.ql-editor .ql-indent-5.ql-direction-rtl.ql-align-right {\npadding-right: 15em;\n}\n.ql-editor li.ql-indent-5.ql-direction-rtl.ql-align-right {\npadding-right: 16.5em;\n}\n.ql-editor .ql-indent-6:not(.ql-direction-rtl) {\npadding-left: 18em;\n}\n.ql-editor li.ql-indent-6:not(.ql-direction-rtl) {\npadding-left: 19.5em;\n}\n.ql-editor .ql-indent-6.ql-direction-rtl.ql-align-right {\npadding-right: 18em;\n}\n.ql-editor li.ql-indent-6.ql-direction-rtl.ql-align-right {\npadding-right: 19.5em;\n}\n.ql-editor .ql-indent-7:not(.ql-direction-rtl) {\npadding-left: 21em;\n}\n.ql-editor li.ql-indent-7:not(.ql-direction-rtl) {\npadding-left: 22.5em;\n}\n.ql-editor .ql-indent-7.ql-direction-rtl.ql-align-right {\npadding-right: 21em;\n}\n.ql-editor li.ql-indent-7.ql-direction-rtl.ql-align-right {\npadding-right: 22.5em;\n}\n.ql-editor .ql-indent-8:not(.ql-direction-rtl) {\npadding-left: 24em;\n}\n.ql-editor li.ql-indent-8:not(.ql-direction-rtl) {\npadding-left: 25.5em;\n}\n.ql-editor .ql-indent-8.ql-direction-rtl.ql-align-right {\npadding-right: 24em;\n}\n.ql-editor li.ql-indent-8.ql-direction-rtl.ql-align-right {\npadding-right: 25.5em;\n}\n.ql-editor .ql-indent-9:not(.ql-direction-rtl) {\npadding-left: 27em;\n}\n.ql-editor li.ql-indent-9:not(.ql-direction-rtl) {\npadding-left: 28.5em;\n}\n.ql-editor .ql-indent-9.ql-direction-rtl.ql-align-right {\npadding-right: 27em;\n}\n.ql-editor li.ql-indent-9.ql-direction-rtl.ql-align-right {\npadding-right: 28.5em;\n}\n.ql-editor .ql-video {\ndisplay: block;\nmax-width: 100%;\n}\n.ql-editor .ql-video.ql-align-center {\nmargin: 0 auto;\n}\n.ql-editor .ql-video.ql-align-right {\nmargin: 0 0 0 auto;\n}\n.ql-editor .ql-bg-black {\nbackground-color: #000;\n}\n.ql-editor .ql-bg-red {\nbackground-color: #e60000;\n}\n.ql-editor .ql-bg-orange {\nbackground-color: #f90;\n}\n.ql-editor .ql-bg-yellow {\nbackground-color: #ff0;\n}\n.ql-editor .ql-bg-green {\nbackground-color: #008a00;\n}\n.ql-editor .ql-bg-blue {\nbackground-color: #06c;\n}\n.ql-editor .ql-bg-purple {\nbackground-color: #93f;\n}\n.ql-editor .ql-color-white {\ncolor: #fff;\n}\n.ql-editor .ql-color-red {\ncolor: #e60000;\n}\n.ql-editor .ql-color-orange {\ncolor: #f90;\n}\n.ql-editor .ql-color-yellow {\ncolor: #ff0;\n}\n.ql-editor .ql-color-green {\ncolor: #008a00;\n}\n.ql-editor .ql-color-blue {\ncolor: #06c;\n}\n.ql-editor .ql-color-purple {\ncolor: #93f;\n}\n.ql-editor .ql-font-serif {\nfont-family: Georgia, Times New Roman, serif;\n}\n.ql-editor .ql-font-monospace {\nfont-family: Monaco, Courier New, monospace;\n}\n.ql-editor .ql-size-small {\nfont-size: 0.75em;\n}\n.ql-editor .ql-size-large {\nfont-size: 1.5em;\n}\n.ql-editor .ql-size-huge {\nfont-size: 2.5em;\n}\n.ql-editor .ql-direction-rtl {\ndirection: rtl;\ntext-align: inherit;\n}\n.ql-editor .ql-align-center {\ntext-align: center;\n}\n.ql-editor .ql-align-justify {\ntext-align: justify;\n}\n.ql-editor .ql-align-right {\ntext-align: right;\n}\n.ql-editor.ql-blank::before {\ncolor: rgba(0,0,0,0.6);\ncontent: attr(data-placeholder);\nfont-style: italic;\nleft: 15px;\npointer-events: none;\nposition: absolute;\nright: 15px;\n}\n.ql-snow.ql-toolbar:after,\n.ql-snow .ql-toolbar:after {\nclear: both;\ncontent: '';\ndisplay: table;\n}\n.ql-snow.ql-toolbar button,\n.ql-snow .ql-toolbar button {\nbackground: none;\nborder: none;\ncursor: pointer;\ndisplay: inline-block;\nfloat: left;\nheight: 24px;\npadding: 3px 5px;\nwidth: 28px;\n}\n.ql-snow.ql-toolbar button svg,\n.ql-snow .ql-toolbar button svg {\nfloat: left;\nheight: 100%;\n}\n.ql-snow.ql-toolbar button:active:hover,\n.ql-snow .ql-toolbar button:active:hover {\noutline: none;\n}\n.ql-snow.ql-toolbar input.ql-image[type=file],\n.ql-snow .ql-toolbar input.ql-image[type=file] {\ndisplay: none;\n}\n.ql-snow.ql-toolbar button:hover,\n.ql-snow .ql-toolbar button:hover,\n.ql-snow.ql-toolbar button:focus,\n.ql-snow .ql-toolbar button:focus,\n.ql-snow.ql-toolbar button.ql-active,\n.ql-snow .ql-toolbar button.ql-active,\n.ql-snow.ql-toolbar .ql-picker-label:hover,\n.ql-snow .ql-toolbar .ql-picker-label:hover,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active,\n.ql-snow.ql-toolbar .ql-picker-item:hover,\n.ql-snow .ql-toolbar .ql-picker-item:hover,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected {\ncolor: #06c;\n}\n.ql-snow.ql-toolbar button:hover .ql-fill,\n.ql-snow .ql-toolbar button:hover .ql-fill,\n.ql-snow.ql-toolbar button:focus .ql-fill,\n.ql-snow .ql-toolbar button:focus .ql-fill,\n.ql-snow.ql-toolbar button.ql-active .ql-fill,\n.ql-snow .ql-toolbar button.ql-active .ql-fill,\n.ql-snow.ql-toolbar .ql-picker-label:hover .ql-fill,\n.ql-snow .ql-toolbar .ql-picker-label:hover .ql-fill,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-fill,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-fill,\n.ql-snow.ql-toolbar .ql-picker-item:hover .ql-fill,\n.ql-snow .ql-toolbar .ql-picker-item:hover .ql-fill,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-fill,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-fill,\n.ql-snow.ql-toolbar button:hover .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar button:hover .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar button:focus .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar button:focus .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar button.ql-active .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar button.ql-active .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke.ql-fill {\nfill: #06c;\n}\n.ql-snow.ql-toolbar button:hover .ql-stroke,\n.ql-snow .ql-toolbar button:hover .ql-stroke,\n.ql-snow.ql-toolbar button:focus .ql-stroke,\n.ql-snow .ql-toolbar button:focus .ql-stroke,\n.ql-snow.ql-toolbar button.ql-active .ql-stroke,\n.ql-snow .ql-toolbar button.ql-active .ql-stroke,\n.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke,\n.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke,\n.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke,\n.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke,\n.ql-snow.ql-toolbar button:hover .ql-stroke-miter,\n.ql-snow .ql-toolbar button:hover .ql-stroke-miter,\n.ql-snow.ql-toolbar button:focus .ql-stroke-miter,\n.ql-snow .ql-toolbar button:focus .ql-stroke-miter,\n.ql-snow.ql-toolbar button.ql-active .ql-stroke-miter,\n.ql-snow .ql-toolbar button.ql-active .ql-stroke-miter,\n.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke-miter,\n.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke-miter,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke-miter,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke-miter,\n.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke-miter,\n.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke-miter,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke-miter,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke-miter {\nstroke: #06c;\n}\n@media (pointer: coarse) {\n.ql-snow.ql-toolbar button:hover:not(.ql-active),\n.ql-snow .ql-toolbar button:hover:not(.ql-active) {\n  color: #444;\n}\n.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-fill,\n.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-fill,\n.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke.ql-fill {\n  fill: #444;\n}\n.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke,\n.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke,\n.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke-miter,\n.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke-miter {\n  stroke: #444;\n}\n}\n.ql-snow {\nbox-sizing: border-box;\n}\n.ql-snow * {\nbox-sizing: border-box;\n}\n.ql-snow .ql-hidden {\ndisplay: none;\n}\n.ql-snow .ql-out-bottom,\n.ql-snow .ql-out-top {\nvisibility: hidden;\n}\n.ql-snow .ql-tooltip {\nposition: absolute;\ntransform: translateY(10px);\n}\n.ql-snow .ql-tooltip a {\ncursor: pointer;\ntext-decoration: none;\n}\n.ql-snow .ql-tooltip.ql-flip {\ntransform: translateY(-10px);\n}\n.ql-snow .ql-formats {\ndisplay: inline-block;\nvertical-align: middle;\n}\n.ql-snow .ql-formats:after {\nclear: both;\ncontent: '';\ndisplay: table;\n}\n.ql-snow .ql-stroke {\nfill: none;\nstroke: #444;\nstroke-linecap: round;\nstroke-linejoin: round;\nstroke-width: 2;\n}\n.ql-snow .ql-stroke-miter {\nfill: none;\nstroke: #444;\nstroke-miterlimit: 10;\nstroke-width: 2;\n}\n.ql-snow .ql-fill,\n.ql-snow .ql-stroke.ql-fill {\nfill: #444;\n}\n.ql-snow .ql-empty {\nfill: none;\n}\n.ql-snow .ql-even {\nfill-rule: evenodd;\n}\n.ql-snow .ql-thin,\n.ql-snow .ql-stroke.ql-thin {\nstroke-width: 1;\n}\n.ql-snow .ql-transparent {\nopacity: 0.4;\n}\n.ql-snow .ql-direction svg:last-child {\ndisplay: none;\n}\n.ql-snow .ql-direction.ql-active svg:last-child {\ndisplay: inline;\n}\n.ql-snow .ql-direction.ql-active svg:first-child {\ndisplay: none;\n}\n.ql-snow .ql-editor h1 {\nfont-size: 2em;\n}\n.ql-snow .ql-editor h2 {\nfont-size: 1.5em;\n}\n.ql-snow .ql-editor h3 {\nfont-size: 1.17em;\n}\n.ql-snow .ql-editor h4 {\nfont-size: 1em;\n}\n.ql-snow .ql-editor h5 {\nfont-size: 0.83em;\n}\n.ql-snow .ql-editor h6 {\nfont-size: 0.67em;\n}\n.ql-snow .ql-editor a {\ntext-decoration: underline;\n}\n.ql-snow .ql-editor blockquote {\nborder-left: 4px solid #ccc;\nmargin-bottom: 5px;\nmargin-top: 5px;\npadding-left: 16px;\n}\n.ql-snow .ql-editor code,\n.ql-snow .ql-editor pre {\nbackground-color: #f0f0f0;\nborder-radius: 3px;\n}\n.ql-snow .ql-editor pre {\nwhite-space: pre-wrap;\nmargin-bottom: 5px;\nmargin-top: 5px;\npadding: 5px 10px;\n}\n.ql-snow .ql-editor code {\nfont-size: 85%;\npadding: 2px 4px;\n}\n.ql-snow .ql-editor pre.ql-syntax {\nbackground-color: #23241f;\ncolor: #f8f8f2;\noverflow: visible;\n}\n.ql-snow .ql-editor img {\nmax-width: 100%;\n}\n.ql-snow .ql-picker {\ncolor: #444;\ndisplay: inline-block;\nfloat: left;\nfont-size: 14px;\nfont-weight: 500;\nheight: 24px;\nposition: relative;\nvertical-align: middle;\n}\n.ql-snow .ql-picker-label {\n  cursor: pointer;\n  display: inline-block;\n  height: 100%;\n  padding-left: 8px;\n  padding-right: 2px;\n  position: relative;\n  width: 100%;\n}\n.ql-snow .ql-picker-label::before {\n  display: inline-block;\n  line-height: 22px;\n}\n.ql-snow .ql-picker-options {\n  background-color: #fff;\n  display: none;\n  min-width: 100%;\n  padding: 4px 8px;\n  position: absolute;\n  white-space: nowrap;\n}\n.ql-snow .ql-picker-options .ql-picker-item {\n  cursor: pointer;\n  display: block;\n  padding-bottom: 5px;\n  padding-top: 5px;\n}\n.ql-snow .ql-picker.ql-expanded .ql-picker-label {\n  color: #ccc;\n  z-index: 2;\n}\n.ql-snow .ql-picker.ql-expanded .ql-picker-label .ql-fill {\n  fill: #ccc;\n}\n.ql-snow .ql-picker.ql-expanded .ql-picker-label .ql-stroke {\n  stroke: #ccc;\n}\n.ql-snow .ql-picker.ql-expanded .ql-picker-options {\n  display: block;\n  margin-top: -1px;\n  top: 100%;\n  z-index: 1;\n}\n.ql-snow .ql-color-picker,\n.ql-snow .ql-icon-picker {\n  width: 28px;\n}\n.ql-snow .ql-color-picker .ql-picker-label,\n.ql-snow .ql-icon-picker .ql-picker-label {\n  padding: 2px 4px;\n}\n.ql-snow .ql-color-picker .ql-picker-label svg,\n.ql-snow .ql-icon-picker .ql-picker-label svg {\n  right: 4px;\n}\n.ql-snow .ql-icon-picker .ql-picker-options {\n  padding: 4px 0px;\n}\n.ql-snow .ql-icon-picker .ql-picker-item {\n  height: 24px;\n  width: 24px;\n  padding: 2px 4px;\n}\n.ql-snow .ql-color-picker .ql-picker-options {\n  padding: 3px 5px;\n  width: 152px;\n}\n.ql-snow .ql-color-picker .ql-picker-item {\n  border: 1px solid transparent;\n  float: left;\n  height: 16px;\n  margin: 2px;\n  padding: 0px;\n  width: 16px;\n}\n.ql-snow .ql-picker:not(.ql-color-picker):not(.ql-icon-picker) svg {\n  position: absolute;\n  margin-top: -9px;\n  right: 0;\n  top: 50%;\n  width: 18px;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-label]:not([data-label=''])::before,\n.ql-snow .ql-picker.ql-font .ql-picker-label[data-label]:not([data-label=''])::before,\n.ql-snow .ql-picker.ql-size .ql-picker-label[data-label]:not([data-label=''])::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-label]:not([data-label=''])::before,\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-label]:not([data-label=''])::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-label]:not([data-label=''])::before {\n  content: attr(data-label);\n}\n.ql-snow .ql-picker.ql-header {\n  width: 98px;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item::before {\n  content: 'Normal';\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"1\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"1\"]::before {\n  content: 'Heading 1';\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"2\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"2\"]::before {\n  content: 'Heading 2';\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"3\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"3\"]::before {\n  content: 'Heading 3';\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"4\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"4\"]::before {\n  content: 'Heading 4';\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"5\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"5\"]::before {\n  content: 'Heading 5';\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"6\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"6\"]::before {\n  content: 'Heading 6';\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"1\"]::before {\n  font-size: 2em;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"2\"]::before {\n  font-size: 1.5em;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"3\"]::before {\n  font-size: 1.17em;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"4\"]::before {\n  font-size: 1em;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"5\"]::before {\n  font-size: 0.83em;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"6\"]::before {\n  font-size: 0.67em;\n}\n.ql-snow .ql-picker.ql-font {\n  width: 108px;\n}\n.ql-snow .ql-picker.ql-font .ql-picker-label::before,\n.ql-snow .ql-picker.ql-font .ql-picker-item::before {\n  content: 'Sans Serif';\n}\n.ql-snow .ql-picker.ql-font .ql-picker-label[data-value=serif]::before,\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=serif]::before {\n  content: 'Serif';\n}\n.ql-snow .ql-picker.ql-font .ql-picker-label[data-value=monospace]::before,\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=monospace]::before {\n  content: 'Monospace';\n}\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=serif]::before {\n  font-family: Georgia, Times New Roman, serif;\n}\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=monospace]::before {\n  font-family: Monaco, Courier New, monospace;\n}\n.ql-snow .ql-picker.ql-size {\n  width: 98px;\n}\n.ql-snow .ql-picker.ql-size .ql-picker-label::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item::before {\n  content: 'Normal';\n}\n.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=small]::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=small]::before {\n  content: 'Small';\n}\n.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=large]::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=large]::before {\n  content: 'Large';\n}\n.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=huge]::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=huge]::before {\n  content: 'Huge';\n}\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=small]::before {\n  font-size: 10px;\n}\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=large]::before {\n  font-size: 18px;\n}\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=huge]::before {\n  font-size: 32px;\n}\n.ql-snow .ql-color-picker.ql-background .ql-picker-item {\n  background-color: #fff;\n}\n.ql-snow .ql-color-picker.ql-color .ql-picker-item {\n  background-color: #000;\n}\n.ql-toolbar.ql-snow {\n  border: 1px solid #ccc;\n  box-sizing: border-box;\n  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;\n  padding: 8px;\n}\n.ql-toolbar.ql-snow .ql-formats {\n  margin-right: 15px;\n}\n.ql-toolbar.ql-snow .ql-picker-label {\n  border: 1px solid transparent;\n}\n.ql-toolbar.ql-snow .ql-picker-options {\n  border: 1px solid transparent;\n  box-shadow: rgba(0,0,0,0.2) 0 2px 8px;\n}\n.ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-label {\n  border-color: #ccc;\n}\n.ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-options {\n  border-color: #ccc;\n}\n.ql-toolbar.ql-snow .ql-color-picker .ql-picker-item.ql-selected,\n.ql-toolbar.ql-snow .ql-color-picker .ql-picker-item:hover {\n  border-color: #000;\n}\n.ql-toolbar.ql-snow + .ql-container.ql-snow {\n  border-top: 0px;\n}\n.ql-snow .ql-tooltip {\n  background-color: #fff;\n  border: 1px solid #ccc;\n  box-shadow: 0px 0px 5px #ddd;\n  color: #444;\n  padding: 5px 12px;\n  white-space: nowrap;\n}\n.ql-snow .ql-tooltip::before {\n  content: \"Visit URL:\";\n  line-height: 26px;\n  margin-right: 8px;\n}\n.ql-snow .ql-tooltip input[type=text] {\n  display: none;\n  border: 1px solid #ccc;\n  font-size: 13px;\n  height: 26px;\n  margin: 0px;\n  padding: 3px 5px;\n  width: 170px;\n}\n.ql-snow .ql-tooltip a.ql-preview {\n  display: inline-block;\n  max-width: 200px;\n  overflow-x: hidden;\n  text-overflow: ellipsis;\n  vertical-align: top;\n}\n.ql-snow .ql-tooltip a.ql-action::after {\n  border-right: 1px solid #ccc;\n  content: 'Edit';\n  margin-left: 16px;\n  padding-right: 8px;\n}\n.ql-snow .ql-tooltip a.ql-remove::before {\n  content: 'Remove';\n  margin-left: 8px;\n}\n.ql-snow .ql-tooltip a {\n  line-height: 26px;\n}\n.ql-snow .ql-tooltip.ql-editing a.ql-preview,\n.ql-snow .ql-tooltip.ql-editing a.ql-remove {\n  display: none;\n}\n.ql-snow .ql-tooltip.ql-editing input[type=text] {\n  display: inline-block;\n}\n.ql-snow .ql-tooltip.ql-editing a.ql-action::after {\n  border-right: 0px;\n  content: 'Save';\n  padding-right: 0px;\n}\n.ql-snow .ql-tooltip[data-mode=link]::before {\n  content: \"Enter link:\";\n}\n.ql-snow .ql-tooltip[data-mode=formula]::before {\n  content: \"Enter formula:\";\n}\n.ql-snow .ql-tooltip[data-mode=video]::before {\n  content: \"Enter video:\";\n}\n.ql-snow a {\n  color: #06c;\n}\n.ql-container.ql-snow {\n  border: 1px solid #ccc;\n}\n", map: {"version":3,"sources":["/Users/briangeorge/Documents/funtimes/vue-base/src/components/forms/fields/QuillRTE.vue"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AAsEA;;;;;CAKA;AACA;EACA,sBAAA;EACA,yCAAA;EACA,eAAA;EACA,YAAA;EACA,WAAA;EACA,kBAAA;AACA;AACA;EACA,kBAAA;AACA;AACA;EACA,oBAAA;AACA;AACA;EACA,eAAA;EACA,WAAA;EACA,kBAAA;EACA,kBAAA;EACA,QAAA;AACA;AACA;EACA,SAAA;EACA,UAAA;AACA;AACA;EACA,sBAAA;EACA,iBAAA;EACA,YAAA;EACA,aAAA;EACA,gBAAA;EACA,kBAAA;EACA,WAAA;EACA,gBAAA;EACA,gBAAA;EACA,qBAAA;EACA,qBAAA;AACA;AACA;AACA,YAAA;AACA;AACA;;;;;;;;;;;AAWA,SAAA;AACA,UAAA;AACA,6EAAA;AACA;AACA;;AAEA,mBAAA;AACA;AACA;;AAEA,qBAAA;AACA;AACA;AACA,gBAAA;AACA;AACA;;AAEA,oBAAA;AACA;AACA;;AAEA,mBAAA;AACA;AACA;;AAEA,WAAA;AACA,eAAA;AACA,mBAAA;AACA;AACA;AACA,gBAAA;AACA;AACA;AACA,gBAAA;AACA;AACA;AACA,qBAAA;AACA,mBAAA;AACA,YAAA;AACA;AACA;AACA,mBAAA;AACA,mBAAA;AACA,iBAAA;AACA;AACA;AACA,kBAAA;AACA,oBAAA;AACA;AACA;;AAEA,mBAAA;AACA;AACA;;AAEA,oBAAA;AACA;AACA;AACA,6EAAA;AACA,yBAAA;AACA;AACA;AACA,sCAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,0CAAA;AACA;AACA;AACA,sEAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,0CAAA;AACA;AACA;AACA,+DAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,sCAAA;AACA;AACA;AACA,wDAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,0CAAA;AACA;AACA;AACA,iDAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,0CAAA;AACA;AACA;AACA,0CAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,sCAAA;AACA;AACA;AACA,mCAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,0CAAA;AACA;AACA;AACA,4BAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,0CAAA;AACA;AACA;AACA,qBAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,sCAAA;AACA;AACA;AACA,iBAAA;AACA;AACA;AACA,mBAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,oBAAA;AACA;AACA;AACA,iBAAA;AACA;AACA;AACA,mBAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,oBAAA;AACA;AACA;AACA,iBAAA;AACA;AACA;AACA,oBAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,qBAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,oBAAA;AACA;AACA;AACA,mBAAA;AACA;AACA;AACA,qBAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,oBAAA;AACA;AACA;AACA,mBAAA;AACA;AACA;AACA,qBAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,oBAAA;AACA;AACA;AACA,mBAAA;AACA;AACA;AACA,qBAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,oBAAA;AACA;AACA;AACA,mBAAA;AACA;AACA;AACA,qBAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,oBAAA;AACA;AACA;AACA,mBAAA;AACA;AACA;AACA,qBAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,oBAAA;AACA;AACA;AACA,mBAAA;AACA;AACA;AACA,qBAAA;AACA;AACA;AACA,cAAA;AACA,eAAA;AACA;AACA;AACA,cAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,sBAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,sBAAA;AACA;AACA;AACA,sBAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,sBAAA;AACA;AACA;AACA,sBAAA;AACA;AACA;AACA,WAAA;AACA;AACA;AACA,cAAA;AACA;AACA;AACA,WAAA;AACA;AACA;AACA,WAAA;AACA;AACA;AACA,cAAA;AACA;AACA;AACA,WAAA;AACA;AACA;AACA,WAAA;AACA;AACA;AACA,4CAAA;AACA;AACA;AACA,2CAAA;AACA;AACA;AACA,iBAAA;AACA;AACA;AACA,gBAAA;AACA;AACA;AACA,gBAAA;AACA;AACA;AACA,cAAA;AACA,mBAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,mBAAA;AACA;AACA;AACA,iBAAA;AACA;AACA;AACA,sBAAA;AACA,+BAAA;AACA,kBAAA;AACA,UAAA;AACA,oBAAA;AACA,kBAAA;AACA,WAAA;AACA;AACA;;;;;CAKA;AACA;AACA,sBAAA;AACA,yCAAA;AACA,eAAA;AACA,YAAA;AACA,WAAA;AACA,kBAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,oBAAA;AACA;AACA;AACA,eAAA;AACA,WAAA;AACA,kBAAA;AACA,kBAAA;AACA,QAAA;AACA;AACA;AACA,SAAA;AACA,UAAA;AACA;AACA;AACA,sBAAA;AACA,iBAAA;AACA,YAAA;AACA,aAAA;AACA,gBAAA;AACA,kBAAA;AACA,WAAA;AACA,gBAAA;AACA,gBAAA;AACA,qBAAA;AACA,qBAAA;AACA;AACA;AACA,YAAA;AACA;AACA;;;;;;;;;;;AAWA,SAAA;AACA,UAAA;AACA,6EAAA;AACA;AACA;;AAEA,mBAAA;AACA;AACA;;AAEA,qBAAA;AACA;AACA;AACA,gBAAA;AACA;AACA;;AAEA,oBAAA;AACA;AACA;;AAEA,mBAAA;AACA;AACA;;AAEA,WAAA;AACA,eAAA;AACA,mBAAA;AACA;AACA;AACA,gBAAA;AACA;AACA;AACA,gBAAA;AACA;AACA;AACA,qBAAA;AACA,mBAAA;AACA,YAAA;AACA;AACA;AACA,mBAAA;AACA,mBAAA;AACA,iBAAA;AACA;AACA;AACA,kBAAA;AACA,oBAAA;AACA;AACA;;AAEA,mBAAA;AACA;AACA;;AAEA,oBAAA;AACA;AACA;AACA,6EAAA;AACA,yBAAA;AACA;AACA;AACA,sCAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,0CAAA;AACA;AACA;AACA,sEAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,0CAAA;AACA;AACA;AACA,+DAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,sCAAA;AACA;AACA;AACA,wDAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,0CAAA;AACA;AACA;AACA,iDAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,0CAAA;AACA;AACA;AACA,0CAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,sCAAA;AACA;AACA;AACA,mCAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,0CAAA;AACA;AACA;AACA,4BAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,0CAAA;AACA;AACA;AACA,qBAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,sCAAA;AACA;AACA;AACA,iBAAA;AACA;AACA;AACA,mBAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,oBAAA;AACA;AACA;AACA,iBAAA;AACA;AACA;AACA,mBAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,oBAAA;AACA;AACA;AACA,iBAAA;AACA;AACA;AACA,oBAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,qBAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,oBAAA;AACA;AACA;AACA,mBAAA;AACA;AACA;AACA,qBAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,oBAAA;AACA;AACA;AACA,mBAAA;AACA;AACA;AACA,qBAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,oBAAA;AACA;AACA;AACA,mBAAA;AACA;AACA;AACA,qBAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,oBAAA;AACA;AACA;AACA,mBAAA;AACA;AACA;AACA,qBAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,oBAAA;AACA;AACA;AACA,mBAAA;AACA;AACA;AACA,qBAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,oBAAA;AACA;AACA;AACA,mBAAA;AACA;AACA;AACA,qBAAA;AACA;AACA;AACA,cAAA;AACA,eAAA;AACA;AACA;AACA,cAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,sBAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,sBAAA;AACA;AACA;AACA,sBAAA;AACA;AACA;AACA,yBAAA;AACA;AACA;AACA,sBAAA;AACA;AACA;AACA,sBAAA;AACA;AACA;AACA,WAAA;AACA;AACA;AACA,cAAA;AACA;AACA;AACA,WAAA;AACA;AACA;AACA,WAAA;AACA;AACA;AACA,cAAA;AACA;AACA;AACA,WAAA;AACA;AACA;AACA,WAAA;AACA;AACA;AACA,4CAAA;AACA;AACA;AACA,2CAAA;AACA;AACA;AACA,iBAAA;AACA;AACA;AACA,gBAAA;AACA;AACA;AACA,gBAAA;AACA;AACA;AACA,cAAA;AACA,mBAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;AACA,mBAAA;AACA;AACA;AACA,iBAAA;AACA;AACA;AACA,sBAAA;AACA,+BAAA;AACA,kBAAA;AACA,UAAA;AACA,oBAAA;AACA,kBAAA;AACA,WAAA;AACA;AACA;;AAEA,WAAA;AACA,WAAA;AACA,cAAA;AACA;AACA;;AAEA,gBAAA;AACA,YAAA;AACA,eAAA;AACA,qBAAA;AACA,WAAA;AACA,YAAA;AACA,gBAAA;AACA,WAAA;AACA;AACA;;AAEA,WAAA;AACA,YAAA;AACA;AACA;;AAEA,aAAA;AACA;AACA;;AAEA,aAAA;AACA;AACA;;;;;;;;;;;;;;AAcA,WAAA;AACA;AACA;;;;;;;;;;;;;;;;;;;;;;;;;;;;AA4BA,UAAA;AACA;AACA;;;;;;;;;;;;;;;;;;;;;;;;;;;;AA4BA,YAAA;AACA;AACA;AACA;;EAEA,WAAA;AACA;AACA;;;;EAIA,UAAA;AACA;AACA;;;;EAIA,YAAA;AACA;AACA;AACA;AACA,sBAAA;AACA;AACA;AACA,sBAAA;AACA;AACA;AACA,aAAA;AACA;AACA;;AAEA,kBAAA;AACA;AACA;AACA,kBAAA;AACA,2BAAA;AACA;AACA;AACA,eAAA;AACA,qBAAA;AACA;AACA;AACA,4BAAA;AACA;AACA;AACA,qBAAA;AACA,sBAAA;AACA;AACA;AACA,WAAA;AACA,WAAA;AACA,cAAA;AACA;AACA;AACA,UAAA;AACA,YAAA;AACA,qBAAA;AACA,sBAAA;AACA,eAAA;AACA;AACA;AACA,UAAA;AACA,YAAA;AACA,qBAAA;AACA,eAAA;AACA;AACA;;AAEA,UAAA;AACA;AACA;AACA,UAAA;AACA;AACA;AACA,kBAAA;AACA;AACA;;AAEA,eAAA;AACA;AACA;AACA,YAAA;AACA;AACA;AACA,aAAA;AACA;AACA;AACA,eAAA;AACA;AACA;AACA,aAAA;AACA;AACA;AACA,cAAA;AACA;AACA;AACA,gBAAA;AACA;AACA;AACA,iBAAA;AACA;AACA;AACA,cAAA;AACA;AACA;AACA,iBAAA;AACA;AACA;AACA,iBAAA;AACA;AACA;AACA,0BAAA;AACA;AACA;AACA,2BAAA;AACA,kBAAA;AACA,eAAA;AACA,kBAAA;AACA;AACA;;AAEA,yBAAA;AACA,kBAAA;AACA;AACA;AACA,qBAAA;AACA,kBAAA;AACA,eAAA;AACA,iBAAA;AACA;AACA;AACA,cAAA;AACA,gBAAA;AACA;AACA;AACA,yBAAA;AACA,cAAA;AACA,iBAAA;AACA;AACA;AACA,eAAA;AACA;AACA;AACA,WAAA;AACA,qBAAA;AACA,WAAA;AACA,eAAA;AACA,gBAAA;AACA,YAAA;AACA,kBAAA;AACA,sBAAA;AACA;AACA;EACA,eAAA;EACA,qBAAA;EACA,YAAA;EACA,iBAAA;EACA,kBAAA;EACA,kBAAA;EACA,WAAA;AACA;AACA;EACA,qBAAA;EACA,iBAAA;AACA;AACA;EACA,sBAAA;EACA,aAAA;EACA,eAAA;EACA,gBAAA;EACA,kBAAA;EACA,mBAAA;AACA;AACA;EACA,eAAA;EACA,cAAA;EACA,mBAAA;EACA,gBAAA;AACA;AACA;EACA,WAAA;EACA,UAAA;AACA;AACA;EACA,UAAA;AACA;AACA;EACA,YAAA;AACA;AACA;EACA,cAAA;EACA,gBAAA;EACA,SAAA;EACA,UAAA;AACA;AACA;;EAEA,WAAA;AACA;AACA;;EAEA,gBAAA;AACA;AACA;;EAEA,UAAA;AACA;AACA;EACA,gBAAA;AACA;AACA;EACA,YAAA;EACA,WAAA;EACA,gBAAA;AACA;AACA;EACA,gBAAA;EACA,YAAA;AACA;AACA;EACA,6BAAA;EACA,WAAA;EACA,YAAA;EACA,WAAA;EACA,YAAA;EACA,WAAA;AACA;AACA;EACA,kBAAA;EACA,gBAAA;EACA,QAAA;EACA,QAAA;EACA,WAAA;AACA;AACA;;;;;;EAMA,yBAAA;AACA;AACA;EACA,WAAA;AACA;AACA;;EAEA,iBAAA;AACA;AACA;;EAEA,oBAAA;AACA;AACA;;EAEA,oBAAA;AACA;AACA;;EAEA,oBAAA;AACA;AACA;;EAEA,oBAAA;AACA;AACA;;EAEA,oBAAA;AACA;AACA;;EAEA,oBAAA;AACA;AACA;EACA,cAAA;AACA;AACA;EACA,gBAAA;AACA;AACA;EACA,iBAAA;AACA;AACA;EACA,cAAA;AACA;AACA;EACA,iBAAA;AACA;AACA;EACA,iBAAA;AACA;AACA;EACA,YAAA;AACA;AACA;;EAEA,qBAAA;AACA;AACA;;EAEA,gBAAA;AACA;AACA;;EAEA,oBAAA;AACA;AACA;EACA,4CAAA;AACA;AACA;EACA,2CAAA;AACA;AACA;EACA,WAAA;AACA;AACA;;EAEA,iBAAA;AACA;AACA;;EAEA,gBAAA;AACA;AACA;;EAEA,gBAAA;AACA;AACA;;EAEA,eAAA;AACA;AACA;EACA,eAAA;AACA;AACA;EACA,eAAA;AACA;AACA;EACA,eAAA;AACA;AACA;EACA,sBAAA;AACA;AACA;EACA,sBAAA;AACA;AACA;EACA,sBAAA;EACA,sBAAA;EACA,+DAAA;EACA,YAAA;AACA;AACA;EACA,kBAAA;AACA;AACA;EACA,6BAAA;AACA;AACA;EACA,6BAAA;EACA,qCAAA;AACA;AACA;EACA,kBAAA;AACA;AACA;EACA,kBAAA;AACA;AACA;;EAEA,kBAAA;AACA;AACA;EACA,eAAA;AACA;AACA;EACA,sBAAA;EACA,sBAAA;EACA,4BAAA;EACA,WAAA;EACA,iBAAA;EACA,mBAAA;AACA;AACA;EACA,qBAAA;EACA,iBAAA;EACA,iBAAA;AACA;AACA;EACA,aAAA;EACA,sBAAA;EACA,eAAA;EACA,YAAA;EACA,WAAA;EACA,gBAAA;EACA,YAAA;AACA;AACA;EACA,qBAAA;EACA,gBAAA;EACA,kBAAA;EACA,uBAAA;EACA,mBAAA;AACA;AACA;EACA,4BAAA;EACA,eAAA;EACA,iBAAA;EACA,kBAAA;AACA;AACA;EACA,iBAAA;EACA,gBAAA;AACA;AACA;EACA,iBAAA;AACA;AACA;;EAEA,aAAA;AACA;AACA;EACA,qBAAA;AACA;AACA;EACA,iBAAA;EACA,eAAA;EACA,kBAAA;AACA;AACA;EACA,sBAAA;AACA;AACA;EACA,yBAAA;AACA;AACA;EACA,uBAAA;AACA;AACA;EACA,WAAA;AACA;AACA;EACA,sBAAA;AACA","file":"QuillRTE.vue","sourcesContent":["<template>\n  <div\n    v-show=\"field.isVisible\"\n    :class=\"classNames\"\n  >\n    <label\n      :for=\"`vf-${reference}`\"\n      class=\"c-input__label\"\n    >\n      {{ field.label }}<sup v-if=\"field.required\">*</sup>\n    </label>\n    <div\n      :id=\"`vf-${reference}__quill-container`\"\n      class=\"c-quill\"\n    >\n      <div :id=\"`vf-${reference}`\">\n        <!-- Quill.js -->\n      </div>\n    </div>\n    <p\n      :id=\"`vf-${reference}__error`\"\n      class=\"c-input__error\"\n      v-if=\"showError\"\n    >\n      {{ errorText }}\n    </p>\n  </div>\n</template>\n\n<script>\nimport Quill from 'quill';\nimport vuexFormInput from '../mixins/vuexFormInput';\n\nexport default {\n  mixins: [\n    vuexFormInput,\n  ],\n\n  data() {\n    return {\n      quill: null,\n    };\n  },\n\n  // TODO: Look at ways to integrate with Quill to pass this value every so often\n  methods: {\n    setFieldVal() {\n      this.debouncedUpdateFieldValue({\n        id: this.reference,\n        val: this.quill.getContents,\n      });\n    },\n  },\n\n  mounted() {\n    this.quill = new Quill(`#vf-${this.reference}`, {\n      modules: {\n        toolbar: [\n          [{ header: [2, 3, 4, false] }],\n          ['bold', 'italic', 'underline'],\n        ],\n        scrollingContainer: `#vf-${this.reference}__quill-container`,\n        theme: 'snow',\n      },\n    });\n  },\n};\n</script>\n\n<style lang=\"css\">\n/*!\n* Quill Editor v1.3.6\n* https://quilljs.com/\n* Copyright (c) 2014, Jason Chen\n* Copyright (c) 2013, salesforce.com\n*/\n.ql-container {\n  box-sizing: border-box;\n  font-family: Helvetica, Arial, sans-serif;\n  font-size: 13px;\n  height: 100%;\n  margin: 0px;\n  position: relative;\n}\n.ql-container.ql-disabled .ql-tooltip {\n  visibility: hidden;\n}\n.ql-container.ql-disabled .ql-editor ul[data-checked] > li::before {\n  pointer-events: none;\n}\n.ql-clipboard {\n  left: -100000px;\n  height: 1px;\n  overflow-y: hidden;\n  position: absolute;\n  top: 50%;\n}\n.ql-clipboard p {\n  margin: 0;\n  padding: 0;\n}\n.ql-editor {\n  box-sizing: border-box;\n  line-height: 1.42;\n  height: 100%;\n  outline: none;\n  overflow-y: auto;\n  padding: 12px 15px;\n  tab-size: 4;\n  -moz-tab-size: 4;\n  text-align: left;\n  white-space: pre-wrap;\n  word-wrap: break-word;\n}\n.ql-editor > * {\ncursor: text;\n}\n.ql-editor p,\n.ql-editor ol,\n.ql-editor ul,\n.ql-editor pre,\n.ql-editor blockquote,\n.ql-editor h1,\n.ql-editor h2,\n.ql-editor h3,\n.ql-editor h4,\n.ql-editor h5,\n.ql-editor h6 {\nmargin: 0;\npadding: 0;\ncounter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol,\n.ql-editor ul {\npadding-left: 1.5em;\n}\n.ql-editor ol > li,\n.ql-editor ul > li {\nlist-style-type: none;\n}\n.ql-editor ul > li::before {\ncontent: '\\2022';\n}\n.ql-editor ul[data-checked=true],\n.ql-editor ul[data-checked=false] {\npointer-events: none;\n}\n.ql-editor ul[data-checked=true] > li *,\n.ql-editor ul[data-checked=false] > li * {\npointer-events: all;\n}\n.ql-editor ul[data-checked=true] > li::before,\n.ql-editor ul[data-checked=false] > li::before {\ncolor: #777;\ncursor: pointer;\npointer-events: all;\n}\n.ql-editor ul[data-checked=true] > li::before {\ncontent: '\\2611';\n}\n.ql-editor ul[data-checked=false] > li::before {\ncontent: '\\2610';\n}\n.ql-editor li::before {\ndisplay: inline-block;\nwhite-space: nowrap;\nwidth: 1.2em;\n}\n.ql-editor li:not(.ql-direction-rtl)::before {\nmargin-left: -1.5em;\nmargin-right: 0.3em;\ntext-align: right;\n}\n.ql-editor li.ql-direction-rtl::before {\nmargin-left: 0.3em;\nmargin-right: -1.5em;\n}\n.ql-editor ol li:not(.ql-direction-rtl),\n.ql-editor ul li:not(.ql-direction-rtl) {\npadding-left: 1.5em;\n}\n.ql-editor ol li.ql-direction-rtl,\n.ql-editor ul li.ql-direction-rtl {\npadding-right: 1.5em;\n}\n.ql-editor ol li {\ncounter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\ncounter-increment: list-0;\n}\n.ql-editor ol li:before {\ncontent: counter(list-0, decimal) '. ';\n}\n.ql-editor ol li.ql-indent-1 {\ncounter-increment: list-1;\n}\n.ql-editor ol li.ql-indent-1:before {\ncontent: counter(list-1, lower-alpha) '. ';\n}\n.ql-editor ol li.ql-indent-1 {\ncounter-reset: list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-2 {\ncounter-increment: list-2;\n}\n.ql-editor ol li.ql-indent-2:before {\ncontent: counter(list-2, lower-roman) '. ';\n}\n.ql-editor ol li.ql-indent-2 {\ncounter-reset: list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-3 {\ncounter-increment: list-3;\n}\n.ql-editor ol li.ql-indent-3:before {\ncontent: counter(list-3, decimal) '. ';\n}\n.ql-editor ol li.ql-indent-3 {\ncounter-reset: list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-4 {\ncounter-increment: list-4;\n}\n.ql-editor ol li.ql-indent-4:before {\ncontent: counter(list-4, lower-alpha) '. ';\n}\n.ql-editor ol li.ql-indent-4 {\ncounter-reset: list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-5 {\ncounter-increment: list-5;\n}\n.ql-editor ol li.ql-indent-5:before {\ncontent: counter(list-5, lower-roman) '. ';\n}\n.ql-editor ol li.ql-indent-5 {\ncounter-reset: list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-6 {\ncounter-increment: list-6;\n}\n.ql-editor ol li.ql-indent-6:before {\ncontent: counter(list-6, decimal) '. ';\n}\n.ql-editor ol li.ql-indent-6 {\ncounter-reset: list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-7 {\ncounter-increment: list-7;\n}\n.ql-editor ol li.ql-indent-7:before {\ncontent: counter(list-7, lower-alpha) '. ';\n}\n.ql-editor ol li.ql-indent-7 {\ncounter-reset: list-8 list-9;\n}\n.ql-editor ol li.ql-indent-8 {\ncounter-increment: list-8;\n}\n.ql-editor ol li.ql-indent-8:before {\ncontent: counter(list-8, lower-roman) '. ';\n}\n.ql-editor ol li.ql-indent-8 {\ncounter-reset: list-9;\n}\n.ql-editor ol li.ql-indent-9 {\ncounter-increment: list-9;\n}\n.ql-editor ol li.ql-indent-9:before {\ncontent: counter(list-9, decimal) '. ';\n}\n.ql-editor .ql-indent-1:not(.ql-direction-rtl) {\npadding-left: 3em;\n}\n.ql-editor li.ql-indent-1:not(.ql-direction-rtl) {\npadding-left: 4.5em;\n}\n.ql-editor .ql-indent-1.ql-direction-rtl.ql-align-right {\npadding-right: 3em;\n}\n.ql-editor li.ql-indent-1.ql-direction-rtl.ql-align-right {\npadding-right: 4.5em;\n}\n.ql-editor .ql-indent-2:not(.ql-direction-rtl) {\npadding-left: 6em;\n}\n.ql-editor li.ql-indent-2:not(.ql-direction-rtl) {\npadding-left: 7.5em;\n}\n.ql-editor .ql-indent-2.ql-direction-rtl.ql-align-right {\npadding-right: 6em;\n}\n.ql-editor li.ql-indent-2.ql-direction-rtl.ql-align-right {\npadding-right: 7.5em;\n}\n.ql-editor .ql-indent-3:not(.ql-direction-rtl) {\npadding-left: 9em;\n}\n.ql-editor li.ql-indent-3:not(.ql-direction-rtl) {\npadding-left: 10.5em;\n}\n.ql-editor .ql-indent-3.ql-direction-rtl.ql-align-right {\npadding-right: 9em;\n}\n.ql-editor li.ql-indent-3.ql-direction-rtl.ql-align-right {\npadding-right: 10.5em;\n}\n.ql-editor .ql-indent-4:not(.ql-direction-rtl) {\npadding-left: 12em;\n}\n.ql-editor li.ql-indent-4:not(.ql-direction-rtl) {\npadding-left: 13.5em;\n}\n.ql-editor .ql-indent-4.ql-direction-rtl.ql-align-right {\npadding-right: 12em;\n}\n.ql-editor li.ql-indent-4.ql-direction-rtl.ql-align-right {\npadding-right: 13.5em;\n}\n.ql-editor .ql-indent-5:not(.ql-direction-rtl) {\npadding-left: 15em;\n}\n.ql-editor li.ql-indent-5:not(.ql-direction-rtl) {\npadding-left: 16.5em;\n}\n.ql-editor .ql-indent-5.ql-direction-rtl.ql-align-right {\npadding-right: 15em;\n}\n.ql-editor li.ql-indent-5.ql-direction-rtl.ql-align-right {\npadding-right: 16.5em;\n}\n.ql-editor .ql-indent-6:not(.ql-direction-rtl) {\npadding-left: 18em;\n}\n.ql-editor li.ql-indent-6:not(.ql-direction-rtl) {\npadding-left: 19.5em;\n}\n.ql-editor .ql-indent-6.ql-direction-rtl.ql-align-right {\npadding-right: 18em;\n}\n.ql-editor li.ql-indent-6.ql-direction-rtl.ql-align-right {\npadding-right: 19.5em;\n}\n.ql-editor .ql-indent-7:not(.ql-direction-rtl) {\npadding-left: 21em;\n}\n.ql-editor li.ql-indent-7:not(.ql-direction-rtl) {\npadding-left: 22.5em;\n}\n.ql-editor .ql-indent-7.ql-direction-rtl.ql-align-right {\npadding-right: 21em;\n}\n.ql-editor li.ql-indent-7.ql-direction-rtl.ql-align-right {\npadding-right: 22.5em;\n}\n.ql-editor .ql-indent-8:not(.ql-direction-rtl) {\npadding-left: 24em;\n}\n.ql-editor li.ql-indent-8:not(.ql-direction-rtl) {\npadding-left: 25.5em;\n}\n.ql-editor .ql-indent-8.ql-direction-rtl.ql-align-right {\npadding-right: 24em;\n}\n.ql-editor li.ql-indent-8.ql-direction-rtl.ql-align-right {\npadding-right: 25.5em;\n}\n.ql-editor .ql-indent-9:not(.ql-direction-rtl) {\npadding-left: 27em;\n}\n.ql-editor li.ql-indent-9:not(.ql-direction-rtl) {\npadding-left: 28.5em;\n}\n.ql-editor .ql-indent-9.ql-direction-rtl.ql-align-right {\npadding-right: 27em;\n}\n.ql-editor li.ql-indent-9.ql-direction-rtl.ql-align-right {\npadding-right: 28.5em;\n}\n.ql-editor .ql-video {\ndisplay: block;\nmax-width: 100%;\n}\n.ql-editor .ql-video.ql-align-center {\nmargin: 0 auto;\n}\n.ql-editor .ql-video.ql-align-right {\nmargin: 0 0 0 auto;\n}\n.ql-editor .ql-bg-black {\nbackground-color: #000;\n}\n.ql-editor .ql-bg-red {\nbackground-color: #e60000;\n}\n.ql-editor .ql-bg-orange {\nbackground-color: #f90;\n}\n.ql-editor .ql-bg-yellow {\nbackground-color: #ff0;\n}\n.ql-editor .ql-bg-green {\nbackground-color: #008a00;\n}\n.ql-editor .ql-bg-blue {\nbackground-color: #06c;\n}\n.ql-editor .ql-bg-purple {\nbackground-color: #93f;\n}\n.ql-editor .ql-color-white {\ncolor: #fff;\n}\n.ql-editor .ql-color-red {\ncolor: #e60000;\n}\n.ql-editor .ql-color-orange {\ncolor: #f90;\n}\n.ql-editor .ql-color-yellow {\ncolor: #ff0;\n}\n.ql-editor .ql-color-green {\ncolor: #008a00;\n}\n.ql-editor .ql-color-blue {\ncolor: #06c;\n}\n.ql-editor .ql-color-purple {\ncolor: #93f;\n}\n.ql-editor .ql-font-serif {\nfont-family: Georgia, Times New Roman, serif;\n}\n.ql-editor .ql-font-monospace {\nfont-family: Monaco, Courier New, monospace;\n}\n.ql-editor .ql-size-small {\nfont-size: 0.75em;\n}\n.ql-editor .ql-size-large {\nfont-size: 1.5em;\n}\n.ql-editor .ql-size-huge {\nfont-size: 2.5em;\n}\n.ql-editor .ql-direction-rtl {\ndirection: rtl;\ntext-align: inherit;\n}\n.ql-editor .ql-align-center {\ntext-align: center;\n}\n.ql-editor .ql-align-justify {\ntext-align: justify;\n}\n.ql-editor .ql-align-right {\ntext-align: right;\n}\n.ql-editor.ql-blank::before {\ncolor: rgba(0,0,0,0.6);\ncontent: attr(data-placeholder);\nfont-style: italic;\nleft: 15px;\npointer-events: none;\nposition: absolute;\nright: 15px;\n}\n/*!\n* Quill Editor v1.3.6\n* https://quilljs.com/\n* Copyright (c) 2014, Jason Chen\n* Copyright (c) 2013, salesforce.com\n*/\n.ql-container {\nbox-sizing: border-box;\nfont-family: Helvetica, Arial, sans-serif;\nfont-size: 13px;\nheight: 100%;\nmargin: 0px;\nposition: relative;\n}\n.ql-container.ql-disabled .ql-tooltip {\nvisibility: hidden;\n}\n.ql-container.ql-disabled .ql-editor ul[data-checked] > li::before {\npointer-events: none;\n}\n.ql-clipboard {\nleft: -100000px;\nheight: 1px;\noverflow-y: hidden;\nposition: absolute;\ntop: 50%;\n}\n.ql-clipboard p {\nmargin: 0;\npadding: 0;\n}\n.ql-editor {\nbox-sizing: border-box;\nline-height: 1.42;\nheight: 100%;\noutline: none;\noverflow-y: auto;\npadding: 12px 15px;\ntab-size: 4;\n-moz-tab-size: 4;\ntext-align: left;\nwhite-space: pre-wrap;\nword-wrap: break-word;\n}\n.ql-editor > * {\ncursor: text;\n}\n.ql-editor p,\n.ql-editor ol,\n.ql-editor ul,\n.ql-editor pre,\n.ql-editor blockquote,\n.ql-editor h1,\n.ql-editor h2,\n.ql-editor h3,\n.ql-editor h4,\n.ql-editor h5,\n.ql-editor h6 {\nmargin: 0;\npadding: 0;\ncounter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol,\n.ql-editor ul {\npadding-left: 1.5em;\n}\n.ql-editor ol > li,\n.ql-editor ul > li {\nlist-style-type: none;\n}\n.ql-editor ul > li::before {\ncontent: '\\2022';\n}\n.ql-editor ul[data-checked=true],\n.ql-editor ul[data-checked=false] {\npointer-events: none;\n}\n.ql-editor ul[data-checked=true] > li *,\n.ql-editor ul[data-checked=false] > li * {\npointer-events: all;\n}\n.ql-editor ul[data-checked=true] > li::before,\n.ql-editor ul[data-checked=false] > li::before {\ncolor: #777;\ncursor: pointer;\npointer-events: all;\n}\n.ql-editor ul[data-checked=true] > li::before {\ncontent: '\\2611';\n}\n.ql-editor ul[data-checked=false] > li::before {\ncontent: '\\2610';\n}\n.ql-editor li::before {\ndisplay: inline-block;\nwhite-space: nowrap;\nwidth: 1.2em;\n}\n.ql-editor li:not(.ql-direction-rtl)::before {\nmargin-left: -1.5em;\nmargin-right: 0.3em;\ntext-align: right;\n}\n.ql-editor li.ql-direction-rtl::before {\nmargin-left: 0.3em;\nmargin-right: -1.5em;\n}\n.ql-editor ol li:not(.ql-direction-rtl),\n.ql-editor ul li:not(.ql-direction-rtl) {\npadding-left: 1.5em;\n}\n.ql-editor ol li.ql-direction-rtl,\n.ql-editor ul li.ql-direction-rtl {\npadding-right: 1.5em;\n}\n.ql-editor ol li {\ncounter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\ncounter-increment: list-0;\n}\n.ql-editor ol li:before {\ncontent: counter(list-0, decimal) '. ';\n}\n.ql-editor ol li.ql-indent-1 {\ncounter-increment: list-1;\n}\n.ql-editor ol li.ql-indent-1:before {\ncontent: counter(list-1, lower-alpha) '. ';\n}\n.ql-editor ol li.ql-indent-1 {\ncounter-reset: list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-2 {\ncounter-increment: list-2;\n}\n.ql-editor ol li.ql-indent-2:before {\ncontent: counter(list-2, lower-roman) '. ';\n}\n.ql-editor ol li.ql-indent-2 {\ncounter-reset: list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-3 {\ncounter-increment: list-3;\n}\n.ql-editor ol li.ql-indent-3:before {\ncontent: counter(list-3, decimal) '. ';\n}\n.ql-editor ol li.ql-indent-3 {\ncounter-reset: list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-4 {\ncounter-increment: list-4;\n}\n.ql-editor ol li.ql-indent-4:before {\ncontent: counter(list-4, lower-alpha) '. ';\n}\n.ql-editor ol li.ql-indent-4 {\ncounter-reset: list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-5 {\ncounter-increment: list-5;\n}\n.ql-editor ol li.ql-indent-5:before {\ncontent: counter(list-5, lower-roman) '. ';\n}\n.ql-editor ol li.ql-indent-5 {\ncounter-reset: list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-6 {\ncounter-increment: list-6;\n}\n.ql-editor ol li.ql-indent-6:before {\ncontent: counter(list-6, decimal) '. ';\n}\n.ql-editor ol li.ql-indent-6 {\ncounter-reset: list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-7 {\ncounter-increment: list-7;\n}\n.ql-editor ol li.ql-indent-7:before {\ncontent: counter(list-7, lower-alpha) '. ';\n}\n.ql-editor ol li.ql-indent-7 {\ncounter-reset: list-8 list-9;\n}\n.ql-editor ol li.ql-indent-8 {\ncounter-increment: list-8;\n}\n.ql-editor ol li.ql-indent-8:before {\ncontent: counter(list-8, lower-roman) '. ';\n}\n.ql-editor ol li.ql-indent-8 {\ncounter-reset: list-9;\n}\n.ql-editor ol li.ql-indent-9 {\ncounter-increment: list-9;\n}\n.ql-editor ol li.ql-indent-9:before {\ncontent: counter(list-9, decimal) '. ';\n}\n.ql-editor .ql-indent-1:not(.ql-direction-rtl) {\npadding-left: 3em;\n}\n.ql-editor li.ql-indent-1:not(.ql-direction-rtl) {\npadding-left: 4.5em;\n}\n.ql-editor .ql-indent-1.ql-direction-rtl.ql-align-right {\npadding-right: 3em;\n}\n.ql-editor li.ql-indent-1.ql-direction-rtl.ql-align-right {\npadding-right: 4.5em;\n}\n.ql-editor .ql-indent-2:not(.ql-direction-rtl) {\npadding-left: 6em;\n}\n.ql-editor li.ql-indent-2:not(.ql-direction-rtl) {\npadding-left: 7.5em;\n}\n.ql-editor .ql-indent-2.ql-direction-rtl.ql-align-right {\npadding-right: 6em;\n}\n.ql-editor li.ql-indent-2.ql-direction-rtl.ql-align-right {\npadding-right: 7.5em;\n}\n.ql-editor .ql-indent-3:not(.ql-direction-rtl) {\npadding-left: 9em;\n}\n.ql-editor li.ql-indent-3:not(.ql-direction-rtl) {\npadding-left: 10.5em;\n}\n.ql-editor .ql-indent-3.ql-direction-rtl.ql-align-right {\npadding-right: 9em;\n}\n.ql-editor li.ql-indent-3.ql-direction-rtl.ql-align-right {\npadding-right: 10.5em;\n}\n.ql-editor .ql-indent-4:not(.ql-direction-rtl) {\npadding-left: 12em;\n}\n.ql-editor li.ql-indent-4:not(.ql-direction-rtl) {\npadding-left: 13.5em;\n}\n.ql-editor .ql-indent-4.ql-direction-rtl.ql-align-right {\npadding-right: 12em;\n}\n.ql-editor li.ql-indent-4.ql-direction-rtl.ql-align-right {\npadding-right: 13.5em;\n}\n.ql-editor .ql-indent-5:not(.ql-direction-rtl) {\npadding-left: 15em;\n}\n.ql-editor li.ql-indent-5:not(.ql-direction-rtl) {\npadding-left: 16.5em;\n}\n.ql-editor .ql-indent-5.ql-direction-rtl.ql-align-right {\npadding-right: 15em;\n}\n.ql-editor li.ql-indent-5.ql-direction-rtl.ql-align-right {\npadding-right: 16.5em;\n}\n.ql-editor .ql-indent-6:not(.ql-direction-rtl) {\npadding-left: 18em;\n}\n.ql-editor li.ql-indent-6:not(.ql-direction-rtl) {\npadding-left: 19.5em;\n}\n.ql-editor .ql-indent-6.ql-direction-rtl.ql-align-right {\npadding-right: 18em;\n}\n.ql-editor li.ql-indent-6.ql-direction-rtl.ql-align-right {\npadding-right: 19.5em;\n}\n.ql-editor .ql-indent-7:not(.ql-direction-rtl) {\npadding-left: 21em;\n}\n.ql-editor li.ql-indent-7:not(.ql-direction-rtl) {\npadding-left: 22.5em;\n}\n.ql-editor .ql-indent-7.ql-direction-rtl.ql-align-right {\npadding-right: 21em;\n}\n.ql-editor li.ql-indent-7.ql-direction-rtl.ql-align-right {\npadding-right: 22.5em;\n}\n.ql-editor .ql-indent-8:not(.ql-direction-rtl) {\npadding-left: 24em;\n}\n.ql-editor li.ql-indent-8:not(.ql-direction-rtl) {\npadding-left: 25.5em;\n}\n.ql-editor .ql-indent-8.ql-direction-rtl.ql-align-right {\npadding-right: 24em;\n}\n.ql-editor li.ql-indent-8.ql-direction-rtl.ql-align-right {\npadding-right: 25.5em;\n}\n.ql-editor .ql-indent-9:not(.ql-direction-rtl) {\npadding-left: 27em;\n}\n.ql-editor li.ql-indent-9:not(.ql-direction-rtl) {\npadding-left: 28.5em;\n}\n.ql-editor .ql-indent-9.ql-direction-rtl.ql-align-right {\npadding-right: 27em;\n}\n.ql-editor li.ql-indent-9.ql-direction-rtl.ql-align-right {\npadding-right: 28.5em;\n}\n.ql-editor .ql-video {\ndisplay: block;\nmax-width: 100%;\n}\n.ql-editor .ql-video.ql-align-center {\nmargin: 0 auto;\n}\n.ql-editor .ql-video.ql-align-right {\nmargin: 0 0 0 auto;\n}\n.ql-editor .ql-bg-black {\nbackground-color: #000;\n}\n.ql-editor .ql-bg-red {\nbackground-color: #e60000;\n}\n.ql-editor .ql-bg-orange {\nbackground-color: #f90;\n}\n.ql-editor .ql-bg-yellow {\nbackground-color: #ff0;\n}\n.ql-editor .ql-bg-green {\nbackground-color: #008a00;\n}\n.ql-editor .ql-bg-blue {\nbackground-color: #06c;\n}\n.ql-editor .ql-bg-purple {\nbackground-color: #93f;\n}\n.ql-editor .ql-color-white {\ncolor: #fff;\n}\n.ql-editor .ql-color-red {\ncolor: #e60000;\n}\n.ql-editor .ql-color-orange {\ncolor: #f90;\n}\n.ql-editor .ql-color-yellow {\ncolor: #ff0;\n}\n.ql-editor .ql-color-green {\ncolor: #008a00;\n}\n.ql-editor .ql-color-blue {\ncolor: #06c;\n}\n.ql-editor .ql-color-purple {\ncolor: #93f;\n}\n.ql-editor .ql-font-serif {\nfont-family: Georgia, Times New Roman, serif;\n}\n.ql-editor .ql-font-monospace {\nfont-family: Monaco, Courier New, monospace;\n}\n.ql-editor .ql-size-small {\nfont-size: 0.75em;\n}\n.ql-editor .ql-size-large {\nfont-size: 1.5em;\n}\n.ql-editor .ql-size-huge {\nfont-size: 2.5em;\n}\n.ql-editor .ql-direction-rtl {\ndirection: rtl;\ntext-align: inherit;\n}\n.ql-editor .ql-align-center {\ntext-align: center;\n}\n.ql-editor .ql-align-justify {\ntext-align: justify;\n}\n.ql-editor .ql-align-right {\ntext-align: right;\n}\n.ql-editor.ql-blank::before {\ncolor: rgba(0,0,0,0.6);\ncontent: attr(data-placeholder);\nfont-style: italic;\nleft: 15px;\npointer-events: none;\nposition: absolute;\nright: 15px;\n}\n.ql-snow.ql-toolbar:after,\n.ql-snow .ql-toolbar:after {\nclear: both;\ncontent: '';\ndisplay: table;\n}\n.ql-snow.ql-toolbar button,\n.ql-snow .ql-toolbar button {\nbackground: none;\nborder: none;\ncursor: pointer;\ndisplay: inline-block;\nfloat: left;\nheight: 24px;\npadding: 3px 5px;\nwidth: 28px;\n}\n.ql-snow.ql-toolbar button svg,\n.ql-snow .ql-toolbar button svg {\nfloat: left;\nheight: 100%;\n}\n.ql-snow.ql-toolbar button:active:hover,\n.ql-snow .ql-toolbar button:active:hover {\noutline: none;\n}\n.ql-snow.ql-toolbar input.ql-image[type=file],\n.ql-snow .ql-toolbar input.ql-image[type=file] {\ndisplay: none;\n}\n.ql-snow.ql-toolbar button:hover,\n.ql-snow .ql-toolbar button:hover,\n.ql-snow.ql-toolbar button:focus,\n.ql-snow .ql-toolbar button:focus,\n.ql-snow.ql-toolbar button.ql-active,\n.ql-snow .ql-toolbar button.ql-active,\n.ql-snow.ql-toolbar .ql-picker-label:hover,\n.ql-snow .ql-toolbar .ql-picker-label:hover,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active,\n.ql-snow.ql-toolbar .ql-picker-item:hover,\n.ql-snow .ql-toolbar .ql-picker-item:hover,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected {\ncolor: #06c;\n}\n.ql-snow.ql-toolbar button:hover .ql-fill,\n.ql-snow .ql-toolbar button:hover .ql-fill,\n.ql-snow.ql-toolbar button:focus .ql-fill,\n.ql-snow .ql-toolbar button:focus .ql-fill,\n.ql-snow.ql-toolbar button.ql-active .ql-fill,\n.ql-snow .ql-toolbar button.ql-active .ql-fill,\n.ql-snow.ql-toolbar .ql-picker-label:hover .ql-fill,\n.ql-snow .ql-toolbar .ql-picker-label:hover .ql-fill,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-fill,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-fill,\n.ql-snow.ql-toolbar .ql-picker-item:hover .ql-fill,\n.ql-snow .ql-toolbar .ql-picker-item:hover .ql-fill,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-fill,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-fill,\n.ql-snow.ql-toolbar button:hover .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar button:hover .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar button:focus .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar button:focus .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar button.ql-active .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar button.ql-active .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke.ql-fill {\nfill: #06c;\n}\n.ql-snow.ql-toolbar button:hover .ql-stroke,\n.ql-snow .ql-toolbar button:hover .ql-stroke,\n.ql-snow.ql-toolbar button:focus .ql-stroke,\n.ql-snow .ql-toolbar button:focus .ql-stroke,\n.ql-snow.ql-toolbar button.ql-active .ql-stroke,\n.ql-snow .ql-toolbar button.ql-active .ql-stroke,\n.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke,\n.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke,\n.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke,\n.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke,\n.ql-snow.ql-toolbar button:hover .ql-stroke-miter,\n.ql-snow .ql-toolbar button:hover .ql-stroke-miter,\n.ql-snow.ql-toolbar button:focus .ql-stroke-miter,\n.ql-snow .ql-toolbar button:focus .ql-stroke-miter,\n.ql-snow.ql-toolbar button.ql-active .ql-stroke-miter,\n.ql-snow .ql-toolbar button.ql-active .ql-stroke-miter,\n.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke-miter,\n.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke-miter,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke-miter,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke-miter,\n.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke-miter,\n.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke-miter,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke-miter,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke-miter {\nstroke: #06c;\n}\n@media (pointer: coarse) {\n.ql-snow.ql-toolbar button:hover:not(.ql-active),\n.ql-snow .ql-toolbar button:hover:not(.ql-active) {\n  color: #444;\n}\n.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-fill,\n.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-fill,\n.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke.ql-fill {\n  fill: #444;\n}\n.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke,\n.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke,\n.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke-miter,\n.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke-miter {\n  stroke: #444;\n}\n}\n.ql-snow {\nbox-sizing: border-box;\n}\n.ql-snow * {\nbox-sizing: border-box;\n}\n.ql-snow .ql-hidden {\ndisplay: none;\n}\n.ql-snow .ql-out-bottom,\n.ql-snow .ql-out-top {\nvisibility: hidden;\n}\n.ql-snow .ql-tooltip {\nposition: absolute;\ntransform: translateY(10px);\n}\n.ql-snow .ql-tooltip a {\ncursor: pointer;\ntext-decoration: none;\n}\n.ql-snow .ql-tooltip.ql-flip {\ntransform: translateY(-10px);\n}\n.ql-snow .ql-formats {\ndisplay: inline-block;\nvertical-align: middle;\n}\n.ql-snow .ql-formats:after {\nclear: both;\ncontent: '';\ndisplay: table;\n}\n.ql-snow .ql-stroke {\nfill: none;\nstroke: #444;\nstroke-linecap: round;\nstroke-linejoin: round;\nstroke-width: 2;\n}\n.ql-snow .ql-stroke-miter {\nfill: none;\nstroke: #444;\nstroke-miterlimit: 10;\nstroke-width: 2;\n}\n.ql-snow .ql-fill,\n.ql-snow .ql-stroke.ql-fill {\nfill: #444;\n}\n.ql-snow .ql-empty {\nfill: none;\n}\n.ql-snow .ql-even {\nfill-rule: evenodd;\n}\n.ql-snow .ql-thin,\n.ql-snow .ql-stroke.ql-thin {\nstroke-width: 1;\n}\n.ql-snow .ql-transparent {\nopacity: 0.4;\n}\n.ql-snow .ql-direction svg:last-child {\ndisplay: none;\n}\n.ql-snow .ql-direction.ql-active svg:last-child {\ndisplay: inline;\n}\n.ql-snow .ql-direction.ql-active svg:first-child {\ndisplay: none;\n}\n.ql-snow .ql-editor h1 {\nfont-size: 2em;\n}\n.ql-snow .ql-editor h2 {\nfont-size: 1.5em;\n}\n.ql-snow .ql-editor h3 {\nfont-size: 1.17em;\n}\n.ql-snow .ql-editor h4 {\nfont-size: 1em;\n}\n.ql-snow .ql-editor h5 {\nfont-size: 0.83em;\n}\n.ql-snow .ql-editor h6 {\nfont-size: 0.67em;\n}\n.ql-snow .ql-editor a {\ntext-decoration: underline;\n}\n.ql-snow .ql-editor blockquote {\nborder-left: 4px solid #ccc;\nmargin-bottom: 5px;\nmargin-top: 5px;\npadding-left: 16px;\n}\n.ql-snow .ql-editor code,\n.ql-snow .ql-editor pre {\nbackground-color: #f0f0f0;\nborder-radius: 3px;\n}\n.ql-snow .ql-editor pre {\nwhite-space: pre-wrap;\nmargin-bottom: 5px;\nmargin-top: 5px;\npadding: 5px 10px;\n}\n.ql-snow .ql-editor code {\nfont-size: 85%;\npadding: 2px 4px;\n}\n.ql-snow .ql-editor pre.ql-syntax {\nbackground-color: #23241f;\ncolor: #f8f8f2;\noverflow: visible;\n}\n.ql-snow .ql-editor img {\nmax-width: 100%;\n}\n.ql-snow .ql-picker {\ncolor: #444;\ndisplay: inline-block;\nfloat: left;\nfont-size: 14px;\nfont-weight: 500;\nheight: 24px;\nposition: relative;\nvertical-align: middle;\n}\n.ql-snow .ql-picker-label {\n  cursor: pointer;\n  display: inline-block;\n  height: 100%;\n  padding-left: 8px;\n  padding-right: 2px;\n  position: relative;\n  width: 100%;\n}\n.ql-snow .ql-picker-label::before {\n  display: inline-block;\n  line-height: 22px;\n}\n.ql-snow .ql-picker-options {\n  background-color: #fff;\n  display: none;\n  min-width: 100%;\n  padding: 4px 8px;\n  position: absolute;\n  white-space: nowrap;\n}\n.ql-snow .ql-picker-options .ql-picker-item {\n  cursor: pointer;\n  display: block;\n  padding-bottom: 5px;\n  padding-top: 5px;\n}\n.ql-snow .ql-picker.ql-expanded .ql-picker-label {\n  color: #ccc;\n  z-index: 2;\n}\n.ql-snow .ql-picker.ql-expanded .ql-picker-label .ql-fill {\n  fill: #ccc;\n}\n.ql-snow .ql-picker.ql-expanded .ql-picker-label .ql-stroke {\n  stroke: #ccc;\n}\n.ql-snow .ql-picker.ql-expanded .ql-picker-options {\n  display: block;\n  margin-top: -1px;\n  top: 100%;\n  z-index: 1;\n}\n.ql-snow .ql-color-picker,\n.ql-snow .ql-icon-picker {\n  width: 28px;\n}\n.ql-snow .ql-color-picker .ql-picker-label,\n.ql-snow .ql-icon-picker .ql-picker-label {\n  padding: 2px 4px;\n}\n.ql-snow .ql-color-picker .ql-picker-label svg,\n.ql-snow .ql-icon-picker .ql-picker-label svg {\n  right: 4px;\n}\n.ql-snow .ql-icon-picker .ql-picker-options {\n  padding: 4px 0px;\n}\n.ql-snow .ql-icon-picker .ql-picker-item {\n  height: 24px;\n  width: 24px;\n  padding: 2px 4px;\n}\n.ql-snow .ql-color-picker .ql-picker-options {\n  padding: 3px 5px;\n  width: 152px;\n}\n.ql-snow .ql-color-picker .ql-picker-item {\n  border: 1px solid transparent;\n  float: left;\n  height: 16px;\n  margin: 2px;\n  padding: 0px;\n  width: 16px;\n}\n.ql-snow .ql-picker:not(.ql-color-picker):not(.ql-icon-picker) svg {\n  position: absolute;\n  margin-top: -9px;\n  right: 0;\n  top: 50%;\n  width: 18px;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-label]:not([data-label=''])::before,\n.ql-snow .ql-picker.ql-font .ql-picker-label[data-label]:not([data-label=''])::before,\n.ql-snow .ql-picker.ql-size .ql-picker-label[data-label]:not([data-label=''])::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-label]:not([data-label=''])::before,\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-label]:not([data-label=''])::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-label]:not([data-label=''])::before {\n  content: attr(data-label);\n}\n.ql-snow .ql-picker.ql-header {\n  width: 98px;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item::before {\n  content: 'Normal';\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"1\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"1\"]::before {\n  content: 'Heading 1';\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"2\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"2\"]::before {\n  content: 'Heading 2';\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"3\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"3\"]::before {\n  content: 'Heading 3';\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"4\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"4\"]::before {\n  content: 'Heading 4';\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"5\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"5\"]::before {\n  content: 'Heading 5';\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"6\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"6\"]::before {\n  content: 'Heading 6';\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"1\"]::before {\n  font-size: 2em;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"2\"]::before {\n  font-size: 1.5em;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"3\"]::before {\n  font-size: 1.17em;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"4\"]::before {\n  font-size: 1em;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"5\"]::before {\n  font-size: 0.83em;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"6\"]::before {\n  font-size: 0.67em;\n}\n.ql-snow .ql-picker.ql-font {\n  width: 108px;\n}\n.ql-snow .ql-picker.ql-font .ql-picker-label::before,\n.ql-snow .ql-picker.ql-font .ql-picker-item::before {\n  content: 'Sans Serif';\n}\n.ql-snow .ql-picker.ql-font .ql-picker-label[data-value=serif]::before,\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=serif]::before {\n  content: 'Serif';\n}\n.ql-snow .ql-picker.ql-font .ql-picker-label[data-value=monospace]::before,\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=monospace]::before {\n  content: 'Monospace';\n}\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=serif]::before {\n  font-family: Georgia, Times New Roman, serif;\n}\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=monospace]::before {\n  font-family: Monaco, Courier New, monospace;\n}\n.ql-snow .ql-picker.ql-size {\n  width: 98px;\n}\n.ql-snow .ql-picker.ql-size .ql-picker-label::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item::before {\n  content: 'Normal';\n}\n.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=small]::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=small]::before {\n  content: 'Small';\n}\n.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=large]::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=large]::before {\n  content: 'Large';\n}\n.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=huge]::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=huge]::before {\n  content: 'Huge';\n}\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=small]::before {\n  font-size: 10px;\n}\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=large]::before {\n  font-size: 18px;\n}\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=huge]::before {\n  font-size: 32px;\n}\n.ql-snow .ql-color-picker.ql-background .ql-picker-item {\n  background-color: #fff;\n}\n.ql-snow .ql-color-picker.ql-color .ql-picker-item {\n  background-color: #000;\n}\n.ql-toolbar.ql-snow {\n  border: 1px solid #ccc;\n  box-sizing: border-box;\n  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;\n  padding: 8px;\n}\n.ql-toolbar.ql-snow .ql-formats {\n  margin-right: 15px;\n}\n.ql-toolbar.ql-snow .ql-picker-label {\n  border: 1px solid transparent;\n}\n.ql-toolbar.ql-snow .ql-picker-options {\n  border: 1px solid transparent;\n  box-shadow: rgba(0,0,0,0.2) 0 2px 8px;\n}\n.ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-label {\n  border-color: #ccc;\n}\n.ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-options {\n  border-color: #ccc;\n}\n.ql-toolbar.ql-snow .ql-color-picker .ql-picker-item.ql-selected,\n.ql-toolbar.ql-snow .ql-color-picker .ql-picker-item:hover {\n  border-color: #000;\n}\n.ql-toolbar.ql-snow + .ql-container.ql-snow {\n  border-top: 0px;\n}\n.ql-snow .ql-tooltip {\n  background-color: #fff;\n  border: 1px solid #ccc;\n  box-shadow: 0px 0px 5px #ddd;\n  color: #444;\n  padding: 5px 12px;\n  white-space: nowrap;\n}\n.ql-snow .ql-tooltip::before {\n  content: \"Visit URL:\";\n  line-height: 26px;\n  margin-right: 8px;\n}\n.ql-snow .ql-tooltip input[type=text] {\n  display: none;\n  border: 1px solid #ccc;\n  font-size: 13px;\n  height: 26px;\n  margin: 0px;\n  padding: 3px 5px;\n  width: 170px;\n}\n.ql-snow .ql-tooltip a.ql-preview {\n  display: inline-block;\n  max-width: 200px;\n  overflow-x: hidden;\n  text-overflow: ellipsis;\n  vertical-align: top;\n}\n.ql-snow .ql-tooltip a.ql-action::after {\n  border-right: 1px solid #ccc;\n  content: 'Edit';\n  margin-left: 16px;\n  padding-right: 8px;\n}\n.ql-snow .ql-tooltip a.ql-remove::before {\n  content: 'Remove';\n  margin-left: 8px;\n}\n.ql-snow .ql-tooltip a {\n  line-height: 26px;\n}\n.ql-snow .ql-tooltip.ql-editing a.ql-preview,\n.ql-snow .ql-tooltip.ql-editing a.ql-remove {\n  display: none;\n}\n.ql-snow .ql-tooltip.ql-editing input[type=text] {\n  display: inline-block;\n}\n.ql-snow .ql-tooltip.ql-editing a.ql-action::after {\n  border-right: 0px;\n  content: 'Save';\n  padding-right: 0px;\n}\n.ql-snow .ql-tooltip[data-mode=link]::before {\n  content: \"Enter link:\";\n}\n.ql-snow .ql-tooltip[data-mode=formula]::before {\n  content: \"Enter formula:\";\n}\n.ql-snow .ql-tooltip[data-mode=video]::before {\n  content: \"Enter video:\";\n}\n.ql-snow a {\n  color: #06c;\n}\n.ql-container.ql-snow {\n  border: 1px solid #ccc;\n}\n</style>\n"]}, media: undefined });
+    inject("data-v-6d539601_0", { source: "@charset \"UTF-8\";\n/*!\n* Quill Editor v1.3.6\n* https://quilljs.com/\n* Copyright (c) 2014, Jason Chen\n* Copyright (c) 2013, salesforce.com\n*/\n.ql-container {\n  box-sizing: border-box;\n  font-family: Helvetica, Arial, sans-serif;\n  font-size: 13px;\n  height: 100%;\n  margin: 0px;\n  position: relative;\n}\n.ql-container.ql-disabled .ql-tooltip {\n  visibility: hidden;\n}\n.ql-container.ql-disabled .ql-editor ul[data-checked] > li::before {\n  pointer-events: none;\n}\n.ql-clipboard {\n  left: -100000px;\n  height: 1px;\n  overflow-y: hidden;\n  position: absolute;\n  top: 50%;\n}\n.ql-clipboard p {\n  margin: 0;\n  padding: 0;\n}\n.ql-editor {\n  box-sizing: border-box;\n  line-height: 1.42;\n  height: 100%;\n  outline: none;\n  overflow-y: auto;\n  padding: 12px 15px;\n  tab-size: 4;\n  -moz-tab-size: 4;\n  text-align: left;\n  white-space: pre-wrap;\n  word-wrap: break-word;\n}\n.ql-editor > * {\n  cursor: text;\n}\n.ql-editor p,\n.ql-editor ol,\n.ql-editor ul,\n.ql-editor pre,\n.ql-editor blockquote,\n.ql-editor h1,\n.ql-editor h2,\n.ql-editor h3,\n.ql-editor h4,\n.ql-editor h5,\n.ql-editor h6 {\n  margin: 0;\n  padding: 0;\n  counter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol,\n.ql-editor ul {\n  padding-left: 1.5em;\n}\n.ql-editor ol > li,\n.ql-editor ul > li {\n  list-style-type: none;\n}\n.ql-editor ul > li::before {\n  content: \"•\";\n}\n.ql-editor ul[data-checked=true],\n.ql-editor ul[data-checked=false] {\n  pointer-events: none;\n}\n.ql-editor ul[data-checked=true] > li *,\n.ql-editor ul[data-checked=false] > li * {\n  pointer-events: all;\n}\n.ql-editor ul[data-checked=true] > li::before,\n.ql-editor ul[data-checked=false] > li::before {\n  color: #777;\n  cursor: pointer;\n  pointer-events: all;\n}\n.ql-editor ul[data-checked=true] > li::before {\n  content: \"☑\";\n}\n.ql-editor ul[data-checked=false] > li::before {\n  content: \"☐\";\n}\n.ql-editor li::before {\n  display: inline-block;\n  white-space: nowrap;\n  width: 1.2em;\n}\n.ql-editor li:not(.ql-direction-rtl)::before {\n  margin-left: -1.5em;\n  margin-right: 0.3em;\n  text-align: right;\n}\n.ql-editor li.ql-direction-rtl::before {\n  margin-left: 0.3em;\n  margin-right: -1.5em;\n}\n.ql-editor ol li:not(.ql-direction-rtl),\n.ql-editor ul li:not(.ql-direction-rtl) {\n  padding-left: 1.5em;\n}\n.ql-editor ol li.ql-direction-rtl,\n.ql-editor ul li.ql-direction-rtl {\n  padding-right: 1.5em;\n}\n.ql-editor ol li {\n  counter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n  counter-increment: list-0;\n}\n.ql-editor ol li:before {\n  content: counter(list-0, decimal) \". \";\n}\n.ql-editor ol li.ql-indent-1 {\n  counter-increment: list-1;\n}\n.ql-editor ol li.ql-indent-1:before {\n  content: counter(list-1, lower-alpha) \". \";\n}\n.ql-editor ol li.ql-indent-1 {\n  counter-reset: list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-2 {\n  counter-increment: list-2;\n}\n.ql-editor ol li.ql-indent-2:before {\n  content: counter(list-2, lower-roman) \". \";\n}\n.ql-editor ol li.ql-indent-2 {\n  counter-reset: list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-3 {\n  counter-increment: list-3;\n}\n.ql-editor ol li.ql-indent-3:before {\n  content: counter(list-3, decimal) \". \";\n}\n.ql-editor ol li.ql-indent-3 {\n  counter-reset: list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-4 {\n  counter-increment: list-4;\n}\n.ql-editor ol li.ql-indent-4:before {\n  content: counter(list-4, lower-alpha) \". \";\n}\n.ql-editor ol li.ql-indent-4 {\n  counter-reset: list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-5 {\n  counter-increment: list-5;\n}\n.ql-editor ol li.ql-indent-5:before {\n  content: counter(list-5, lower-roman) \". \";\n}\n.ql-editor ol li.ql-indent-5 {\n  counter-reset: list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-6 {\n  counter-increment: list-6;\n}\n.ql-editor ol li.ql-indent-6:before {\n  content: counter(list-6, decimal) \". \";\n}\n.ql-editor ol li.ql-indent-6 {\n  counter-reset: list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-7 {\n  counter-increment: list-7;\n}\n.ql-editor ol li.ql-indent-7:before {\n  content: counter(list-7, lower-alpha) \". \";\n}\n.ql-editor ol li.ql-indent-7 {\n  counter-reset: list-8 list-9;\n}\n.ql-editor ol li.ql-indent-8 {\n  counter-increment: list-8;\n}\n.ql-editor ol li.ql-indent-8:before {\n  content: counter(list-8, lower-roman) \". \";\n}\n.ql-editor ol li.ql-indent-8 {\n  counter-reset: list-9;\n}\n.ql-editor ol li.ql-indent-9 {\n  counter-increment: list-9;\n}\n.ql-editor ol li.ql-indent-9:before {\n  content: counter(list-9, decimal) \". \";\n}\n.ql-editor .ql-indent-1:not(.ql-direction-rtl) {\n  padding-left: 3em;\n}\n.ql-editor li.ql-indent-1:not(.ql-direction-rtl) {\n  padding-left: 4.5em;\n}\n.ql-editor .ql-indent-1.ql-direction-rtl.ql-align-right {\n  padding-right: 3em;\n}\n.ql-editor li.ql-indent-1.ql-direction-rtl.ql-align-right {\n  padding-right: 4.5em;\n}\n.ql-editor .ql-indent-2:not(.ql-direction-rtl) {\n  padding-left: 6em;\n}\n.ql-editor li.ql-indent-2:not(.ql-direction-rtl) {\n  padding-left: 7.5em;\n}\n.ql-editor .ql-indent-2.ql-direction-rtl.ql-align-right {\n  padding-right: 6em;\n}\n.ql-editor li.ql-indent-2.ql-direction-rtl.ql-align-right {\n  padding-right: 7.5em;\n}\n.ql-editor .ql-indent-3:not(.ql-direction-rtl) {\n  padding-left: 9em;\n}\n.ql-editor li.ql-indent-3:not(.ql-direction-rtl) {\n  padding-left: 10.5em;\n}\n.ql-editor .ql-indent-3.ql-direction-rtl.ql-align-right {\n  padding-right: 9em;\n}\n.ql-editor li.ql-indent-3.ql-direction-rtl.ql-align-right {\n  padding-right: 10.5em;\n}\n.ql-editor .ql-indent-4:not(.ql-direction-rtl) {\n  padding-left: 12em;\n}\n.ql-editor li.ql-indent-4:not(.ql-direction-rtl) {\n  padding-left: 13.5em;\n}\n.ql-editor .ql-indent-4.ql-direction-rtl.ql-align-right {\n  padding-right: 12em;\n}\n.ql-editor li.ql-indent-4.ql-direction-rtl.ql-align-right {\n  padding-right: 13.5em;\n}\n.ql-editor .ql-indent-5:not(.ql-direction-rtl) {\n  padding-left: 15em;\n}\n.ql-editor li.ql-indent-5:not(.ql-direction-rtl) {\n  padding-left: 16.5em;\n}\n.ql-editor .ql-indent-5.ql-direction-rtl.ql-align-right {\n  padding-right: 15em;\n}\n.ql-editor li.ql-indent-5.ql-direction-rtl.ql-align-right {\n  padding-right: 16.5em;\n}\n.ql-editor .ql-indent-6:not(.ql-direction-rtl) {\n  padding-left: 18em;\n}\n.ql-editor li.ql-indent-6:not(.ql-direction-rtl) {\n  padding-left: 19.5em;\n}\n.ql-editor .ql-indent-6.ql-direction-rtl.ql-align-right {\n  padding-right: 18em;\n}\n.ql-editor li.ql-indent-6.ql-direction-rtl.ql-align-right {\n  padding-right: 19.5em;\n}\n.ql-editor .ql-indent-7:not(.ql-direction-rtl) {\n  padding-left: 21em;\n}\n.ql-editor li.ql-indent-7:not(.ql-direction-rtl) {\n  padding-left: 22.5em;\n}\n.ql-editor .ql-indent-7.ql-direction-rtl.ql-align-right {\n  padding-right: 21em;\n}\n.ql-editor li.ql-indent-7.ql-direction-rtl.ql-align-right {\n  padding-right: 22.5em;\n}\n.ql-editor .ql-indent-8:not(.ql-direction-rtl) {\n  padding-left: 24em;\n}\n.ql-editor li.ql-indent-8:not(.ql-direction-rtl) {\n  padding-left: 25.5em;\n}\n.ql-editor .ql-indent-8.ql-direction-rtl.ql-align-right {\n  padding-right: 24em;\n}\n.ql-editor li.ql-indent-8.ql-direction-rtl.ql-align-right {\n  padding-right: 25.5em;\n}\n.ql-editor .ql-indent-9:not(.ql-direction-rtl) {\n  padding-left: 27em;\n}\n.ql-editor li.ql-indent-9:not(.ql-direction-rtl) {\n  padding-left: 28.5em;\n}\n.ql-editor .ql-indent-9.ql-direction-rtl.ql-align-right {\n  padding-right: 27em;\n}\n.ql-editor li.ql-indent-9.ql-direction-rtl.ql-align-right {\n  padding-right: 28.5em;\n}\n.ql-editor .ql-video {\n  display: block;\n  max-width: 100%;\n}\n.ql-editor .ql-video.ql-align-center {\n  margin: 0 auto;\n}\n.ql-editor .ql-video.ql-align-right {\n  margin: 0 0 0 auto;\n}\n.ql-editor .ql-bg-black {\n  background-color: #000;\n}\n.ql-editor .ql-bg-red {\n  background-color: #e60000;\n}\n.ql-editor .ql-bg-orange {\n  background-color: #f90;\n}\n.ql-editor .ql-bg-yellow {\n  background-color: #ff0;\n}\n.ql-editor .ql-bg-green {\n  background-color: #008a00;\n}\n.ql-editor .ql-bg-blue {\n  background-color: #06c;\n}\n.ql-editor .ql-bg-purple {\n  background-color: #93f;\n}\n.ql-editor .ql-color-white {\n  color: #fff;\n}\n.ql-editor .ql-color-red {\n  color: #e60000;\n}\n.ql-editor .ql-color-orange {\n  color: #f90;\n}\n.ql-editor .ql-color-yellow {\n  color: #ff0;\n}\n.ql-editor .ql-color-green {\n  color: #008a00;\n}\n.ql-editor .ql-color-blue {\n  color: #06c;\n}\n.ql-editor .ql-color-purple {\n  color: #93f;\n}\n.ql-editor .ql-font-serif {\n  font-family: Georgia, Times New Roman, serif;\n}\n.ql-editor .ql-font-monospace {\n  font-family: Monaco, Courier New, monospace;\n}\n.ql-editor .ql-size-small {\n  font-size: 0.75em;\n}\n.ql-editor .ql-size-large {\n  font-size: 1.5em;\n}\n.ql-editor .ql-size-huge {\n  font-size: 2.5em;\n}\n.ql-editor .ql-direction-rtl {\n  direction: rtl;\n  text-align: inherit;\n}\n.ql-editor .ql-align-center {\n  text-align: center;\n}\n.ql-editor .ql-align-justify {\n  text-align: justify;\n}\n.ql-editor .ql-align-right {\n  text-align: right;\n}\n.ql-editor.ql-blank::before {\n  color: rgba(0, 0, 0, 0.6);\n  content: attr(data-placeholder);\n  font-style: italic;\n  left: 15px;\n  pointer-events: none;\n  position: absolute;\n  right: 15px;\n}\n\n/*!\n* Quill Editor v1.3.6\n* https://quilljs.com/\n* Copyright (c) 2014, Jason Chen\n* Copyright (c) 2013, salesforce.com\n*/\n.ql-container {\n  box-sizing: border-box;\n  font-family: Helvetica, Arial, sans-serif;\n  font-size: 13px;\n  height: 100%;\n  margin: 0px;\n  position: relative;\n}\n.ql-container.ql-disabled .ql-tooltip {\n  visibility: hidden;\n}\n.ql-container.ql-disabled .ql-editor ul[data-checked] > li::before {\n  pointer-events: none;\n}\n.ql-clipboard {\n  left: -100000px;\n  height: 1px;\n  overflow-y: hidden;\n  position: absolute;\n  top: 50%;\n}\n.ql-clipboard p {\n  margin: 0;\n  padding: 0;\n}\n.ql-editor {\n  box-sizing: border-box;\n  line-height: 1.42;\n  height: 100%;\n  outline: none;\n  overflow-y: auto;\n  padding: 12px 15px;\n  tab-size: 4;\n  -moz-tab-size: 4;\n  text-align: left;\n  white-space: pre-wrap;\n  word-wrap: break-word;\n}\n.ql-editor > * {\n  cursor: text;\n}\n.ql-editor p,\n.ql-editor ol,\n.ql-editor ul,\n.ql-editor pre,\n.ql-editor blockquote,\n.ql-editor h1,\n.ql-editor h2,\n.ql-editor h3,\n.ql-editor h4,\n.ql-editor h5,\n.ql-editor h6 {\n  margin: 0;\n  padding: 0;\n  counter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol,\n.ql-editor ul {\n  padding-left: 1.5em;\n}\n.ql-editor ol > li,\n.ql-editor ul > li {\n  list-style-type: none;\n}\n.ql-editor ul > li::before {\n  content: \"•\";\n}\n.ql-editor ul[data-checked=true],\n.ql-editor ul[data-checked=false] {\n  pointer-events: none;\n}\n.ql-editor ul[data-checked=true] > li *,\n.ql-editor ul[data-checked=false] > li * {\n  pointer-events: all;\n}\n.ql-editor ul[data-checked=true] > li::before,\n.ql-editor ul[data-checked=false] > li::before {\n  color: #777;\n  cursor: pointer;\n  pointer-events: all;\n}\n.ql-editor ul[data-checked=true] > li::before {\n  content: \"☑\";\n}\n.ql-editor ul[data-checked=false] > li::before {\n  content: \"☐\";\n}\n.ql-editor li::before {\n  display: inline-block;\n  white-space: nowrap;\n  width: 1.2em;\n}\n.ql-editor li:not(.ql-direction-rtl)::before {\n  margin-left: -1.5em;\n  margin-right: 0.3em;\n  text-align: right;\n}\n.ql-editor li.ql-direction-rtl::before {\n  margin-left: 0.3em;\n  margin-right: -1.5em;\n}\n.ql-editor ol li:not(.ql-direction-rtl),\n.ql-editor ul li:not(.ql-direction-rtl) {\n  padding-left: 1.5em;\n}\n.ql-editor ol li.ql-direction-rtl,\n.ql-editor ul li.ql-direction-rtl {\n  padding-right: 1.5em;\n}\n.ql-editor ol li {\n  counter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n  counter-increment: list-0;\n}\n.ql-editor ol li:before {\n  content: counter(list-0, decimal) \". \";\n}\n.ql-editor ol li.ql-indent-1 {\n  counter-increment: list-1;\n}\n.ql-editor ol li.ql-indent-1:before {\n  content: counter(list-1, lower-alpha) \". \";\n}\n.ql-editor ol li.ql-indent-1 {\n  counter-reset: list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-2 {\n  counter-increment: list-2;\n}\n.ql-editor ol li.ql-indent-2:before {\n  content: counter(list-2, lower-roman) \". \";\n}\n.ql-editor ol li.ql-indent-2 {\n  counter-reset: list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-3 {\n  counter-increment: list-3;\n}\n.ql-editor ol li.ql-indent-3:before {\n  content: counter(list-3, decimal) \". \";\n}\n.ql-editor ol li.ql-indent-3 {\n  counter-reset: list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-4 {\n  counter-increment: list-4;\n}\n.ql-editor ol li.ql-indent-4:before {\n  content: counter(list-4, lower-alpha) \". \";\n}\n.ql-editor ol li.ql-indent-4 {\n  counter-reset: list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-5 {\n  counter-increment: list-5;\n}\n.ql-editor ol li.ql-indent-5:before {\n  content: counter(list-5, lower-roman) \". \";\n}\n.ql-editor ol li.ql-indent-5 {\n  counter-reset: list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-6 {\n  counter-increment: list-6;\n}\n.ql-editor ol li.ql-indent-6:before {\n  content: counter(list-6, decimal) \". \";\n}\n.ql-editor ol li.ql-indent-6 {\n  counter-reset: list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-7 {\n  counter-increment: list-7;\n}\n.ql-editor ol li.ql-indent-7:before {\n  content: counter(list-7, lower-alpha) \". \";\n}\n.ql-editor ol li.ql-indent-7 {\n  counter-reset: list-8 list-9;\n}\n.ql-editor ol li.ql-indent-8 {\n  counter-increment: list-8;\n}\n.ql-editor ol li.ql-indent-8:before {\n  content: counter(list-8, lower-roman) \". \";\n}\n.ql-editor ol li.ql-indent-8 {\n  counter-reset: list-9;\n}\n.ql-editor ol li.ql-indent-9 {\n  counter-increment: list-9;\n}\n.ql-editor ol li.ql-indent-9:before {\n  content: counter(list-9, decimal) \". \";\n}\n.ql-editor .ql-indent-1:not(.ql-direction-rtl) {\n  padding-left: 3em;\n}\n.ql-editor li.ql-indent-1:not(.ql-direction-rtl) {\n  padding-left: 4.5em;\n}\n.ql-editor .ql-indent-1.ql-direction-rtl.ql-align-right {\n  padding-right: 3em;\n}\n.ql-editor li.ql-indent-1.ql-direction-rtl.ql-align-right {\n  padding-right: 4.5em;\n}\n.ql-editor .ql-indent-2:not(.ql-direction-rtl) {\n  padding-left: 6em;\n}\n.ql-editor li.ql-indent-2:not(.ql-direction-rtl) {\n  padding-left: 7.5em;\n}\n.ql-editor .ql-indent-2.ql-direction-rtl.ql-align-right {\n  padding-right: 6em;\n}\n.ql-editor li.ql-indent-2.ql-direction-rtl.ql-align-right {\n  padding-right: 7.5em;\n}\n.ql-editor .ql-indent-3:not(.ql-direction-rtl) {\n  padding-left: 9em;\n}\n.ql-editor li.ql-indent-3:not(.ql-direction-rtl) {\n  padding-left: 10.5em;\n}\n.ql-editor .ql-indent-3.ql-direction-rtl.ql-align-right {\n  padding-right: 9em;\n}\n.ql-editor li.ql-indent-3.ql-direction-rtl.ql-align-right {\n  padding-right: 10.5em;\n}\n.ql-editor .ql-indent-4:not(.ql-direction-rtl) {\n  padding-left: 12em;\n}\n.ql-editor li.ql-indent-4:not(.ql-direction-rtl) {\n  padding-left: 13.5em;\n}\n.ql-editor .ql-indent-4.ql-direction-rtl.ql-align-right {\n  padding-right: 12em;\n}\n.ql-editor li.ql-indent-4.ql-direction-rtl.ql-align-right {\n  padding-right: 13.5em;\n}\n.ql-editor .ql-indent-5:not(.ql-direction-rtl) {\n  padding-left: 15em;\n}\n.ql-editor li.ql-indent-5:not(.ql-direction-rtl) {\n  padding-left: 16.5em;\n}\n.ql-editor .ql-indent-5.ql-direction-rtl.ql-align-right {\n  padding-right: 15em;\n}\n.ql-editor li.ql-indent-5.ql-direction-rtl.ql-align-right {\n  padding-right: 16.5em;\n}\n.ql-editor .ql-indent-6:not(.ql-direction-rtl) {\n  padding-left: 18em;\n}\n.ql-editor li.ql-indent-6:not(.ql-direction-rtl) {\n  padding-left: 19.5em;\n}\n.ql-editor .ql-indent-6.ql-direction-rtl.ql-align-right {\n  padding-right: 18em;\n}\n.ql-editor li.ql-indent-6.ql-direction-rtl.ql-align-right {\n  padding-right: 19.5em;\n}\n.ql-editor .ql-indent-7:not(.ql-direction-rtl) {\n  padding-left: 21em;\n}\n.ql-editor li.ql-indent-7:not(.ql-direction-rtl) {\n  padding-left: 22.5em;\n}\n.ql-editor .ql-indent-7.ql-direction-rtl.ql-align-right {\n  padding-right: 21em;\n}\n.ql-editor li.ql-indent-7.ql-direction-rtl.ql-align-right {\n  padding-right: 22.5em;\n}\n.ql-editor .ql-indent-8:not(.ql-direction-rtl) {\n  padding-left: 24em;\n}\n.ql-editor li.ql-indent-8:not(.ql-direction-rtl) {\n  padding-left: 25.5em;\n}\n.ql-editor .ql-indent-8.ql-direction-rtl.ql-align-right {\n  padding-right: 24em;\n}\n.ql-editor li.ql-indent-8.ql-direction-rtl.ql-align-right {\n  padding-right: 25.5em;\n}\n.ql-editor .ql-indent-9:not(.ql-direction-rtl) {\n  padding-left: 27em;\n}\n.ql-editor li.ql-indent-9:not(.ql-direction-rtl) {\n  padding-left: 28.5em;\n}\n.ql-editor .ql-indent-9.ql-direction-rtl.ql-align-right {\n  padding-right: 27em;\n}\n.ql-editor li.ql-indent-9.ql-direction-rtl.ql-align-right {\n  padding-right: 28.5em;\n}\n.ql-editor .ql-video {\n  display: block;\n  max-width: 100%;\n}\n.ql-editor .ql-video.ql-align-center {\n  margin: 0 auto;\n}\n.ql-editor .ql-video.ql-align-right {\n  margin: 0 0 0 auto;\n}\n.ql-editor .ql-bg-black {\n  background-color: #000;\n}\n.ql-editor .ql-bg-red {\n  background-color: #e60000;\n}\n.ql-editor .ql-bg-orange {\n  background-color: #f90;\n}\n.ql-editor .ql-bg-yellow {\n  background-color: #ff0;\n}\n.ql-editor .ql-bg-green {\n  background-color: #008a00;\n}\n.ql-editor .ql-bg-blue {\n  background-color: #06c;\n}\n.ql-editor .ql-bg-purple {\n  background-color: #93f;\n}\n.ql-editor .ql-color-white {\n  color: #fff;\n}\n.ql-editor .ql-color-red {\n  color: #e60000;\n}\n.ql-editor .ql-color-orange {\n  color: #f90;\n}\n.ql-editor .ql-color-yellow {\n  color: #ff0;\n}\n.ql-editor .ql-color-green {\n  color: #008a00;\n}\n.ql-editor .ql-color-blue {\n  color: #06c;\n}\n.ql-editor .ql-color-purple {\n  color: #93f;\n}\n.ql-editor .ql-font-serif {\n  font-family: Georgia, Times New Roman, serif;\n}\n.ql-editor .ql-font-monospace {\n  font-family: Monaco, Courier New, monospace;\n}\n.ql-editor .ql-size-small {\n  font-size: 0.75em;\n}\n.ql-editor .ql-size-large {\n  font-size: 1.5em;\n}\n.ql-editor .ql-size-huge {\n  font-size: 2.5em;\n}\n.ql-editor .ql-direction-rtl {\n  direction: rtl;\n  text-align: inherit;\n}\n.ql-editor .ql-align-center {\n  text-align: center;\n}\n.ql-editor .ql-align-justify {\n  text-align: justify;\n}\n.ql-editor .ql-align-right {\n  text-align: right;\n}\n.ql-editor.ql-blank::before {\n  color: rgba(0, 0, 0, 0.6);\n  content: attr(data-placeholder);\n  font-style: italic;\n  left: 15px;\n  pointer-events: none;\n  position: absolute;\n  right: 15px;\n}\n.ql-snow.ql-toolbar:after,\n.ql-snow .ql-toolbar:after {\n  clear: both;\n  content: \"\";\n  display: table;\n}\n.ql-snow.ql-toolbar button,\n.ql-snow .ql-toolbar button {\n  background: none;\n  border: none;\n  cursor: pointer;\n  display: inline-block;\n  float: left;\n  height: 24px;\n  padding: 3px 5px;\n  width: 28px;\n}\n.ql-snow.ql-toolbar button svg,\n.ql-snow .ql-toolbar button svg {\n  float: left;\n  height: 100%;\n}\n.ql-snow.ql-toolbar button:active:hover,\n.ql-snow .ql-toolbar button:active:hover {\n  outline: none;\n}\n.ql-snow.ql-toolbar input.ql-image[type=file],\n.ql-snow .ql-toolbar input.ql-image[type=file] {\n  display: none;\n}\n.ql-snow.ql-toolbar button:hover,\n.ql-snow .ql-toolbar button:hover,\n.ql-snow.ql-toolbar button:focus,\n.ql-snow .ql-toolbar button:focus,\n.ql-snow.ql-toolbar button.ql-active,\n.ql-snow .ql-toolbar button.ql-active,\n.ql-snow.ql-toolbar .ql-picker-label:hover,\n.ql-snow .ql-toolbar .ql-picker-label:hover,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active,\n.ql-snow.ql-toolbar .ql-picker-item:hover,\n.ql-snow .ql-toolbar .ql-picker-item:hover,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected {\n  color: #06c;\n}\n.ql-snow.ql-toolbar button:hover .ql-fill,\n.ql-snow .ql-toolbar button:hover .ql-fill,\n.ql-snow.ql-toolbar button:focus .ql-fill,\n.ql-snow .ql-toolbar button:focus .ql-fill,\n.ql-snow.ql-toolbar button.ql-active .ql-fill,\n.ql-snow .ql-toolbar button.ql-active .ql-fill,\n.ql-snow.ql-toolbar .ql-picker-label:hover .ql-fill,\n.ql-snow .ql-toolbar .ql-picker-label:hover .ql-fill,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-fill,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-fill,\n.ql-snow.ql-toolbar .ql-picker-item:hover .ql-fill,\n.ql-snow .ql-toolbar .ql-picker-item:hover .ql-fill,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-fill,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-fill,\n.ql-snow.ql-toolbar button:hover .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar button:hover .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar button:focus .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar button:focus .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar button.ql-active .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar button.ql-active .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke.ql-fill {\n  fill: color(\"theme-interaction\", \"hover\");\n}\n.ql-snow.ql-toolbar button:hover .ql-stroke,\n.ql-snow .ql-toolbar button:hover .ql-stroke,\n.ql-snow.ql-toolbar button:focus .ql-stroke,\n.ql-snow .ql-toolbar button:focus .ql-stroke,\n.ql-snow.ql-toolbar button.ql-active .ql-stroke,\n.ql-snow .ql-toolbar button.ql-active .ql-stroke,\n.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke,\n.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke,\n.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke,\n.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke,\n.ql-snow.ql-toolbar button:hover .ql-stroke-miter,\n.ql-snow .ql-toolbar button:hover .ql-stroke-miter,\n.ql-snow.ql-toolbar button:focus .ql-stroke-miter,\n.ql-snow .ql-toolbar button:focus .ql-stroke-miter,\n.ql-snow.ql-toolbar button.ql-active .ql-stroke-miter,\n.ql-snow .ql-toolbar button.ql-active .ql-stroke-miter,\n.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke-miter,\n.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke-miter,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke-miter,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke-miter,\n.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke-miter,\n.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke-miter,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke-miter,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke-miter {\n  stroke: #06c;\n}\n@media (pointer: coarse) {\n.ql-snow.ql-toolbar button:hover:not(.ql-active),\n.ql-snow .ql-toolbar button:hover:not(.ql-active) {\n    color: #444;\n}\n.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-fill,\n.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-fill,\n.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke.ql-fill {\n    fill: #444;\n}\n.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke,\n.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke,\n.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke-miter,\n.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke-miter {\n    stroke: #444;\n}\n}\n.ql-snow {\n  box-sizing: border-box;\n}\n.ql-snow * {\n  box-sizing: border-box;\n}\n.ql-snow .ql-hidden {\n  display: none;\n}\n.ql-snow .ql-out-bottom,\n.ql-snow .ql-out-top {\n  visibility: hidden;\n}\n.ql-snow .ql-tooltip {\n  position: absolute;\n  transform: translateY(10px);\n}\n.ql-snow .ql-tooltip a {\n  cursor: pointer;\n  text-decoration: none;\n}\n.ql-snow .ql-tooltip.ql-flip {\n  transform: translateY(-10px);\n}\n.ql-snow .ql-formats {\n  display: inline-block;\n  vertical-align: middle;\n}\n.ql-snow .ql-formats:after {\n  clear: both;\n  content: \"\";\n  display: table;\n}\n.ql-snow .ql-stroke {\n  fill: none;\n  stroke: #444;\n  stroke-linecap: round;\n  stroke-linejoin: round;\n  stroke-width: 2;\n}\n.ql-snow .ql-stroke-miter {\n  fill: none;\n  stroke: #444;\n  stroke-miterlimit: 10;\n  stroke-width: 2;\n}\n.ql-snow .ql-fill,\n.ql-snow .ql-stroke.ql-fill {\n  fill: #444;\n}\n.ql-snow .ql-empty {\n  fill: none;\n}\n.ql-snow .ql-even {\n  fill-rule: evenodd;\n}\n.ql-snow .ql-thin,\n.ql-snow .ql-stroke.ql-thin {\n  stroke-width: 1;\n}\n.ql-snow .ql-transparent {\n  opacity: 0.4;\n}\n.ql-snow .ql-direction svg:last-child {\n  display: none;\n}\n.ql-snow .ql-direction.ql-active svg:last-child {\n  display: inline;\n}\n.ql-snow .ql-direction.ql-active svg:first-child {\n  display: none;\n}\n.ql-snow .ql-editor h1 {\n  font-size: 2em;\n}\n.ql-snow .ql-editor h2 {\n  font-size: 1.5em;\n}\n.ql-snow .ql-editor h3 {\n  font-size: 1.17em;\n}\n.ql-snow .ql-editor h4 {\n  font-size: 1em;\n}\n.ql-snow .ql-editor h5 {\n  font-size: 0.83em;\n}\n.ql-snow .ql-editor h6 {\n  font-size: 0.67em;\n}\n.ql-snow .ql-editor a {\n  text-decoration: underline;\n}\n.ql-snow .ql-editor blockquote {\n  border-left: 4px solid #ccc;\n  margin-bottom: 5px;\n  margin-top: 5px;\n  padding-left: 16px;\n}\n.ql-snow .ql-editor code,\n.ql-snow .ql-editor pre {\n  background-color: #f0f0f0;\n  border-radius: 3px;\n}\n.ql-snow .ql-editor pre {\n  white-space: pre-wrap;\n  margin-bottom: 5px;\n  margin-top: 5px;\n  padding: 5px 10px;\n}\n.ql-snow .ql-editor code {\n  font-size: 85%;\n  padding: 2px 4px;\n}\n.ql-snow .ql-editor pre.ql-syntax {\n  background-color: #23241f;\n  color: #f8f8f2;\n  overflow: visible;\n}\n.ql-snow .ql-editor img {\n  max-width: 100%;\n}\n.ql-snow .ql-picker {\n  color: #444;\n  display: inline-block;\n  float: left;\n  font-size: 14px;\n  font-weight: 500;\n  height: 24px;\n  position: relative;\n  vertical-align: middle;\n}\n.ql-snow .ql-picker-label {\n  cursor: pointer;\n  display: inline-block;\n  height: 100%;\n  padding-left: 8px;\n  padding-right: 2px;\n  position: relative;\n  width: 100%;\n}\n.ql-snow .ql-picker-label::before {\n  display: inline-block;\n  line-height: 22px;\n}\n.ql-snow .ql-picker-options {\n  background-color: #fff;\n  display: none;\n  min-width: 100%;\n  padding: 4px 8px;\n  position: absolute;\n  white-space: nowrap;\n}\n.ql-snow .ql-picker-options .ql-picker-item {\n  cursor: pointer;\n  display: block;\n  padding-bottom: 5px;\n  padding-top: 5px;\n}\n.ql-snow .ql-picker.ql-expanded .ql-picker-label {\n  color: #ccc;\n  z-index: 2;\n}\n.ql-snow .ql-picker.ql-expanded .ql-picker-label .ql-fill {\n  fill: #ccc;\n}\n.ql-snow .ql-picker.ql-expanded .ql-picker-label .ql-stroke {\n  stroke: #ccc;\n}\n.ql-snow .ql-picker.ql-expanded .ql-picker-options {\n  display: block;\n  margin-top: -1px;\n  top: 100%;\n  z-index: 1;\n}\n.ql-snow .ql-color-picker,\n.ql-snow .ql-icon-picker {\n  width: 28px;\n}\n.ql-snow .ql-color-picker .ql-picker-label,\n.ql-snow .ql-icon-picker .ql-picker-label {\n  padding: 2px 4px;\n}\n.ql-snow .ql-color-picker .ql-picker-label svg,\n.ql-snow .ql-icon-picker .ql-picker-label svg {\n  right: 4px;\n}\n.ql-snow .ql-icon-picker .ql-picker-options {\n  padding: 4px 0px;\n}\n.ql-snow .ql-icon-picker .ql-picker-item {\n  height: 24px;\n  width: 24px;\n  padding: 2px 4px;\n}\n.ql-snow .ql-color-picker .ql-picker-options {\n  padding: 3px 5px;\n  width: 152px;\n}\n.ql-snow .ql-color-picker .ql-picker-item {\n  border: 1px solid transparent;\n  float: left;\n  height: 16px;\n  margin: 2px;\n  padding: 0px;\n  width: 16px;\n}\n.ql-snow .ql-picker:not(.ql-color-picker):not(.ql-icon-picker) svg {\n  position: absolute;\n  margin-top: -9px;\n  right: 0;\n  top: 50%;\n  width: 18px;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-label]:not([data-label=\"\"])::before,\n.ql-snow .ql-picker.ql-font .ql-picker-label[data-label]:not([data-label=\"\"])::before,\n.ql-snow .ql-picker.ql-size .ql-picker-label[data-label]:not([data-label=\"\"])::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-label]:not([data-label=\"\"])::before,\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-label]:not([data-label=\"\"])::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-label]:not([data-label=\"\"])::before {\n  content: attr(data-label);\n}\n.ql-snow .ql-picker.ql-header {\n  width: 98px;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item::before {\n  content: \"Normal\";\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"1\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"1\"]::before {\n  content: \"Heading 1\";\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"2\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"2\"]::before {\n  content: \"Heading 2\";\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"3\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"3\"]::before {\n  content: \"Heading 3\";\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"4\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"4\"]::before {\n  content: \"Heading 4\";\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"5\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"5\"]::before {\n  content: \"Heading 5\";\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"6\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"6\"]::before {\n  content: \"Heading 6\";\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"1\"]::before {\n  font-size: 2em;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"2\"]::before {\n  font-size: 1.5em;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"3\"]::before {\n  font-size: 1.17em;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"4\"]::before {\n  font-size: 1em;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"5\"]::before {\n  font-size: 0.83em;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"6\"]::before {\n  font-size: 0.67em;\n}\n.ql-snow .ql-picker.ql-font {\n  width: 108px;\n}\n.ql-snow .ql-picker.ql-font .ql-picker-label::before,\n.ql-snow .ql-picker.ql-font .ql-picker-item::before {\n  content: \"Sans Serif\";\n}\n.ql-snow .ql-picker.ql-font .ql-picker-label[data-value=serif]::before,\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=serif]::before {\n  content: \"Serif\";\n}\n.ql-snow .ql-picker.ql-font .ql-picker-label[data-value=monospace]::before,\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=monospace]::before {\n  content: \"Monospace\";\n}\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=serif]::before {\n  font-family: Georgia, Times New Roman, serif;\n}\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=monospace]::before {\n  font-family: Monaco, Courier New, monospace;\n}\n.ql-snow .ql-picker.ql-size {\n  width: 98px;\n}\n.ql-snow .ql-picker.ql-size .ql-picker-label::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item::before {\n  content: \"Normal\";\n}\n.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=small]::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=small]::before {\n  content: \"Small\";\n}\n.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=large]::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=large]::before {\n  content: \"Large\";\n}\n.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=huge]::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=huge]::before {\n  content: \"Huge\";\n}\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=small]::before {\n  font-size: 10px;\n}\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=large]::before {\n  font-size: 18px;\n}\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=huge]::before {\n  font-size: 32px;\n}\n.ql-snow .ql-color-picker.ql-background .ql-picker-item {\n  background-color: #fff;\n}\n.ql-snow .ql-color-picker.ql-color .ql-picker-item {\n  background-color: #000;\n}\n.ql-toolbar.ql-snow {\n  border: 1px solid #ccc;\n  box-sizing: border-box;\n  font-family: \"Helvetica Neue\", \"Helvetica\", \"Arial\", sans-serif;\n  padding: 8px;\n}\n.ql-toolbar.ql-snow .ql-formats {\n  margin-right: 15px;\n}\n.ql-toolbar.ql-snow .ql-picker-label {\n  border: 1px solid transparent;\n}\n.ql-toolbar.ql-snow .ql-picker-options {\n  border: 1px solid transparent;\n  box-shadow: rgba(0, 0, 0, 0.2) 0 2px 8px;\n}\n.ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-label {\n  border-color: #ccc;\n}\n.ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-options {\n  border-color: #ccc;\n}\n.ql-toolbar.ql-snow .ql-color-picker .ql-picker-item.ql-selected,\n.ql-toolbar.ql-snow .ql-color-picker .ql-picker-item:hover {\n  border-color: #000;\n}\n.ql-toolbar.ql-snow + .ql-container.ql-snow {\n  border-top: 0px;\n}\n.ql-snow .ql-tooltip {\n  background-color: #fff;\n  border: 1px solid #ccc;\n  box-shadow: 0px 0px 5px #ddd;\n  color: #444;\n  padding: 5px 12px;\n  white-space: nowrap;\n}\n.ql-snow .ql-tooltip::before {\n  content: \"Visit URL:\";\n  line-height: 26px;\n  margin-right: 8px;\n}\n.ql-snow .ql-tooltip input[type=text] {\n  display: none;\n  border: 1px solid #ccc;\n  font-size: 13px;\n  height: 26px;\n  margin: 0px;\n  padding: 3px 5px;\n  width: 170px;\n}\n.ql-snow .ql-tooltip a.ql-preview {\n  display: inline-block;\n  max-width: 200px;\n  overflow-x: hidden;\n  text-overflow: ellipsis;\n  vertical-align: top;\n}\n.ql-snow .ql-tooltip a.ql-action::after {\n  border-right: 1px solid #ccc;\n  content: \"Edit\";\n  margin-left: 16px;\n  padding-right: 8px;\n}\n.ql-snow .ql-tooltip a.ql-remove::before {\n  content: \"Remove\";\n  margin-left: 8px;\n}\n.ql-snow .ql-tooltip a {\n  line-height: 26px;\n}\n.ql-snow .ql-tooltip.ql-editing a.ql-preview,\n.ql-snow .ql-tooltip.ql-editing a.ql-remove {\n  display: none;\n}\n.ql-snow .ql-tooltip.ql-editing input[type=text] {\n  display: inline-block;\n}\n.ql-snow .ql-tooltip.ql-editing a.ql-action::after {\n  border-right: 0px;\n  content: \"Save\";\n  padding-right: 0px;\n}\n.ql-snow .ql-tooltip[data-mode=link]::before {\n  content: \"Enter link:\";\n}\n.ql-snow .ql-tooltip[data-mode=formula]::before {\n  content: \"Enter formula:\";\n}\n.ql-snow .ql-tooltip[data-mode=video]::before {\n  content: \"Enter video:\";\n}\n.ql-snow a {\n  color: #06c;\n}\n.ql-container.ql-snow {\n  border: 1px solid #ccc;\n}\n\n/*# sourceMappingURL=QuillRTE.vue.map */", map: {"version":3,"sources":["QuillRTE.vue","/Users/briangeorge/Documents/funtimes/vue-base/src/components/forms/fields/QuillRTE.vue"],"names":[],"mappings":"AAAA,gBAAgB;ACwEhB;;;;;CAAA;AAMA;EACA,sBAAA;EACA,yCAAA;EACA,eAAA;EACA,YAAA;EACA,WAAA;EACA,kBAAA;ADtEA;ACwEA;EACA,kBAAA;ADrEA;ACuEA;EACA,oBAAA;ADpEA;ACsEA;EACA,eAAA;EACA,WAAA;EACA,kBAAA;EACA,kBAAA;EACA,QAAA;ADnEA;ACqEA;EACA,SAAA;EACA,UAAA;ADlEA;ACoEA;EACA,sBAAA;EACA,iBAAA;EACA,YAAA;EACA,aAAA;EACA,gBAAA;EACA,kBAAA;EACA,WAAA;EACA,gBAAA;EACA,gBAAA;EACA,qBAAA;EACA,qBAAA;ADjEA;ACmEA;EACA,YAAA;ADhEA;ACkEA;;;;;;;;;;;EAWA,SAAA;EACA,UAAA;EACA,6EAAA;AD/DA;ACiEA;;EAEA,mBAAA;AD9DA;ACgEA;;EAEA,qBAAA;AD7DA;AC+DA;EACA,YAAA;AD5DA;AC8DA;;EAEA,oBAAA;AD3DA;AC6DA;;EAEA,mBAAA;AD1DA;AC4DA;;EAEA,WAAA;EACA,eAAA;EACA,mBAAA;ADzDA;AC2DA;EACA,YAAA;ADxDA;AC0DA;EACA,YAAA;ADvDA;ACyDA;EACA,qBAAA;EACA,mBAAA;EACA,YAAA;ADtDA;ACwDA;EACA,mBAAA;EACA,mBAAA;EACA,iBAAA;ADrDA;ACuDA;EACA,kBAAA;EACA,oBAAA;ADpDA;ACsDA;;EAEA,mBAAA;ADnDA;ACqDA;;EAEA,oBAAA;ADlDA;ACoDA;EACA,6EAAA;EACA,yBAAA;ADjDA;ACmDA;EACA,sCAAA;ADhDA;ACkDA;EACA,yBAAA;AD/CA;ACiDA;EACA,0CAAA;AD9CA;ACgDA;EACA,sEAAA;AD7CA;AC+CA;EACA,yBAAA;AD5CA;AC8CA;EACA,0CAAA;AD3CA;AC6CA;EACA,+DAAA;AD1CA;AC4CA;EACA,yBAAA;ADzCA;AC2CA;EACA,sCAAA;ADxCA;AC0CA;EACA,wDAAA;ADvCA;ACyCA;EACA,yBAAA;ADtCA;ACwCA;EACA,0CAAA;ADrCA;ACuCA;EACA,iDAAA;ADpCA;ACsCA;EACA,yBAAA;ADnCA;ACqCA;EACA,0CAAA;ADlCA;ACoCA;EACA,0CAAA;ADjCA;ACmCA;EACA,yBAAA;ADhCA;ACkCA;EACA,sCAAA;AD/BA;ACiCA;EACA,mCAAA;AD9BA;ACgCA;EACA,yBAAA;AD7BA;AC+BA;EACA,0CAAA;AD5BA;AC8BA;EACA,4BAAA;AD3BA;AC6BA;EACA,yBAAA;AD1BA;AC4BA;EACA,0CAAA;ADzBA;AC2BA;EACA,qBAAA;ADxBA;AC0BA;EACA,yBAAA;ADvBA;ACyBA;EACA,sCAAA;ADtBA;ACwBA;EACA,iBAAA;ADrBA;ACuBA;EACA,mBAAA;ADpBA;ACsBA;EACA,kBAAA;ADnBA;ACqBA;EACA,oBAAA;ADlBA;ACoBA;EACA,iBAAA;ADjBA;ACmBA;EACA,mBAAA;ADhBA;ACkBA;EACA,kBAAA;ADfA;ACiBA;EACA,oBAAA;ADdA;ACgBA;EACA,iBAAA;ADbA;ACeA;EACA,oBAAA;ADZA;ACcA;EACA,kBAAA;ADXA;ACaA;EACA,qBAAA;ADVA;ACYA;EACA,kBAAA;ADTA;ACWA;EACA,oBAAA;ADRA;ACUA;EACA,mBAAA;ADPA;ACSA;EACA,qBAAA;ADNA;ACQA;EACA,kBAAA;ADLA;ACOA;EACA,oBAAA;ADJA;ACMA;EACA,mBAAA;ADHA;ACKA;EACA,qBAAA;ADFA;ACIA;EACA,kBAAA;ADDA;ACGA;EACA,oBAAA;ADAA;ACEA;EACA,mBAAA;ADCA;ACCA;EACA,qBAAA;ADEA;ACAA;EACA,kBAAA;ADGA;ACDA;EACA,oBAAA;ADIA;ACFA;EACA,mBAAA;ADKA;ACHA;EACA,qBAAA;ADMA;ACJA;EACA,kBAAA;ADOA;ACLA;EACA,oBAAA;ADQA;ACNA;EACA,mBAAA;ADSA;ACPA;EACA,qBAAA;ADUA;ACRA;EACA,kBAAA;ADWA;ACTA;EACA,oBAAA;ADYA;ACVA;EACA,mBAAA;ADaA;ACXA;EACA,qBAAA;ADcA;ACZA;EACA,cAAA;EACA,eAAA;ADeA;ACbA;EACA,cAAA;ADgBA;ACdA;EACA,kBAAA;ADiBA;ACfA;EACA,sBAAA;ADkBA;AChBA;EACA,yBAAA;ADmBA;ACjBA;EACA,sBAAA;ADoBA;AClBA;EACA,sBAAA;ADqBA;ACnBA;EACA,yBAAA;ADsBA;ACpBA;EACA,sBAAA;ADuBA;ACrBA;EACA,sBAAA;ADwBA;ACtBA;EACA,WAAA;ADyBA;ACvBA;EACA,cAAA;AD0BA;ACxBA;EACA,WAAA;AD2BA;ACzBA;EACA,WAAA;AD4BA;AC1BA;EACA,cAAA;AD6BA;AC3BA;EACA,WAAA;AD8BA;AC5BA;EACA,WAAA;AD+BA;AC7BA;EACA,4CAAA;ADgCA;AC9BA;EACA,2CAAA;ADiCA;AC/BA;EACA,iBAAA;ADkCA;AChCA;EACA,gBAAA;ADmCA;ACjCA;EACA,gBAAA;ADoCA;AClCA;EACA,cAAA;EACA,mBAAA;ADqCA;ACnCA;EACA,kBAAA;ADsCA;ACpCA;EACA,mBAAA;ADuCA;ACrCA;EACA,iBAAA;ADwCA;ACtCA;EACA,yBAAA;EACA,+BAAA;EACA,kBAAA;EACA,UAAA;EACA,oBAAA;EACA,kBAAA;EACA,WAAA;ADyCA;;ACvCA;;;;;CAAA;AAMA;EACA,sBAAA;EACA,yCAAA;EACA,eAAA;EACA,YAAA;EACA,WAAA;EACA,kBAAA;AD0CA;ACxCA;EACA,kBAAA;AD2CA;ACzCA;EACA,oBAAA;AD4CA;AC1CA;EACA,eAAA;EACA,WAAA;EACA,kBAAA;EACA,kBAAA;EACA,QAAA;AD6CA;AC3CA;EACA,SAAA;EACA,UAAA;AD8CA;AC5CA;EACA,sBAAA;EACA,iBAAA;EACA,YAAA;EACA,aAAA;EACA,gBAAA;EACA,kBAAA;EACA,WAAA;EACA,gBAAA;EACA,gBAAA;EACA,qBAAA;EACA,qBAAA;AD+CA;AC7CA;EACA,YAAA;ADgDA;AC9CA;;;;;;;;;;;EAWA,SAAA;EACA,UAAA;EACA,6EAAA;ADiDA;AC/CA;;EAEA,mBAAA;ADkDA;AChDA;;EAEA,qBAAA;ADmDA;ACjDA;EACA,YAAA;ADoDA;AClDA;;EAEA,oBAAA;ADqDA;ACnDA;;EAEA,mBAAA;ADsDA;ACpDA;;EAEA,WAAA;EACA,eAAA;EACA,mBAAA;ADuDA;ACrDA;EACA,YAAA;ADwDA;ACtDA;EACA,YAAA;ADyDA;ACvDA;EACA,qBAAA;EACA,mBAAA;EACA,YAAA;AD0DA;ACxDA;EACA,mBAAA;EACA,mBAAA;EACA,iBAAA;AD2DA;ACzDA;EACA,kBAAA;EACA,oBAAA;AD4DA;AC1DA;;EAEA,mBAAA;AD6DA;AC3DA;;EAEA,oBAAA;AD8DA;AC5DA;EACA,6EAAA;EACA,yBAAA;AD+DA;AC7DA;EACA,sCAAA;ADgEA;AC9DA;EACA,yBAAA;ADiEA;AC/DA;EACA,0CAAA;ADkEA;AChEA;EACA,sEAAA;ADmEA;ACjEA;EACA,yBAAA;ADoEA;AClEA;EACA,0CAAA;ADqEA;ACnEA;EACA,+DAAA;ADsEA;ACpEA;EACA,yBAAA;ADuEA;ACrEA;EACA,sCAAA;ADwEA;ACtEA;EACA,wDAAA;ADyEA;ACvEA;EACA,yBAAA;AD0EA;ACxEA;EACA,0CAAA;AD2EA;ACzEA;EACA,iDAAA;AD4EA;AC1EA;EACA,yBAAA;AD6EA;AC3EA;EACA,0CAAA;AD8EA;AC5EA;EACA,0CAAA;AD+EA;AC7EA;EACA,yBAAA;ADgFA;AC9EA;EACA,sCAAA;ADiFA;AC/EA;EACA,mCAAA;ADkFA;AChFA;EACA,yBAAA;ADmFA;ACjFA;EACA,0CAAA;ADoFA;AClFA;EACA,4BAAA;ADqFA;ACnFA;EACA,yBAAA;ADsFA;ACpFA;EACA,0CAAA;ADuFA;ACrFA;EACA,qBAAA;ADwFA;ACtFA;EACA,yBAAA;ADyFA;ACvFA;EACA,sCAAA;AD0FA;ACxFA;EACA,iBAAA;AD2FA;ACzFA;EACA,mBAAA;AD4FA;AC1FA;EACA,kBAAA;AD6FA;AC3FA;EACA,oBAAA;AD8FA;AC5FA;EACA,iBAAA;AD+FA;AC7FA;EACA,mBAAA;ADgGA;AC9FA;EACA,kBAAA;ADiGA;AC/FA;EACA,oBAAA;ADkGA;AChGA;EACA,iBAAA;ADmGA;ACjGA;EACA,oBAAA;ADoGA;AClGA;EACA,kBAAA;ADqGA;ACnGA;EACA,qBAAA;ADsGA;ACpGA;EACA,kBAAA;ADuGA;ACrGA;EACA,oBAAA;ADwGA;ACtGA;EACA,mBAAA;ADyGA;ACvGA;EACA,qBAAA;AD0GA;ACxGA;EACA,kBAAA;AD2GA;ACzGA;EACA,oBAAA;AD4GA;AC1GA;EACA,mBAAA;AD6GA;AC3GA;EACA,qBAAA;AD8GA;AC5GA;EACA,kBAAA;AD+GA;AC7GA;EACA,oBAAA;ADgHA;AC9GA;EACA,mBAAA;ADiHA;AC/GA;EACA,qBAAA;ADkHA;AChHA;EACA,kBAAA;ADmHA;ACjHA;EACA,oBAAA;ADoHA;AClHA;EACA,mBAAA;ADqHA;ACnHA;EACA,qBAAA;ADsHA;ACpHA;EACA,kBAAA;ADuHA;ACrHA;EACA,oBAAA;ADwHA;ACtHA;EACA,mBAAA;ADyHA;ACvHA;EACA,qBAAA;AD0HA;ACxHA;EACA,kBAAA;AD2HA;ACzHA;EACA,oBAAA;AD4HA;AC1HA;EACA,mBAAA;AD6HA;AC3HA;EACA,qBAAA;AD8HA;AC5HA;EACA,cAAA;EACA,eAAA;AD+HA;AC7HA;EACA,cAAA;ADgIA;AC9HA;EACA,kBAAA;ADiIA;AC/HA;EACA,sBAAA;ADkIA;AChIA;EACA,yBAAA;ADmIA;ACjIA;EACA,sBAAA;ADoIA;AClIA;EACA,sBAAA;ADqIA;ACnIA;EACA,yBAAA;ADsIA;ACpIA;EACA,sBAAA;ADuIA;ACrIA;EACA,sBAAA;ADwIA;ACtIA;EACA,WAAA;ADyIA;ACvIA;EACA,cAAA;AD0IA;ACxIA;EACA,WAAA;AD2IA;ACzIA;EACA,WAAA;AD4IA;AC1IA;EACA,cAAA;AD6IA;AC3IA;EACA,WAAA;AD8IA;AC5IA;EACA,WAAA;AD+IA;AC7IA;EACA,4CAAA;ADgJA;AC9IA;EACA,2CAAA;ADiJA;AC/IA;EACA,iBAAA;ADkJA;AChJA;EACA,gBAAA;ADmJA;ACjJA;EACA,gBAAA;ADoJA;AClJA;EACA,cAAA;EACA,mBAAA;ADqJA;ACnJA;EACA,kBAAA;ADsJA;ACpJA;EACA,mBAAA;ADuJA;ACrJA;EACA,iBAAA;ADwJA;ACtJA;EACA,yBAAA;EACA,+BAAA;EACA,kBAAA;EACA,UAAA;EACA,oBAAA;EACA,kBAAA;EACA,WAAA;ADyJA;ACvJA;;EAEA,WAAA;EACA,WAAA;EACA,cAAA;AD0JA;ACxJA;;EAEA,gBAAA;EACA,YAAA;EACA,eAAA;EACA,qBAAA;EACA,WAAA;EACA,YAAA;EACA,gBAAA;EACA,WAAA;AD2JA;ACzJA;;EAEA,WAAA;EACA,YAAA;AD4JA;AC1JA;;EAEA,aAAA;AD6JA;AC3JA;;EAEA,aAAA;AD8JA;AC5JA;;;;;;;;;;;;;;EAcA,WAAA;AD+JA;AC7JA;;;;;;;;;;;;;;;;;;;;;;;;;;;;EA4BA,yCAAA;ADgKA;AC9JA;;;;;;;;;;;;;;;;;;;;;;;;;;;;EA4BA,YAAA;ADiKA;AC/JA;AACA;;IAEA,WAAA;ADkKE;AChKF;;;;IAIA,UAAA;ADmKE;ACjKF;;;;IAIA,YAAA;ADoKE;AACF;AClKA;EACA,sBAAA;ADoKA;AClKA;EACA,sBAAA;ADqKA;ACnKA;EACA,aAAA;ADsKA;ACpKA;;EAEA,kBAAA;ADuKA;ACrKA;EACA,kBAAA;EACA,2BAAA;ADwKA;ACtKA;EACA,eAAA;EACA,qBAAA;ADyKA;ACvKA;EACA,4BAAA;AD0KA;ACxKA;EACA,qBAAA;EACA,sBAAA;AD2KA;ACzKA;EACA,WAAA;EACA,WAAA;EACA,cAAA;AD4KA;AC1KA;EACA,UAAA;EACA,YAAA;EACA,qBAAA;EACA,sBAAA;EACA,eAAA;AD6KA;AC3KA;EACA,UAAA;EACA,YAAA;EACA,qBAAA;EACA,eAAA;AD8KA;AC5KA;;EAEA,UAAA;AD+KA;AC7KA;EACA,UAAA;ADgLA;AC9KA;EACA,kBAAA;ADiLA;AC/KA;;EAEA,eAAA;ADkLA;AChLA;EACA,YAAA;ADmLA;ACjLA;EACA,aAAA;ADoLA;AClLA;EACA,eAAA;ADqLA;ACnLA;EACA,aAAA;ADsLA;ACpLA;EACA,cAAA;ADuLA;ACrLA;EACA,gBAAA;ADwLA;ACtLA;EACA,iBAAA;ADyLA;ACvLA;EACA,cAAA;AD0LA;ACxLA;EACA,iBAAA;AD2LA;ACzLA;EACA,iBAAA;AD4LA;AC1LA;EACA,0BAAA;AD6LA;AC3LA;EACA,2BAAA;EACA,kBAAA;EACA,eAAA;EACA,kBAAA;AD8LA;AC5LA;;EAEA,yBAAA;EACA,kBAAA;AD+LA;AC7LA;EACA,qBAAA;EACA,kBAAA;EACA,eAAA;EACA,iBAAA;ADgMA;AC9LA;EACA,cAAA;EACA,gBAAA;ADiMA;AC/LA;EACA,yBAAA;EACA,cAAA;EACA,iBAAA;ADkMA;AChMA;EACA,eAAA;ADmMA;ACjMA;EACA,WAAA;EACA,qBAAA;EACA,WAAA;EACA,eAAA;EACA,gBAAA;EACA,YAAA;EACA,kBAAA;EACA,sBAAA;ADoMA;AClMA;EACA,eAAA;EACA,qBAAA;EACA,YAAA;EACA,iBAAA;EACA,kBAAA;EACA,kBAAA;EACA,WAAA;ADqMA;ACnMA;EACA,qBAAA;EACA,iBAAA;ADsMA;ACpMA;EACA,sBAAA;EACA,aAAA;EACA,eAAA;EACA,gBAAA;EACA,kBAAA;EACA,mBAAA;ADuMA;ACrMA;EACA,eAAA;EACA,cAAA;EACA,mBAAA;EACA,gBAAA;ADwMA;ACtMA;EACA,WAAA;EACA,UAAA;ADyMA;ACvMA;EACA,UAAA;AD0MA;ACxMA;EACA,YAAA;AD2MA;ACzMA;EACA,cAAA;EACA,gBAAA;EACA,SAAA;EACA,UAAA;AD4MA;AC1MA;;EAEA,WAAA;AD6MA;AC3MA;;EAEA,gBAAA;AD8MA;AC5MA;;EAEA,UAAA;AD+MA;AC7MA;EACA,gBAAA;ADgNA;AC9MA;EACA,YAAA;EACA,WAAA;EACA,gBAAA;ADiNA;AC/MA;EACA,gBAAA;EACA,YAAA;ADkNA;AChNA;EACA,6BAAA;EACA,WAAA;EACA,YAAA;EACA,WAAA;EACA,YAAA;EACA,WAAA;ADmNA;ACjNA;EACA,kBAAA;EACA,gBAAA;EACA,QAAA;EACA,QAAA;EACA,WAAA;ADoNA;AClNA;;;;;;EAMA,yBAAA;ADqNA;ACnNA;EACA,WAAA;ADsNA;ACpNA;;EAEA,iBAAA;ADuNA;ACrNA;;EAEA,oBAAA;ADwNA;ACtNA;;EAEA,oBAAA;ADyNA;ACvNA;;EAEA,oBAAA;AD0NA;ACxNA;;EAEA,oBAAA;AD2NA;ACzNA;;EAEA,oBAAA;AD4NA;AC1NA;;EAEA,oBAAA;AD6NA;AC3NA;EACA,cAAA;AD8NA;AC5NA;EACA,gBAAA;AD+NA;AC7NA;EACA,iBAAA;ADgOA;AC9NA;EACA,cAAA;ADiOA;AC/NA;EACA,iBAAA;ADkOA;AChOA;EACA,iBAAA;ADmOA;ACjOA;EACA,YAAA;ADoOA;AClOA;;EAEA,qBAAA;ADqOA;ACnOA;;EAEA,gBAAA;ADsOA;ACpOA;;EAEA,oBAAA;ADuOA;ACrOA;EACA,4CAAA;ADwOA;ACtOA;EACA,2CAAA;ADyOA;ACvOA;EACA,WAAA;AD0OA;ACxOA;;EAEA,iBAAA;AD2OA;ACzOA;;EAEA,gBAAA;AD4OA;AC1OA;;EAEA,gBAAA;AD6OA;AC3OA;;EAEA,eAAA;AD8OA;AC5OA;EACA,eAAA;AD+OA;AC7OA;EACA,eAAA;ADgPA;AC9OA;EACA,eAAA;ADiPA;AC/OA;EACA,sBAAA;ADkPA;AChPA;EACA,sBAAA;ADmPA;ACjPA;EACA,sBAAA;EACA,sBAAA;EACA,+DAAA;EACA,YAAA;ADoPA;AClPA;EACA,kBAAA;ADqPA;ACnPA;EACA,6BAAA;ADsPA;ACpPA;EACA,6BAAA;EACA,wCAAA;ADuPA;ACrPA;EACA,kBAAA;ADwPA;ACtPA;EACA,kBAAA;ADyPA;ACvPA;;EAEA,kBAAA;AD0PA;ACxPA;EACA,eAAA;AD2PA;ACzPA;EACA,sBAAA;EACA,sBAAA;EACA,4BAAA;EACA,WAAA;EACA,iBAAA;EACA,mBAAA;AD4PA;AC1PA;EACA,qBAAA;EACA,iBAAA;EACA,iBAAA;AD6PA;AC3PA;EACA,aAAA;EACA,sBAAA;EACA,eAAA;EACA,YAAA;EACA,WAAA;EACA,gBAAA;EACA,YAAA;AD8PA;AC5PA;EACA,qBAAA;EACA,gBAAA;EACA,kBAAA;EACA,uBAAA;EACA,mBAAA;AD+PA;AC7PA;EACA,4BAAA;EACA,eAAA;EACA,iBAAA;EACA,kBAAA;ADgQA;AC9PA;EACA,iBAAA;EACA,gBAAA;ADiQA;AC/PA;EACA,iBAAA;ADkQA;AChQA;;EAEA,aAAA;ADmQA;ACjQA;EACA,qBAAA;ADoQA;AClQA;EACA,iBAAA;EACA,eAAA;EACA,kBAAA;ADqQA;ACnQA;EACA,sBAAA;ADsQA;ACpQA;EACA,yBAAA;ADuQA;ACrQA;EACA,uBAAA;ADwQA;ACtQA;EACA,WAAA;ADyQA;ACvQA;EACA,sBAAA;AD0QA;;AAEA,uCAAuC","file":"QuillRTE.vue","sourcesContent":["@charset \"UTF-8\";\n/*!\n* Quill Editor v1.3.6\n* https://quilljs.com/\n* Copyright (c) 2014, Jason Chen\n* Copyright (c) 2013, salesforce.com\n*/\n.ql-container {\n  box-sizing: border-box;\n  font-family: Helvetica, Arial, sans-serif;\n  font-size: 13px;\n  height: 100%;\n  margin: 0px;\n  position: relative;\n}\n\n.ql-container.ql-disabled .ql-tooltip {\n  visibility: hidden;\n}\n\n.ql-container.ql-disabled .ql-editor ul[data-checked] > li::before {\n  pointer-events: none;\n}\n\n.ql-clipboard {\n  left: -100000px;\n  height: 1px;\n  overflow-y: hidden;\n  position: absolute;\n  top: 50%;\n}\n\n.ql-clipboard p {\n  margin: 0;\n  padding: 0;\n}\n\n.ql-editor {\n  box-sizing: border-box;\n  line-height: 1.42;\n  height: 100%;\n  outline: none;\n  overflow-y: auto;\n  padding: 12px 15px;\n  tab-size: 4;\n  -moz-tab-size: 4;\n  text-align: left;\n  white-space: pre-wrap;\n  word-wrap: break-word;\n}\n\n.ql-editor > * {\n  cursor: text;\n}\n\n.ql-editor p,\n.ql-editor ol,\n.ql-editor ul,\n.ql-editor pre,\n.ql-editor blockquote,\n.ql-editor h1,\n.ql-editor h2,\n.ql-editor h3,\n.ql-editor h4,\n.ql-editor h5,\n.ql-editor h6 {\n  margin: 0;\n  padding: 0;\n  counter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n\n.ql-editor ol,\n.ql-editor ul {\n  padding-left: 1.5em;\n}\n\n.ql-editor ol > li,\n.ql-editor ul > li {\n  list-style-type: none;\n}\n\n.ql-editor ul > li::before {\n  content: \"•\";\n}\n\n.ql-editor ul[data-checked=true],\n.ql-editor ul[data-checked=false] {\n  pointer-events: none;\n}\n\n.ql-editor ul[data-checked=true] > li *,\n.ql-editor ul[data-checked=false] > li * {\n  pointer-events: all;\n}\n\n.ql-editor ul[data-checked=true] > li::before,\n.ql-editor ul[data-checked=false] > li::before {\n  color: #777;\n  cursor: pointer;\n  pointer-events: all;\n}\n\n.ql-editor ul[data-checked=true] > li::before {\n  content: \"☑\";\n}\n\n.ql-editor ul[data-checked=false] > li::before {\n  content: \"☐\";\n}\n\n.ql-editor li::before {\n  display: inline-block;\n  white-space: nowrap;\n  width: 1.2em;\n}\n\n.ql-editor li:not(.ql-direction-rtl)::before {\n  margin-left: -1.5em;\n  margin-right: 0.3em;\n  text-align: right;\n}\n\n.ql-editor li.ql-direction-rtl::before {\n  margin-left: 0.3em;\n  margin-right: -1.5em;\n}\n\n.ql-editor ol li:not(.ql-direction-rtl),\n.ql-editor ul li:not(.ql-direction-rtl) {\n  padding-left: 1.5em;\n}\n\n.ql-editor ol li.ql-direction-rtl,\n.ql-editor ul li.ql-direction-rtl {\n  padding-right: 1.5em;\n}\n\n.ql-editor ol li {\n  counter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n  counter-increment: list-0;\n}\n\n.ql-editor ol li:before {\n  content: counter(list-0, decimal) \". \";\n}\n\n.ql-editor ol li.ql-indent-1 {\n  counter-increment: list-1;\n}\n\n.ql-editor ol li.ql-indent-1:before {\n  content: counter(list-1, lower-alpha) \". \";\n}\n\n.ql-editor ol li.ql-indent-1 {\n  counter-reset: list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n\n.ql-editor ol li.ql-indent-2 {\n  counter-increment: list-2;\n}\n\n.ql-editor ol li.ql-indent-2:before {\n  content: counter(list-2, lower-roman) \". \";\n}\n\n.ql-editor ol li.ql-indent-2 {\n  counter-reset: list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n\n.ql-editor ol li.ql-indent-3 {\n  counter-increment: list-3;\n}\n\n.ql-editor ol li.ql-indent-3:before {\n  content: counter(list-3, decimal) \". \";\n}\n\n.ql-editor ol li.ql-indent-3 {\n  counter-reset: list-4 list-5 list-6 list-7 list-8 list-9;\n}\n\n.ql-editor ol li.ql-indent-4 {\n  counter-increment: list-4;\n}\n\n.ql-editor ol li.ql-indent-4:before {\n  content: counter(list-4, lower-alpha) \". \";\n}\n\n.ql-editor ol li.ql-indent-4 {\n  counter-reset: list-5 list-6 list-7 list-8 list-9;\n}\n\n.ql-editor ol li.ql-indent-5 {\n  counter-increment: list-5;\n}\n\n.ql-editor ol li.ql-indent-5:before {\n  content: counter(list-5, lower-roman) \". \";\n}\n\n.ql-editor ol li.ql-indent-5 {\n  counter-reset: list-6 list-7 list-8 list-9;\n}\n\n.ql-editor ol li.ql-indent-6 {\n  counter-increment: list-6;\n}\n\n.ql-editor ol li.ql-indent-6:before {\n  content: counter(list-6, decimal) \". \";\n}\n\n.ql-editor ol li.ql-indent-6 {\n  counter-reset: list-7 list-8 list-9;\n}\n\n.ql-editor ol li.ql-indent-7 {\n  counter-increment: list-7;\n}\n\n.ql-editor ol li.ql-indent-7:before {\n  content: counter(list-7, lower-alpha) \". \";\n}\n\n.ql-editor ol li.ql-indent-7 {\n  counter-reset: list-8 list-9;\n}\n\n.ql-editor ol li.ql-indent-8 {\n  counter-increment: list-8;\n}\n\n.ql-editor ol li.ql-indent-8:before {\n  content: counter(list-8, lower-roman) \". \";\n}\n\n.ql-editor ol li.ql-indent-8 {\n  counter-reset: list-9;\n}\n\n.ql-editor ol li.ql-indent-9 {\n  counter-increment: list-9;\n}\n\n.ql-editor ol li.ql-indent-9:before {\n  content: counter(list-9, decimal) \". \";\n}\n\n.ql-editor .ql-indent-1:not(.ql-direction-rtl) {\n  padding-left: 3em;\n}\n\n.ql-editor li.ql-indent-1:not(.ql-direction-rtl) {\n  padding-left: 4.5em;\n}\n\n.ql-editor .ql-indent-1.ql-direction-rtl.ql-align-right {\n  padding-right: 3em;\n}\n\n.ql-editor li.ql-indent-1.ql-direction-rtl.ql-align-right {\n  padding-right: 4.5em;\n}\n\n.ql-editor .ql-indent-2:not(.ql-direction-rtl) {\n  padding-left: 6em;\n}\n\n.ql-editor li.ql-indent-2:not(.ql-direction-rtl) {\n  padding-left: 7.5em;\n}\n\n.ql-editor .ql-indent-2.ql-direction-rtl.ql-align-right {\n  padding-right: 6em;\n}\n\n.ql-editor li.ql-indent-2.ql-direction-rtl.ql-align-right {\n  padding-right: 7.5em;\n}\n\n.ql-editor .ql-indent-3:not(.ql-direction-rtl) {\n  padding-left: 9em;\n}\n\n.ql-editor li.ql-indent-3:not(.ql-direction-rtl) {\n  padding-left: 10.5em;\n}\n\n.ql-editor .ql-indent-3.ql-direction-rtl.ql-align-right {\n  padding-right: 9em;\n}\n\n.ql-editor li.ql-indent-3.ql-direction-rtl.ql-align-right {\n  padding-right: 10.5em;\n}\n\n.ql-editor .ql-indent-4:not(.ql-direction-rtl) {\n  padding-left: 12em;\n}\n\n.ql-editor li.ql-indent-4:not(.ql-direction-rtl) {\n  padding-left: 13.5em;\n}\n\n.ql-editor .ql-indent-4.ql-direction-rtl.ql-align-right {\n  padding-right: 12em;\n}\n\n.ql-editor li.ql-indent-4.ql-direction-rtl.ql-align-right {\n  padding-right: 13.5em;\n}\n\n.ql-editor .ql-indent-5:not(.ql-direction-rtl) {\n  padding-left: 15em;\n}\n\n.ql-editor li.ql-indent-5:not(.ql-direction-rtl) {\n  padding-left: 16.5em;\n}\n\n.ql-editor .ql-indent-5.ql-direction-rtl.ql-align-right {\n  padding-right: 15em;\n}\n\n.ql-editor li.ql-indent-5.ql-direction-rtl.ql-align-right {\n  padding-right: 16.5em;\n}\n\n.ql-editor .ql-indent-6:not(.ql-direction-rtl) {\n  padding-left: 18em;\n}\n\n.ql-editor li.ql-indent-6:not(.ql-direction-rtl) {\n  padding-left: 19.5em;\n}\n\n.ql-editor .ql-indent-6.ql-direction-rtl.ql-align-right {\n  padding-right: 18em;\n}\n\n.ql-editor li.ql-indent-6.ql-direction-rtl.ql-align-right {\n  padding-right: 19.5em;\n}\n\n.ql-editor .ql-indent-7:not(.ql-direction-rtl) {\n  padding-left: 21em;\n}\n\n.ql-editor li.ql-indent-7:not(.ql-direction-rtl) {\n  padding-left: 22.5em;\n}\n\n.ql-editor .ql-indent-7.ql-direction-rtl.ql-align-right {\n  padding-right: 21em;\n}\n\n.ql-editor li.ql-indent-7.ql-direction-rtl.ql-align-right {\n  padding-right: 22.5em;\n}\n\n.ql-editor .ql-indent-8:not(.ql-direction-rtl) {\n  padding-left: 24em;\n}\n\n.ql-editor li.ql-indent-8:not(.ql-direction-rtl) {\n  padding-left: 25.5em;\n}\n\n.ql-editor .ql-indent-8.ql-direction-rtl.ql-align-right {\n  padding-right: 24em;\n}\n\n.ql-editor li.ql-indent-8.ql-direction-rtl.ql-align-right {\n  padding-right: 25.5em;\n}\n\n.ql-editor .ql-indent-9:not(.ql-direction-rtl) {\n  padding-left: 27em;\n}\n\n.ql-editor li.ql-indent-9:not(.ql-direction-rtl) {\n  padding-left: 28.5em;\n}\n\n.ql-editor .ql-indent-9.ql-direction-rtl.ql-align-right {\n  padding-right: 27em;\n}\n\n.ql-editor li.ql-indent-9.ql-direction-rtl.ql-align-right {\n  padding-right: 28.5em;\n}\n\n.ql-editor .ql-video {\n  display: block;\n  max-width: 100%;\n}\n\n.ql-editor .ql-video.ql-align-center {\n  margin: 0 auto;\n}\n\n.ql-editor .ql-video.ql-align-right {\n  margin: 0 0 0 auto;\n}\n\n.ql-editor .ql-bg-black {\n  background-color: #000;\n}\n\n.ql-editor .ql-bg-red {\n  background-color: #e60000;\n}\n\n.ql-editor .ql-bg-orange {\n  background-color: #f90;\n}\n\n.ql-editor .ql-bg-yellow {\n  background-color: #ff0;\n}\n\n.ql-editor .ql-bg-green {\n  background-color: #008a00;\n}\n\n.ql-editor .ql-bg-blue {\n  background-color: #06c;\n}\n\n.ql-editor .ql-bg-purple {\n  background-color: #93f;\n}\n\n.ql-editor .ql-color-white {\n  color: #fff;\n}\n\n.ql-editor .ql-color-red {\n  color: #e60000;\n}\n\n.ql-editor .ql-color-orange {\n  color: #f90;\n}\n\n.ql-editor .ql-color-yellow {\n  color: #ff0;\n}\n\n.ql-editor .ql-color-green {\n  color: #008a00;\n}\n\n.ql-editor .ql-color-blue {\n  color: #06c;\n}\n\n.ql-editor .ql-color-purple {\n  color: #93f;\n}\n\n.ql-editor .ql-font-serif {\n  font-family: Georgia, Times New Roman, serif;\n}\n\n.ql-editor .ql-font-monospace {\n  font-family: Monaco, Courier New, monospace;\n}\n\n.ql-editor .ql-size-small {\n  font-size: 0.75em;\n}\n\n.ql-editor .ql-size-large {\n  font-size: 1.5em;\n}\n\n.ql-editor .ql-size-huge {\n  font-size: 2.5em;\n}\n\n.ql-editor .ql-direction-rtl {\n  direction: rtl;\n  text-align: inherit;\n}\n\n.ql-editor .ql-align-center {\n  text-align: center;\n}\n\n.ql-editor .ql-align-justify {\n  text-align: justify;\n}\n\n.ql-editor .ql-align-right {\n  text-align: right;\n}\n\n.ql-editor.ql-blank::before {\n  color: rgba(0, 0, 0, 0.6);\n  content: attr(data-placeholder);\n  font-style: italic;\n  left: 15px;\n  pointer-events: none;\n  position: absolute;\n  right: 15px;\n}\n\n/*!\n* Quill Editor v1.3.6\n* https://quilljs.com/\n* Copyright (c) 2014, Jason Chen\n* Copyright (c) 2013, salesforce.com\n*/\n.ql-container {\n  box-sizing: border-box;\n  font-family: Helvetica, Arial, sans-serif;\n  font-size: 13px;\n  height: 100%;\n  margin: 0px;\n  position: relative;\n}\n\n.ql-container.ql-disabled .ql-tooltip {\n  visibility: hidden;\n}\n\n.ql-container.ql-disabled .ql-editor ul[data-checked] > li::before {\n  pointer-events: none;\n}\n\n.ql-clipboard {\n  left: -100000px;\n  height: 1px;\n  overflow-y: hidden;\n  position: absolute;\n  top: 50%;\n}\n\n.ql-clipboard p {\n  margin: 0;\n  padding: 0;\n}\n\n.ql-editor {\n  box-sizing: border-box;\n  line-height: 1.42;\n  height: 100%;\n  outline: none;\n  overflow-y: auto;\n  padding: 12px 15px;\n  tab-size: 4;\n  -moz-tab-size: 4;\n  text-align: left;\n  white-space: pre-wrap;\n  word-wrap: break-word;\n}\n\n.ql-editor > * {\n  cursor: text;\n}\n\n.ql-editor p,\n.ql-editor ol,\n.ql-editor ul,\n.ql-editor pre,\n.ql-editor blockquote,\n.ql-editor h1,\n.ql-editor h2,\n.ql-editor h3,\n.ql-editor h4,\n.ql-editor h5,\n.ql-editor h6 {\n  margin: 0;\n  padding: 0;\n  counter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n\n.ql-editor ol,\n.ql-editor ul {\n  padding-left: 1.5em;\n}\n\n.ql-editor ol > li,\n.ql-editor ul > li {\n  list-style-type: none;\n}\n\n.ql-editor ul > li::before {\n  content: \"•\";\n}\n\n.ql-editor ul[data-checked=true],\n.ql-editor ul[data-checked=false] {\n  pointer-events: none;\n}\n\n.ql-editor ul[data-checked=true] > li *,\n.ql-editor ul[data-checked=false] > li * {\n  pointer-events: all;\n}\n\n.ql-editor ul[data-checked=true] > li::before,\n.ql-editor ul[data-checked=false] > li::before {\n  color: #777;\n  cursor: pointer;\n  pointer-events: all;\n}\n\n.ql-editor ul[data-checked=true] > li::before {\n  content: \"☑\";\n}\n\n.ql-editor ul[data-checked=false] > li::before {\n  content: \"☐\";\n}\n\n.ql-editor li::before {\n  display: inline-block;\n  white-space: nowrap;\n  width: 1.2em;\n}\n\n.ql-editor li:not(.ql-direction-rtl)::before {\n  margin-left: -1.5em;\n  margin-right: 0.3em;\n  text-align: right;\n}\n\n.ql-editor li.ql-direction-rtl::before {\n  margin-left: 0.3em;\n  margin-right: -1.5em;\n}\n\n.ql-editor ol li:not(.ql-direction-rtl),\n.ql-editor ul li:not(.ql-direction-rtl) {\n  padding-left: 1.5em;\n}\n\n.ql-editor ol li.ql-direction-rtl,\n.ql-editor ul li.ql-direction-rtl {\n  padding-right: 1.5em;\n}\n\n.ql-editor ol li {\n  counter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n  counter-increment: list-0;\n}\n\n.ql-editor ol li:before {\n  content: counter(list-0, decimal) \". \";\n}\n\n.ql-editor ol li.ql-indent-1 {\n  counter-increment: list-1;\n}\n\n.ql-editor ol li.ql-indent-1:before {\n  content: counter(list-1, lower-alpha) \". \";\n}\n\n.ql-editor ol li.ql-indent-1 {\n  counter-reset: list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n\n.ql-editor ol li.ql-indent-2 {\n  counter-increment: list-2;\n}\n\n.ql-editor ol li.ql-indent-2:before {\n  content: counter(list-2, lower-roman) \". \";\n}\n\n.ql-editor ol li.ql-indent-2 {\n  counter-reset: list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n\n.ql-editor ol li.ql-indent-3 {\n  counter-increment: list-3;\n}\n\n.ql-editor ol li.ql-indent-3:before {\n  content: counter(list-3, decimal) \". \";\n}\n\n.ql-editor ol li.ql-indent-3 {\n  counter-reset: list-4 list-5 list-6 list-7 list-8 list-9;\n}\n\n.ql-editor ol li.ql-indent-4 {\n  counter-increment: list-4;\n}\n\n.ql-editor ol li.ql-indent-4:before {\n  content: counter(list-4, lower-alpha) \". \";\n}\n\n.ql-editor ol li.ql-indent-4 {\n  counter-reset: list-5 list-6 list-7 list-8 list-9;\n}\n\n.ql-editor ol li.ql-indent-5 {\n  counter-increment: list-5;\n}\n\n.ql-editor ol li.ql-indent-5:before {\n  content: counter(list-5, lower-roman) \". \";\n}\n\n.ql-editor ol li.ql-indent-5 {\n  counter-reset: list-6 list-7 list-8 list-9;\n}\n\n.ql-editor ol li.ql-indent-6 {\n  counter-increment: list-6;\n}\n\n.ql-editor ol li.ql-indent-6:before {\n  content: counter(list-6, decimal) \". \";\n}\n\n.ql-editor ol li.ql-indent-6 {\n  counter-reset: list-7 list-8 list-9;\n}\n\n.ql-editor ol li.ql-indent-7 {\n  counter-increment: list-7;\n}\n\n.ql-editor ol li.ql-indent-7:before {\n  content: counter(list-7, lower-alpha) \". \";\n}\n\n.ql-editor ol li.ql-indent-7 {\n  counter-reset: list-8 list-9;\n}\n\n.ql-editor ol li.ql-indent-8 {\n  counter-increment: list-8;\n}\n\n.ql-editor ol li.ql-indent-8:before {\n  content: counter(list-8, lower-roman) \". \";\n}\n\n.ql-editor ol li.ql-indent-8 {\n  counter-reset: list-9;\n}\n\n.ql-editor ol li.ql-indent-9 {\n  counter-increment: list-9;\n}\n\n.ql-editor ol li.ql-indent-9:before {\n  content: counter(list-9, decimal) \". \";\n}\n\n.ql-editor .ql-indent-1:not(.ql-direction-rtl) {\n  padding-left: 3em;\n}\n\n.ql-editor li.ql-indent-1:not(.ql-direction-rtl) {\n  padding-left: 4.5em;\n}\n\n.ql-editor .ql-indent-1.ql-direction-rtl.ql-align-right {\n  padding-right: 3em;\n}\n\n.ql-editor li.ql-indent-1.ql-direction-rtl.ql-align-right {\n  padding-right: 4.5em;\n}\n\n.ql-editor .ql-indent-2:not(.ql-direction-rtl) {\n  padding-left: 6em;\n}\n\n.ql-editor li.ql-indent-2:not(.ql-direction-rtl) {\n  padding-left: 7.5em;\n}\n\n.ql-editor .ql-indent-2.ql-direction-rtl.ql-align-right {\n  padding-right: 6em;\n}\n\n.ql-editor li.ql-indent-2.ql-direction-rtl.ql-align-right {\n  padding-right: 7.5em;\n}\n\n.ql-editor .ql-indent-3:not(.ql-direction-rtl) {\n  padding-left: 9em;\n}\n\n.ql-editor li.ql-indent-3:not(.ql-direction-rtl) {\n  padding-left: 10.5em;\n}\n\n.ql-editor .ql-indent-3.ql-direction-rtl.ql-align-right {\n  padding-right: 9em;\n}\n\n.ql-editor li.ql-indent-3.ql-direction-rtl.ql-align-right {\n  padding-right: 10.5em;\n}\n\n.ql-editor .ql-indent-4:not(.ql-direction-rtl) {\n  padding-left: 12em;\n}\n\n.ql-editor li.ql-indent-4:not(.ql-direction-rtl) {\n  padding-left: 13.5em;\n}\n\n.ql-editor .ql-indent-4.ql-direction-rtl.ql-align-right {\n  padding-right: 12em;\n}\n\n.ql-editor li.ql-indent-4.ql-direction-rtl.ql-align-right {\n  padding-right: 13.5em;\n}\n\n.ql-editor .ql-indent-5:not(.ql-direction-rtl) {\n  padding-left: 15em;\n}\n\n.ql-editor li.ql-indent-5:not(.ql-direction-rtl) {\n  padding-left: 16.5em;\n}\n\n.ql-editor .ql-indent-5.ql-direction-rtl.ql-align-right {\n  padding-right: 15em;\n}\n\n.ql-editor li.ql-indent-5.ql-direction-rtl.ql-align-right {\n  padding-right: 16.5em;\n}\n\n.ql-editor .ql-indent-6:not(.ql-direction-rtl) {\n  padding-left: 18em;\n}\n\n.ql-editor li.ql-indent-6:not(.ql-direction-rtl) {\n  padding-left: 19.5em;\n}\n\n.ql-editor .ql-indent-6.ql-direction-rtl.ql-align-right {\n  padding-right: 18em;\n}\n\n.ql-editor li.ql-indent-6.ql-direction-rtl.ql-align-right {\n  padding-right: 19.5em;\n}\n\n.ql-editor .ql-indent-7:not(.ql-direction-rtl) {\n  padding-left: 21em;\n}\n\n.ql-editor li.ql-indent-7:not(.ql-direction-rtl) {\n  padding-left: 22.5em;\n}\n\n.ql-editor .ql-indent-7.ql-direction-rtl.ql-align-right {\n  padding-right: 21em;\n}\n\n.ql-editor li.ql-indent-7.ql-direction-rtl.ql-align-right {\n  padding-right: 22.5em;\n}\n\n.ql-editor .ql-indent-8:not(.ql-direction-rtl) {\n  padding-left: 24em;\n}\n\n.ql-editor li.ql-indent-8:not(.ql-direction-rtl) {\n  padding-left: 25.5em;\n}\n\n.ql-editor .ql-indent-8.ql-direction-rtl.ql-align-right {\n  padding-right: 24em;\n}\n\n.ql-editor li.ql-indent-8.ql-direction-rtl.ql-align-right {\n  padding-right: 25.5em;\n}\n\n.ql-editor .ql-indent-9:not(.ql-direction-rtl) {\n  padding-left: 27em;\n}\n\n.ql-editor li.ql-indent-9:not(.ql-direction-rtl) {\n  padding-left: 28.5em;\n}\n\n.ql-editor .ql-indent-9.ql-direction-rtl.ql-align-right {\n  padding-right: 27em;\n}\n\n.ql-editor li.ql-indent-9.ql-direction-rtl.ql-align-right {\n  padding-right: 28.5em;\n}\n\n.ql-editor .ql-video {\n  display: block;\n  max-width: 100%;\n}\n\n.ql-editor .ql-video.ql-align-center {\n  margin: 0 auto;\n}\n\n.ql-editor .ql-video.ql-align-right {\n  margin: 0 0 0 auto;\n}\n\n.ql-editor .ql-bg-black {\n  background-color: #000;\n}\n\n.ql-editor .ql-bg-red {\n  background-color: #e60000;\n}\n\n.ql-editor .ql-bg-orange {\n  background-color: #f90;\n}\n\n.ql-editor .ql-bg-yellow {\n  background-color: #ff0;\n}\n\n.ql-editor .ql-bg-green {\n  background-color: #008a00;\n}\n\n.ql-editor .ql-bg-blue {\n  background-color: #06c;\n}\n\n.ql-editor .ql-bg-purple {\n  background-color: #93f;\n}\n\n.ql-editor .ql-color-white {\n  color: #fff;\n}\n\n.ql-editor .ql-color-red {\n  color: #e60000;\n}\n\n.ql-editor .ql-color-orange {\n  color: #f90;\n}\n\n.ql-editor .ql-color-yellow {\n  color: #ff0;\n}\n\n.ql-editor .ql-color-green {\n  color: #008a00;\n}\n\n.ql-editor .ql-color-blue {\n  color: #06c;\n}\n\n.ql-editor .ql-color-purple {\n  color: #93f;\n}\n\n.ql-editor .ql-font-serif {\n  font-family: Georgia, Times New Roman, serif;\n}\n\n.ql-editor .ql-font-monospace {\n  font-family: Monaco, Courier New, monospace;\n}\n\n.ql-editor .ql-size-small {\n  font-size: 0.75em;\n}\n\n.ql-editor .ql-size-large {\n  font-size: 1.5em;\n}\n\n.ql-editor .ql-size-huge {\n  font-size: 2.5em;\n}\n\n.ql-editor .ql-direction-rtl {\n  direction: rtl;\n  text-align: inherit;\n}\n\n.ql-editor .ql-align-center {\n  text-align: center;\n}\n\n.ql-editor .ql-align-justify {\n  text-align: justify;\n}\n\n.ql-editor .ql-align-right {\n  text-align: right;\n}\n\n.ql-editor.ql-blank::before {\n  color: rgba(0, 0, 0, 0.6);\n  content: attr(data-placeholder);\n  font-style: italic;\n  left: 15px;\n  pointer-events: none;\n  position: absolute;\n  right: 15px;\n}\n\n.ql-snow.ql-toolbar:after,\n.ql-snow .ql-toolbar:after {\n  clear: both;\n  content: \"\";\n  display: table;\n}\n\n.ql-snow.ql-toolbar button,\n.ql-snow .ql-toolbar button {\n  background: none;\n  border: none;\n  cursor: pointer;\n  display: inline-block;\n  float: left;\n  height: 24px;\n  padding: 3px 5px;\n  width: 28px;\n}\n\n.ql-snow.ql-toolbar button svg,\n.ql-snow .ql-toolbar button svg {\n  float: left;\n  height: 100%;\n}\n\n.ql-snow.ql-toolbar button:active:hover,\n.ql-snow .ql-toolbar button:active:hover {\n  outline: none;\n}\n\n.ql-snow.ql-toolbar input.ql-image[type=file],\n.ql-snow .ql-toolbar input.ql-image[type=file] {\n  display: none;\n}\n\n.ql-snow.ql-toolbar button:hover,\n.ql-snow .ql-toolbar button:hover,\n.ql-snow.ql-toolbar button:focus,\n.ql-snow .ql-toolbar button:focus,\n.ql-snow.ql-toolbar button.ql-active,\n.ql-snow .ql-toolbar button.ql-active,\n.ql-snow.ql-toolbar .ql-picker-label:hover,\n.ql-snow .ql-toolbar .ql-picker-label:hover,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active,\n.ql-snow.ql-toolbar .ql-picker-item:hover,\n.ql-snow .ql-toolbar .ql-picker-item:hover,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected {\n  color: #06c;\n}\n\n.ql-snow.ql-toolbar button:hover .ql-fill,\n.ql-snow .ql-toolbar button:hover .ql-fill,\n.ql-snow.ql-toolbar button:focus .ql-fill,\n.ql-snow .ql-toolbar button:focus .ql-fill,\n.ql-snow.ql-toolbar button.ql-active .ql-fill,\n.ql-snow .ql-toolbar button.ql-active .ql-fill,\n.ql-snow.ql-toolbar .ql-picker-label:hover .ql-fill,\n.ql-snow .ql-toolbar .ql-picker-label:hover .ql-fill,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-fill,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-fill,\n.ql-snow.ql-toolbar .ql-picker-item:hover .ql-fill,\n.ql-snow .ql-toolbar .ql-picker-item:hover .ql-fill,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-fill,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-fill,\n.ql-snow.ql-toolbar button:hover .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar button:hover .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar button:focus .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar button:focus .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar button.ql-active .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar button.ql-active .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke.ql-fill {\n  fill: color(\"theme-interaction\", \"hover\");\n}\n\n.ql-snow.ql-toolbar button:hover .ql-stroke,\n.ql-snow .ql-toolbar button:hover .ql-stroke,\n.ql-snow.ql-toolbar button:focus .ql-stroke,\n.ql-snow .ql-toolbar button:focus .ql-stroke,\n.ql-snow.ql-toolbar button.ql-active .ql-stroke,\n.ql-snow .ql-toolbar button.ql-active .ql-stroke,\n.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke,\n.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke,\n.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke,\n.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke,\n.ql-snow.ql-toolbar button:hover .ql-stroke-miter,\n.ql-snow .ql-toolbar button:hover .ql-stroke-miter,\n.ql-snow.ql-toolbar button:focus .ql-stroke-miter,\n.ql-snow .ql-toolbar button:focus .ql-stroke-miter,\n.ql-snow.ql-toolbar button.ql-active .ql-stroke-miter,\n.ql-snow .ql-toolbar button.ql-active .ql-stroke-miter,\n.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke-miter,\n.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke-miter,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke-miter,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke-miter,\n.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke-miter,\n.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke-miter,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke-miter,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke-miter {\n  stroke: #06c;\n}\n\n@media (pointer: coarse) {\n  .ql-snow.ql-toolbar button:hover:not(.ql-active),\n.ql-snow .ql-toolbar button:hover:not(.ql-active) {\n    color: #444;\n  }\n\n  .ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-fill,\n.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-fill,\n.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke.ql-fill {\n    fill: #444;\n  }\n\n  .ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke,\n.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke,\n.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke-miter,\n.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke-miter {\n    stroke: #444;\n  }\n}\n.ql-snow {\n  box-sizing: border-box;\n}\n\n.ql-snow * {\n  box-sizing: border-box;\n}\n\n.ql-snow .ql-hidden {\n  display: none;\n}\n\n.ql-snow .ql-out-bottom,\n.ql-snow .ql-out-top {\n  visibility: hidden;\n}\n\n.ql-snow .ql-tooltip {\n  position: absolute;\n  transform: translateY(10px);\n}\n\n.ql-snow .ql-tooltip a {\n  cursor: pointer;\n  text-decoration: none;\n}\n\n.ql-snow .ql-tooltip.ql-flip {\n  transform: translateY(-10px);\n}\n\n.ql-snow .ql-formats {\n  display: inline-block;\n  vertical-align: middle;\n}\n\n.ql-snow .ql-formats:after {\n  clear: both;\n  content: \"\";\n  display: table;\n}\n\n.ql-snow .ql-stroke {\n  fill: none;\n  stroke: #444;\n  stroke-linecap: round;\n  stroke-linejoin: round;\n  stroke-width: 2;\n}\n\n.ql-snow .ql-stroke-miter {\n  fill: none;\n  stroke: #444;\n  stroke-miterlimit: 10;\n  stroke-width: 2;\n}\n\n.ql-snow .ql-fill,\n.ql-snow .ql-stroke.ql-fill {\n  fill: #444;\n}\n\n.ql-snow .ql-empty {\n  fill: none;\n}\n\n.ql-snow .ql-even {\n  fill-rule: evenodd;\n}\n\n.ql-snow .ql-thin,\n.ql-snow .ql-stroke.ql-thin {\n  stroke-width: 1;\n}\n\n.ql-snow .ql-transparent {\n  opacity: 0.4;\n}\n\n.ql-snow .ql-direction svg:last-child {\n  display: none;\n}\n\n.ql-snow .ql-direction.ql-active svg:last-child {\n  display: inline;\n}\n\n.ql-snow .ql-direction.ql-active svg:first-child {\n  display: none;\n}\n\n.ql-snow .ql-editor h1 {\n  font-size: 2em;\n}\n\n.ql-snow .ql-editor h2 {\n  font-size: 1.5em;\n}\n\n.ql-snow .ql-editor h3 {\n  font-size: 1.17em;\n}\n\n.ql-snow .ql-editor h4 {\n  font-size: 1em;\n}\n\n.ql-snow .ql-editor h5 {\n  font-size: 0.83em;\n}\n\n.ql-snow .ql-editor h6 {\n  font-size: 0.67em;\n}\n\n.ql-snow .ql-editor a {\n  text-decoration: underline;\n}\n\n.ql-snow .ql-editor blockquote {\n  border-left: 4px solid #ccc;\n  margin-bottom: 5px;\n  margin-top: 5px;\n  padding-left: 16px;\n}\n\n.ql-snow .ql-editor code,\n.ql-snow .ql-editor pre {\n  background-color: #f0f0f0;\n  border-radius: 3px;\n}\n\n.ql-snow .ql-editor pre {\n  white-space: pre-wrap;\n  margin-bottom: 5px;\n  margin-top: 5px;\n  padding: 5px 10px;\n}\n\n.ql-snow .ql-editor code {\n  font-size: 85%;\n  padding: 2px 4px;\n}\n\n.ql-snow .ql-editor pre.ql-syntax {\n  background-color: #23241f;\n  color: #f8f8f2;\n  overflow: visible;\n}\n\n.ql-snow .ql-editor img {\n  max-width: 100%;\n}\n\n.ql-snow .ql-picker {\n  color: #444;\n  display: inline-block;\n  float: left;\n  font-size: 14px;\n  font-weight: 500;\n  height: 24px;\n  position: relative;\n  vertical-align: middle;\n}\n\n.ql-snow .ql-picker-label {\n  cursor: pointer;\n  display: inline-block;\n  height: 100%;\n  padding-left: 8px;\n  padding-right: 2px;\n  position: relative;\n  width: 100%;\n}\n\n.ql-snow .ql-picker-label::before {\n  display: inline-block;\n  line-height: 22px;\n}\n\n.ql-snow .ql-picker-options {\n  background-color: #fff;\n  display: none;\n  min-width: 100%;\n  padding: 4px 8px;\n  position: absolute;\n  white-space: nowrap;\n}\n\n.ql-snow .ql-picker-options .ql-picker-item {\n  cursor: pointer;\n  display: block;\n  padding-bottom: 5px;\n  padding-top: 5px;\n}\n\n.ql-snow .ql-picker.ql-expanded .ql-picker-label {\n  color: #ccc;\n  z-index: 2;\n}\n\n.ql-snow .ql-picker.ql-expanded .ql-picker-label .ql-fill {\n  fill: #ccc;\n}\n\n.ql-snow .ql-picker.ql-expanded .ql-picker-label .ql-stroke {\n  stroke: #ccc;\n}\n\n.ql-snow .ql-picker.ql-expanded .ql-picker-options {\n  display: block;\n  margin-top: -1px;\n  top: 100%;\n  z-index: 1;\n}\n\n.ql-snow .ql-color-picker,\n.ql-snow .ql-icon-picker {\n  width: 28px;\n}\n\n.ql-snow .ql-color-picker .ql-picker-label,\n.ql-snow .ql-icon-picker .ql-picker-label {\n  padding: 2px 4px;\n}\n\n.ql-snow .ql-color-picker .ql-picker-label svg,\n.ql-snow .ql-icon-picker .ql-picker-label svg {\n  right: 4px;\n}\n\n.ql-snow .ql-icon-picker .ql-picker-options {\n  padding: 4px 0px;\n}\n\n.ql-snow .ql-icon-picker .ql-picker-item {\n  height: 24px;\n  width: 24px;\n  padding: 2px 4px;\n}\n\n.ql-snow .ql-color-picker .ql-picker-options {\n  padding: 3px 5px;\n  width: 152px;\n}\n\n.ql-snow .ql-color-picker .ql-picker-item {\n  border: 1px solid transparent;\n  float: left;\n  height: 16px;\n  margin: 2px;\n  padding: 0px;\n  width: 16px;\n}\n\n.ql-snow .ql-picker:not(.ql-color-picker):not(.ql-icon-picker) svg {\n  position: absolute;\n  margin-top: -9px;\n  right: 0;\n  top: 50%;\n  width: 18px;\n}\n\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-label]:not([data-label=\"\"])::before,\n.ql-snow .ql-picker.ql-font .ql-picker-label[data-label]:not([data-label=\"\"])::before,\n.ql-snow .ql-picker.ql-size .ql-picker-label[data-label]:not([data-label=\"\"])::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-label]:not([data-label=\"\"])::before,\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-label]:not([data-label=\"\"])::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-label]:not([data-label=\"\"])::before {\n  content: attr(data-label);\n}\n\n.ql-snow .ql-picker.ql-header {\n  width: 98px;\n}\n\n.ql-snow .ql-picker.ql-header .ql-picker-label::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item::before {\n  content: \"Normal\";\n}\n\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"1\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"1\"]::before {\n  content: \"Heading 1\";\n}\n\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"2\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"2\"]::before {\n  content: \"Heading 2\";\n}\n\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"3\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"3\"]::before {\n  content: \"Heading 3\";\n}\n\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"4\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"4\"]::before {\n  content: \"Heading 4\";\n}\n\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"5\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"5\"]::before {\n  content: \"Heading 5\";\n}\n\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"6\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"6\"]::before {\n  content: \"Heading 6\";\n}\n\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"1\"]::before {\n  font-size: 2em;\n}\n\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"2\"]::before {\n  font-size: 1.5em;\n}\n\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"3\"]::before {\n  font-size: 1.17em;\n}\n\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"4\"]::before {\n  font-size: 1em;\n}\n\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"5\"]::before {\n  font-size: 0.83em;\n}\n\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"6\"]::before {\n  font-size: 0.67em;\n}\n\n.ql-snow .ql-picker.ql-font {\n  width: 108px;\n}\n\n.ql-snow .ql-picker.ql-font .ql-picker-label::before,\n.ql-snow .ql-picker.ql-font .ql-picker-item::before {\n  content: \"Sans Serif\";\n}\n\n.ql-snow .ql-picker.ql-font .ql-picker-label[data-value=serif]::before,\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=serif]::before {\n  content: \"Serif\";\n}\n\n.ql-snow .ql-picker.ql-font .ql-picker-label[data-value=monospace]::before,\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=monospace]::before {\n  content: \"Monospace\";\n}\n\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=serif]::before {\n  font-family: Georgia, Times New Roman, serif;\n}\n\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=monospace]::before {\n  font-family: Monaco, Courier New, monospace;\n}\n\n.ql-snow .ql-picker.ql-size {\n  width: 98px;\n}\n\n.ql-snow .ql-picker.ql-size .ql-picker-label::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item::before {\n  content: \"Normal\";\n}\n\n.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=small]::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=small]::before {\n  content: \"Small\";\n}\n\n.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=large]::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=large]::before {\n  content: \"Large\";\n}\n\n.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=huge]::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=huge]::before {\n  content: \"Huge\";\n}\n\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=small]::before {\n  font-size: 10px;\n}\n\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=large]::before {\n  font-size: 18px;\n}\n\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=huge]::before {\n  font-size: 32px;\n}\n\n.ql-snow .ql-color-picker.ql-background .ql-picker-item {\n  background-color: #fff;\n}\n\n.ql-snow .ql-color-picker.ql-color .ql-picker-item {\n  background-color: #000;\n}\n\n.ql-toolbar.ql-snow {\n  border: 1px solid #ccc;\n  box-sizing: border-box;\n  font-family: \"Helvetica Neue\", \"Helvetica\", \"Arial\", sans-serif;\n  padding: 8px;\n}\n\n.ql-toolbar.ql-snow .ql-formats {\n  margin-right: 15px;\n}\n\n.ql-toolbar.ql-snow .ql-picker-label {\n  border: 1px solid transparent;\n}\n\n.ql-toolbar.ql-snow .ql-picker-options {\n  border: 1px solid transparent;\n  box-shadow: rgba(0, 0, 0, 0.2) 0 2px 8px;\n}\n\n.ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-label {\n  border-color: #ccc;\n}\n\n.ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-options {\n  border-color: #ccc;\n}\n\n.ql-toolbar.ql-snow .ql-color-picker .ql-picker-item.ql-selected,\n.ql-toolbar.ql-snow .ql-color-picker .ql-picker-item:hover {\n  border-color: #000;\n}\n\n.ql-toolbar.ql-snow + .ql-container.ql-snow {\n  border-top: 0px;\n}\n\n.ql-snow .ql-tooltip {\n  background-color: #fff;\n  border: 1px solid #ccc;\n  box-shadow: 0px 0px 5px #ddd;\n  color: #444;\n  padding: 5px 12px;\n  white-space: nowrap;\n}\n\n.ql-snow .ql-tooltip::before {\n  content: \"Visit URL:\";\n  line-height: 26px;\n  margin-right: 8px;\n}\n\n.ql-snow .ql-tooltip input[type=text] {\n  display: none;\n  border: 1px solid #ccc;\n  font-size: 13px;\n  height: 26px;\n  margin: 0px;\n  padding: 3px 5px;\n  width: 170px;\n}\n\n.ql-snow .ql-tooltip a.ql-preview {\n  display: inline-block;\n  max-width: 200px;\n  overflow-x: hidden;\n  text-overflow: ellipsis;\n  vertical-align: top;\n}\n\n.ql-snow .ql-tooltip a.ql-action::after {\n  border-right: 1px solid #ccc;\n  content: \"Edit\";\n  margin-left: 16px;\n  padding-right: 8px;\n}\n\n.ql-snow .ql-tooltip a.ql-remove::before {\n  content: \"Remove\";\n  margin-left: 8px;\n}\n\n.ql-snow .ql-tooltip a {\n  line-height: 26px;\n}\n\n.ql-snow .ql-tooltip.ql-editing a.ql-preview,\n.ql-snow .ql-tooltip.ql-editing a.ql-remove {\n  display: none;\n}\n\n.ql-snow .ql-tooltip.ql-editing input[type=text] {\n  display: inline-block;\n}\n\n.ql-snow .ql-tooltip.ql-editing a.ql-action::after {\n  border-right: 0px;\n  content: \"Save\";\n  padding-right: 0px;\n}\n\n.ql-snow .ql-tooltip[data-mode=link]::before {\n  content: \"Enter link:\";\n}\n\n.ql-snow .ql-tooltip[data-mode=formula]::before {\n  content: \"Enter formula:\";\n}\n\n.ql-snow .ql-tooltip[data-mode=video]::before {\n  content: \"Enter video:\";\n}\n\n.ql-snow a {\n  color: #06c;\n}\n\n.ql-container.ql-snow {\n  border: 1px solid #ccc;\n}\n\n/*# sourceMappingURL=QuillRTE.vue.map */","<template>\n  <div\n    v-show=\"field.isVisible\"\n    :class=\"classNames\"\n  >\n    <label\n      :for=\"`vf-${reference}`\"\n      class=\"c-input__label\"\n    >\n      {{ field.label }}<sup v-if=\"field.required\">*</sup>\n    </label>\n    <div\n      :id=\"`vf-${reference}__quill-container`\"\n      class=\"c-quill\"\n    >\n      <div :id=\"`vf-${reference}`\">\n        <!-- Quill.js -->\n      </div>\n    </div>\n    <p\n      :id=\"`vf-${reference}__error`\"\n      class=\"c-input__error\"\n      v-if=\"showError\"\n    >\n      {{ errorText }}\n    </p>\n  </div>\n</template>\n\n<script>\nimport Quill from 'quill';\nimport vuexFormInput from '../mixins/vuexFormInput';\n\nexport default {\n  mixins: [\n    vuexFormInput,\n  ],\n\n  data() {\n    return {\n      quill: null,\n    };\n  },\n\n  methods: {\n    setFieldVal() {\n      this.debouncedUpdateFieldValue({\n        id: this.reference,\n        val: this.quill.getContents(),\n      });\n    },\n  },\n\n  mounted() {\n    this.quill = new Quill(`#vf-${this.reference}`, {\n      toolbar: [\n        [{ header: [2, 3, 4, false] }],\n        ['bold', 'italic', 'underline'],\n      ],\n      scrollingContainer: `#vf-${this.reference}__quill-container`,\n      theme: 'snow',\n    });\n\n    // Update stored value on debounced text change\n    this.quill.on('text-change', () => {\n      this.setFieldVal();\n    });\n  },\n};\n</script>\n\n<style lang=\"scss\">\n/*!\n* Quill Editor v1.3.6\n* https://quilljs.com/\n* Copyright (c) 2014, Jason Chen\n* Copyright (c) 2013, salesforce.com\n*/\n.ql-container {\n  box-sizing: border-box;\n  font-family: Helvetica, Arial, sans-serif;\n  font-size: 13px;\n  height: 100%;\n  margin: 0px;\n  position: relative;\n}\n.ql-container.ql-disabled .ql-tooltip {\n  visibility: hidden;\n}\n.ql-container.ql-disabled .ql-editor ul[data-checked] > li::before {\n  pointer-events: none;\n}\n.ql-clipboard {\n  left: -100000px;\n  height: 1px;\n  overflow-y: hidden;\n  position: absolute;\n  top: 50%;\n}\n.ql-clipboard p {\n  margin: 0;\n  padding: 0;\n}\n.ql-editor {\n  box-sizing: border-box;\n  line-height: 1.42;\n  height: 100%;\n  outline: none;\n  overflow-y: auto;\n  padding: 12px 15px;\n  tab-size: 4;\n  -moz-tab-size: 4;\n  text-align: left;\n  white-space: pre-wrap;\n  word-wrap: break-word;\n}\n.ql-editor > * {\ncursor: text;\n}\n.ql-editor p,\n.ql-editor ol,\n.ql-editor ul,\n.ql-editor pre,\n.ql-editor blockquote,\n.ql-editor h1,\n.ql-editor h2,\n.ql-editor h3,\n.ql-editor h4,\n.ql-editor h5,\n.ql-editor h6 {\nmargin: 0;\npadding: 0;\ncounter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol,\n.ql-editor ul {\npadding-left: 1.5em;\n}\n.ql-editor ol > li,\n.ql-editor ul > li {\nlist-style-type: none;\n}\n.ql-editor ul > li::before {\ncontent: '\\2022';\n}\n.ql-editor ul[data-checked=true],\n.ql-editor ul[data-checked=false] {\npointer-events: none;\n}\n.ql-editor ul[data-checked=true] > li *,\n.ql-editor ul[data-checked=false] > li * {\npointer-events: all;\n}\n.ql-editor ul[data-checked=true] > li::before,\n.ql-editor ul[data-checked=false] > li::before {\ncolor: #777;\ncursor: pointer;\npointer-events: all;\n}\n.ql-editor ul[data-checked=true] > li::before {\ncontent: '\\2611';\n}\n.ql-editor ul[data-checked=false] > li::before {\ncontent: '\\2610';\n}\n.ql-editor li::before {\ndisplay: inline-block;\nwhite-space: nowrap;\nwidth: 1.2em;\n}\n.ql-editor li:not(.ql-direction-rtl)::before {\nmargin-left: -1.5em;\nmargin-right: 0.3em;\ntext-align: right;\n}\n.ql-editor li.ql-direction-rtl::before {\nmargin-left: 0.3em;\nmargin-right: -1.5em;\n}\n.ql-editor ol li:not(.ql-direction-rtl),\n.ql-editor ul li:not(.ql-direction-rtl) {\npadding-left: 1.5em;\n}\n.ql-editor ol li.ql-direction-rtl,\n.ql-editor ul li.ql-direction-rtl {\npadding-right: 1.5em;\n}\n.ql-editor ol li {\ncounter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\ncounter-increment: list-0;\n}\n.ql-editor ol li:before {\ncontent: counter(list-0, decimal) '. ';\n}\n.ql-editor ol li.ql-indent-1 {\ncounter-increment: list-1;\n}\n.ql-editor ol li.ql-indent-1:before {\ncontent: counter(list-1, lower-alpha) '. ';\n}\n.ql-editor ol li.ql-indent-1 {\ncounter-reset: list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-2 {\ncounter-increment: list-2;\n}\n.ql-editor ol li.ql-indent-2:before {\ncontent: counter(list-2, lower-roman) '. ';\n}\n.ql-editor ol li.ql-indent-2 {\ncounter-reset: list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-3 {\ncounter-increment: list-3;\n}\n.ql-editor ol li.ql-indent-3:before {\ncontent: counter(list-3, decimal) '. ';\n}\n.ql-editor ol li.ql-indent-3 {\ncounter-reset: list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-4 {\ncounter-increment: list-4;\n}\n.ql-editor ol li.ql-indent-4:before {\ncontent: counter(list-4, lower-alpha) '. ';\n}\n.ql-editor ol li.ql-indent-4 {\ncounter-reset: list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-5 {\ncounter-increment: list-5;\n}\n.ql-editor ol li.ql-indent-5:before {\ncontent: counter(list-5, lower-roman) '. ';\n}\n.ql-editor ol li.ql-indent-5 {\ncounter-reset: list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-6 {\ncounter-increment: list-6;\n}\n.ql-editor ol li.ql-indent-6:before {\ncontent: counter(list-6, decimal) '. ';\n}\n.ql-editor ol li.ql-indent-6 {\ncounter-reset: list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-7 {\ncounter-increment: list-7;\n}\n.ql-editor ol li.ql-indent-7:before {\ncontent: counter(list-7, lower-alpha) '. ';\n}\n.ql-editor ol li.ql-indent-7 {\ncounter-reset: list-8 list-9;\n}\n.ql-editor ol li.ql-indent-8 {\ncounter-increment: list-8;\n}\n.ql-editor ol li.ql-indent-8:before {\ncontent: counter(list-8, lower-roman) '. ';\n}\n.ql-editor ol li.ql-indent-8 {\ncounter-reset: list-9;\n}\n.ql-editor ol li.ql-indent-9 {\ncounter-increment: list-9;\n}\n.ql-editor ol li.ql-indent-9:before {\ncontent: counter(list-9, decimal) '. ';\n}\n.ql-editor .ql-indent-1:not(.ql-direction-rtl) {\npadding-left: 3em;\n}\n.ql-editor li.ql-indent-1:not(.ql-direction-rtl) {\npadding-left: 4.5em;\n}\n.ql-editor .ql-indent-1.ql-direction-rtl.ql-align-right {\npadding-right: 3em;\n}\n.ql-editor li.ql-indent-1.ql-direction-rtl.ql-align-right {\npadding-right: 4.5em;\n}\n.ql-editor .ql-indent-2:not(.ql-direction-rtl) {\npadding-left: 6em;\n}\n.ql-editor li.ql-indent-2:not(.ql-direction-rtl) {\npadding-left: 7.5em;\n}\n.ql-editor .ql-indent-2.ql-direction-rtl.ql-align-right {\npadding-right: 6em;\n}\n.ql-editor li.ql-indent-2.ql-direction-rtl.ql-align-right {\npadding-right: 7.5em;\n}\n.ql-editor .ql-indent-3:not(.ql-direction-rtl) {\npadding-left: 9em;\n}\n.ql-editor li.ql-indent-3:not(.ql-direction-rtl) {\npadding-left: 10.5em;\n}\n.ql-editor .ql-indent-3.ql-direction-rtl.ql-align-right {\npadding-right: 9em;\n}\n.ql-editor li.ql-indent-3.ql-direction-rtl.ql-align-right {\npadding-right: 10.5em;\n}\n.ql-editor .ql-indent-4:not(.ql-direction-rtl) {\npadding-left: 12em;\n}\n.ql-editor li.ql-indent-4:not(.ql-direction-rtl) {\npadding-left: 13.5em;\n}\n.ql-editor .ql-indent-4.ql-direction-rtl.ql-align-right {\npadding-right: 12em;\n}\n.ql-editor li.ql-indent-4.ql-direction-rtl.ql-align-right {\npadding-right: 13.5em;\n}\n.ql-editor .ql-indent-5:not(.ql-direction-rtl) {\npadding-left: 15em;\n}\n.ql-editor li.ql-indent-5:not(.ql-direction-rtl) {\npadding-left: 16.5em;\n}\n.ql-editor .ql-indent-5.ql-direction-rtl.ql-align-right {\npadding-right: 15em;\n}\n.ql-editor li.ql-indent-5.ql-direction-rtl.ql-align-right {\npadding-right: 16.5em;\n}\n.ql-editor .ql-indent-6:not(.ql-direction-rtl) {\npadding-left: 18em;\n}\n.ql-editor li.ql-indent-6:not(.ql-direction-rtl) {\npadding-left: 19.5em;\n}\n.ql-editor .ql-indent-6.ql-direction-rtl.ql-align-right {\npadding-right: 18em;\n}\n.ql-editor li.ql-indent-6.ql-direction-rtl.ql-align-right {\npadding-right: 19.5em;\n}\n.ql-editor .ql-indent-7:not(.ql-direction-rtl) {\npadding-left: 21em;\n}\n.ql-editor li.ql-indent-7:not(.ql-direction-rtl) {\npadding-left: 22.5em;\n}\n.ql-editor .ql-indent-7.ql-direction-rtl.ql-align-right {\npadding-right: 21em;\n}\n.ql-editor li.ql-indent-7.ql-direction-rtl.ql-align-right {\npadding-right: 22.5em;\n}\n.ql-editor .ql-indent-8:not(.ql-direction-rtl) {\npadding-left: 24em;\n}\n.ql-editor li.ql-indent-8:not(.ql-direction-rtl) {\npadding-left: 25.5em;\n}\n.ql-editor .ql-indent-8.ql-direction-rtl.ql-align-right {\npadding-right: 24em;\n}\n.ql-editor li.ql-indent-8.ql-direction-rtl.ql-align-right {\npadding-right: 25.5em;\n}\n.ql-editor .ql-indent-9:not(.ql-direction-rtl) {\npadding-left: 27em;\n}\n.ql-editor li.ql-indent-9:not(.ql-direction-rtl) {\npadding-left: 28.5em;\n}\n.ql-editor .ql-indent-9.ql-direction-rtl.ql-align-right {\npadding-right: 27em;\n}\n.ql-editor li.ql-indent-9.ql-direction-rtl.ql-align-right {\npadding-right: 28.5em;\n}\n.ql-editor .ql-video {\ndisplay: block;\nmax-width: 100%;\n}\n.ql-editor .ql-video.ql-align-center {\nmargin: 0 auto;\n}\n.ql-editor .ql-video.ql-align-right {\nmargin: 0 0 0 auto;\n}\n.ql-editor .ql-bg-black {\nbackground-color: #000;\n}\n.ql-editor .ql-bg-red {\nbackground-color: #e60000;\n}\n.ql-editor .ql-bg-orange {\nbackground-color: #f90;\n}\n.ql-editor .ql-bg-yellow {\nbackground-color: #ff0;\n}\n.ql-editor .ql-bg-green {\nbackground-color: #008a00;\n}\n.ql-editor .ql-bg-blue {\nbackground-color: #06c;\n}\n.ql-editor .ql-bg-purple {\nbackground-color: #93f;\n}\n.ql-editor .ql-color-white {\ncolor: #fff;\n}\n.ql-editor .ql-color-red {\ncolor: #e60000;\n}\n.ql-editor .ql-color-orange {\ncolor: #f90;\n}\n.ql-editor .ql-color-yellow {\ncolor: #ff0;\n}\n.ql-editor .ql-color-green {\ncolor: #008a00;\n}\n.ql-editor .ql-color-blue {\ncolor: #06c;\n}\n.ql-editor .ql-color-purple {\ncolor: #93f;\n}\n.ql-editor .ql-font-serif {\nfont-family: Georgia, Times New Roman, serif;\n}\n.ql-editor .ql-font-monospace {\nfont-family: Monaco, Courier New, monospace;\n}\n.ql-editor .ql-size-small {\nfont-size: 0.75em;\n}\n.ql-editor .ql-size-large {\nfont-size: 1.5em;\n}\n.ql-editor .ql-size-huge {\nfont-size: 2.5em;\n}\n.ql-editor .ql-direction-rtl {\ndirection: rtl;\ntext-align: inherit;\n}\n.ql-editor .ql-align-center {\ntext-align: center;\n}\n.ql-editor .ql-align-justify {\ntext-align: justify;\n}\n.ql-editor .ql-align-right {\ntext-align: right;\n}\n.ql-editor.ql-blank::before {\ncolor: rgba(0,0,0,0.6);\ncontent: attr(data-placeholder);\nfont-style: italic;\nleft: 15px;\npointer-events: none;\nposition: absolute;\nright: 15px;\n}\n/*!\n* Quill Editor v1.3.6\n* https://quilljs.com/\n* Copyright (c) 2014, Jason Chen\n* Copyright (c) 2013, salesforce.com\n*/\n.ql-container {\nbox-sizing: border-box;\nfont-family: Helvetica, Arial, sans-serif;\nfont-size: 13px;\nheight: 100%;\nmargin: 0px;\nposition: relative;\n}\n.ql-container.ql-disabled .ql-tooltip {\nvisibility: hidden;\n}\n.ql-container.ql-disabled .ql-editor ul[data-checked] > li::before {\npointer-events: none;\n}\n.ql-clipboard {\nleft: -100000px;\nheight: 1px;\noverflow-y: hidden;\nposition: absolute;\ntop: 50%;\n}\n.ql-clipboard p {\nmargin: 0;\npadding: 0;\n}\n.ql-editor {\nbox-sizing: border-box;\nline-height: 1.42;\nheight: 100%;\noutline: none;\noverflow-y: auto;\npadding: 12px 15px;\ntab-size: 4;\n-moz-tab-size: 4;\ntext-align: left;\nwhite-space: pre-wrap;\nword-wrap: break-word;\n}\n.ql-editor > * {\ncursor: text;\n}\n.ql-editor p,\n.ql-editor ol,\n.ql-editor ul,\n.ql-editor pre,\n.ql-editor blockquote,\n.ql-editor h1,\n.ql-editor h2,\n.ql-editor h3,\n.ql-editor h4,\n.ql-editor h5,\n.ql-editor h6 {\nmargin: 0;\npadding: 0;\ncounter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol,\n.ql-editor ul {\npadding-left: 1.5em;\n}\n.ql-editor ol > li,\n.ql-editor ul > li {\nlist-style-type: none;\n}\n.ql-editor ul > li::before {\ncontent: '\\2022';\n}\n.ql-editor ul[data-checked=true],\n.ql-editor ul[data-checked=false] {\npointer-events: none;\n}\n.ql-editor ul[data-checked=true] > li *,\n.ql-editor ul[data-checked=false] > li * {\npointer-events: all;\n}\n.ql-editor ul[data-checked=true] > li::before,\n.ql-editor ul[data-checked=false] > li::before {\ncolor: #777;\ncursor: pointer;\npointer-events: all;\n}\n.ql-editor ul[data-checked=true] > li::before {\ncontent: '\\2611';\n}\n.ql-editor ul[data-checked=false] > li::before {\ncontent: '\\2610';\n}\n.ql-editor li::before {\ndisplay: inline-block;\nwhite-space: nowrap;\nwidth: 1.2em;\n}\n.ql-editor li:not(.ql-direction-rtl)::before {\nmargin-left: -1.5em;\nmargin-right: 0.3em;\ntext-align: right;\n}\n.ql-editor li.ql-direction-rtl::before {\nmargin-left: 0.3em;\nmargin-right: -1.5em;\n}\n.ql-editor ol li:not(.ql-direction-rtl),\n.ql-editor ul li:not(.ql-direction-rtl) {\npadding-left: 1.5em;\n}\n.ql-editor ol li.ql-direction-rtl,\n.ql-editor ul li.ql-direction-rtl {\npadding-right: 1.5em;\n}\n.ql-editor ol li {\ncounter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\ncounter-increment: list-0;\n}\n.ql-editor ol li:before {\ncontent: counter(list-0, decimal) '. ';\n}\n.ql-editor ol li.ql-indent-1 {\ncounter-increment: list-1;\n}\n.ql-editor ol li.ql-indent-1:before {\ncontent: counter(list-1, lower-alpha) '. ';\n}\n.ql-editor ol li.ql-indent-1 {\ncounter-reset: list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-2 {\ncounter-increment: list-2;\n}\n.ql-editor ol li.ql-indent-2:before {\ncontent: counter(list-2, lower-roman) '. ';\n}\n.ql-editor ol li.ql-indent-2 {\ncounter-reset: list-3 list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-3 {\ncounter-increment: list-3;\n}\n.ql-editor ol li.ql-indent-3:before {\ncontent: counter(list-3, decimal) '. ';\n}\n.ql-editor ol li.ql-indent-3 {\ncounter-reset: list-4 list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-4 {\ncounter-increment: list-4;\n}\n.ql-editor ol li.ql-indent-4:before {\ncontent: counter(list-4, lower-alpha) '. ';\n}\n.ql-editor ol li.ql-indent-4 {\ncounter-reset: list-5 list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-5 {\ncounter-increment: list-5;\n}\n.ql-editor ol li.ql-indent-5:before {\ncontent: counter(list-5, lower-roman) '. ';\n}\n.ql-editor ol li.ql-indent-5 {\ncounter-reset: list-6 list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-6 {\ncounter-increment: list-6;\n}\n.ql-editor ol li.ql-indent-6:before {\ncontent: counter(list-6, decimal) '. ';\n}\n.ql-editor ol li.ql-indent-6 {\ncounter-reset: list-7 list-8 list-9;\n}\n.ql-editor ol li.ql-indent-7 {\ncounter-increment: list-7;\n}\n.ql-editor ol li.ql-indent-7:before {\ncontent: counter(list-7, lower-alpha) '. ';\n}\n.ql-editor ol li.ql-indent-7 {\ncounter-reset: list-8 list-9;\n}\n.ql-editor ol li.ql-indent-8 {\ncounter-increment: list-8;\n}\n.ql-editor ol li.ql-indent-8:before {\ncontent: counter(list-8, lower-roman) '. ';\n}\n.ql-editor ol li.ql-indent-8 {\ncounter-reset: list-9;\n}\n.ql-editor ol li.ql-indent-9 {\ncounter-increment: list-9;\n}\n.ql-editor ol li.ql-indent-9:before {\ncontent: counter(list-9, decimal) '. ';\n}\n.ql-editor .ql-indent-1:not(.ql-direction-rtl) {\npadding-left: 3em;\n}\n.ql-editor li.ql-indent-1:not(.ql-direction-rtl) {\npadding-left: 4.5em;\n}\n.ql-editor .ql-indent-1.ql-direction-rtl.ql-align-right {\npadding-right: 3em;\n}\n.ql-editor li.ql-indent-1.ql-direction-rtl.ql-align-right {\npadding-right: 4.5em;\n}\n.ql-editor .ql-indent-2:not(.ql-direction-rtl) {\npadding-left: 6em;\n}\n.ql-editor li.ql-indent-2:not(.ql-direction-rtl) {\npadding-left: 7.5em;\n}\n.ql-editor .ql-indent-2.ql-direction-rtl.ql-align-right {\npadding-right: 6em;\n}\n.ql-editor li.ql-indent-2.ql-direction-rtl.ql-align-right {\npadding-right: 7.5em;\n}\n.ql-editor .ql-indent-3:not(.ql-direction-rtl) {\npadding-left: 9em;\n}\n.ql-editor li.ql-indent-3:not(.ql-direction-rtl) {\npadding-left: 10.5em;\n}\n.ql-editor .ql-indent-3.ql-direction-rtl.ql-align-right {\npadding-right: 9em;\n}\n.ql-editor li.ql-indent-3.ql-direction-rtl.ql-align-right {\npadding-right: 10.5em;\n}\n.ql-editor .ql-indent-4:not(.ql-direction-rtl) {\npadding-left: 12em;\n}\n.ql-editor li.ql-indent-4:not(.ql-direction-rtl) {\npadding-left: 13.5em;\n}\n.ql-editor .ql-indent-4.ql-direction-rtl.ql-align-right {\npadding-right: 12em;\n}\n.ql-editor li.ql-indent-4.ql-direction-rtl.ql-align-right {\npadding-right: 13.5em;\n}\n.ql-editor .ql-indent-5:not(.ql-direction-rtl) {\npadding-left: 15em;\n}\n.ql-editor li.ql-indent-5:not(.ql-direction-rtl) {\npadding-left: 16.5em;\n}\n.ql-editor .ql-indent-5.ql-direction-rtl.ql-align-right {\npadding-right: 15em;\n}\n.ql-editor li.ql-indent-5.ql-direction-rtl.ql-align-right {\npadding-right: 16.5em;\n}\n.ql-editor .ql-indent-6:not(.ql-direction-rtl) {\npadding-left: 18em;\n}\n.ql-editor li.ql-indent-6:not(.ql-direction-rtl) {\npadding-left: 19.5em;\n}\n.ql-editor .ql-indent-6.ql-direction-rtl.ql-align-right {\npadding-right: 18em;\n}\n.ql-editor li.ql-indent-6.ql-direction-rtl.ql-align-right {\npadding-right: 19.5em;\n}\n.ql-editor .ql-indent-7:not(.ql-direction-rtl) {\npadding-left: 21em;\n}\n.ql-editor li.ql-indent-7:not(.ql-direction-rtl) {\npadding-left: 22.5em;\n}\n.ql-editor .ql-indent-7.ql-direction-rtl.ql-align-right {\npadding-right: 21em;\n}\n.ql-editor li.ql-indent-7.ql-direction-rtl.ql-align-right {\npadding-right: 22.5em;\n}\n.ql-editor .ql-indent-8:not(.ql-direction-rtl) {\npadding-left: 24em;\n}\n.ql-editor li.ql-indent-8:not(.ql-direction-rtl) {\npadding-left: 25.5em;\n}\n.ql-editor .ql-indent-8.ql-direction-rtl.ql-align-right {\npadding-right: 24em;\n}\n.ql-editor li.ql-indent-8.ql-direction-rtl.ql-align-right {\npadding-right: 25.5em;\n}\n.ql-editor .ql-indent-9:not(.ql-direction-rtl) {\npadding-left: 27em;\n}\n.ql-editor li.ql-indent-9:not(.ql-direction-rtl) {\npadding-left: 28.5em;\n}\n.ql-editor .ql-indent-9.ql-direction-rtl.ql-align-right {\npadding-right: 27em;\n}\n.ql-editor li.ql-indent-9.ql-direction-rtl.ql-align-right {\npadding-right: 28.5em;\n}\n.ql-editor .ql-video {\ndisplay: block;\nmax-width: 100%;\n}\n.ql-editor .ql-video.ql-align-center {\nmargin: 0 auto;\n}\n.ql-editor .ql-video.ql-align-right {\nmargin: 0 0 0 auto;\n}\n.ql-editor .ql-bg-black {\nbackground-color: #000;\n}\n.ql-editor .ql-bg-red {\nbackground-color: #e60000;\n}\n.ql-editor .ql-bg-orange {\nbackground-color: #f90;\n}\n.ql-editor .ql-bg-yellow {\nbackground-color: #ff0;\n}\n.ql-editor .ql-bg-green {\nbackground-color: #008a00;\n}\n.ql-editor .ql-bg-blue {\nbackground-color: #06c;\n}\n.ql-editor .ql-bg-purple {\nbackground-color: #93f;\n}\n.ql-editor .ql-color-white {\ncolor: #fff;\n}\n.ql-editor .ql-color-red {\ncolor: #e60000;\n}\n.ql-editor .ql-color-orange {\ncolor: #f90;\n}\n.ql-editor .ql-color-yellow {\ncolor: #ff0;\n}\n.ql-editor .ql-color-green {\ncolor: #008a00;\n}\n.ql-editor .ql-color-blue {\ncolor: #06c;\n}\n.ql-editor .ql-color-purple {\ncolor: #93f;\n}\n.ql-editor .ql-font-serif {\nfont-family: Georgia, Times New Roman, serif;\n}\n.ql-editor .ql-font-monospace {\nfont-family: Monaco, Courier New, monospace;\n}\n.ql-editor .ql-size-small {\nfont-size: 0.75em;\n}\n.ql-editor .ql-size-large {\nfont-size: 1.5em;\n}\n.ql-editor .ql-size-huge {\nfont-size: 2.5em;\n}\n.ql-editor .ql-direction-rtl {\ndirection: rtl;\ntext-align: inherit;\n}\n.ql-editor .ql-align-center {\ntext-align: center;\n}\n.ql-editor .ql-align-justify {\ntext-align: justify;\n}\n.ql-editor .ql-align-right {\ntext-align: right;\n}\n.ql-editor.ql-blank::before {\ncolor: rgba(0,0,0,0.6);\ncontent: attr(data-placeholder);\nfont-style: italic;\nleft: 15px;\npointer-events: none;\nposition: absolute;\nright: 15px;\n}\n.ql-snow.ql-toolbar:after,\n.ql-snow .ql-toolbar:after {\nclear: both;\ncontent: '';\ndisplay: table;\n}\n.ql-snow.ql-toolbar button,\n.ql-snow .ql-toolbar button {\nbackground: none;\nborder: none;\ncursor: pointer;\ndisplay: inline-block;\nfloat: left;\nheight: 24px;\npadding: 3px 5px;\nwidth: 28px;\n}\n.ql-snow.ql-toolbar button svg,\n.ql-snow .ql-toolbar button svg {\nfloat: left;\nheight: 100%;\n}\n.ql-snow.ql-toolbar button:active:hover,\n.ql-snow .ql-toolbar button:active:hover {\noutline: none;\n}\n.ql-snow.ql-toolbar input.ql-image[type=file],\n.ql-snow .ql-toolbar input.ql-image[type=file] {\ndisplay: none;\n}\n.ql-snow.ql-toolbar button:hover,\n.ql-snow .ql-toolbar button:hover,\n.ql-snow.ql-toolbar button:focus,\n.ql-snow .ql-toolbar button:focus,\n.ql-snow.ql-toolbar button.ql-active,\n.ql-snow .ql-toolbar button.ql-active,\n.ql-snow.ql-toolbar .ql-picker-label:hover,\n.ql-snow .ql-toolbar .ql-picker-label:hover,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active,\n.ql-snow.ql-toolbar .ql-picker-item:hover,\n.ql-snow .ql-toolbar .ql-picker-item:hover,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected {\ncolor: #06c;\n}\n.ql-snow.ql-toolbar button:hover .ql-fill,\n.ql-snow .ql-toolbar button:hover .ql-fill,\n.ql-snow.ql-toolbar button:focus .ql-fill,\n.ql-snow .ql-toolbar button:focus .ql-fill,\n.ql-snow.ql-toolbar button.ql-active .ql-fill,\n.ql-snow .ql-toolbar button.ql-active .ql-fill,\n.ql-snow.ql-toolbar .ql-picker-label:hover .ql-fill,\n.ql-snow .ql-toolbar .ql-picker-label:hover .ql-fill,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-fill,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-fill,\n.ql-snow.ql-toolbar .ql-picker-item:hover .ql-fill,\n.ql-snow .ql-toolbar .ql-picker-item:hover .ql-fill,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-fill,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-fill,\n.ql-snow.ql-toolbar button:hover .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar button:hover .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar button:focus .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar button:focus .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar button.ql-active .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar button.ql-active .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke.ql-fill,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke.ql-fill {\nfill: color('theme-interaction', 'hover');\n}\n.ql-snow.ql-toolbar button:hover .ql-stroke,\n.ql-snow .ql-toolbar button:hover .ql-stroke,\n.ql-snow.ql-toolbar button:focus .ql-stroke,\n.ql-snow .ql-toolbar button:focus .ql-stroke,\n.ql-snow.ql-toolbar button.ql-active .ql-stroke,\n.ql-snow .ql-toolbar button.ql-active .ql-stroke,\n.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke,\n.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke,\n.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke,\n.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke,\n.ql-snow.ql-toolbar button:hover .ql-stroke-miter,\n.ql-snow .ql-toolbar button:hover .ql-stroke-miter,\n.ql-snow.ql-toolbar button:focus .ql-stroke-miter,\n.ql-snow .ql-toolbar button:focus .ql-stroke-miter,\n.ql-snow.ql-toolbar button.ql-active .ql-stroke-miter,\n.ql-snow .ql-toolbar button.ql-active .ql-stroke-miter,\n.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke-miter,\n.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke-miter,\n.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke-miter,\n.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke-miter,\n.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke-miter,\n.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke-miter,\n.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke-miter,\n.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke-miter {\nstroke: #06c;\n}\n@media (pointer: coarse) {\n.ql-snow.ql-toolbar button:hover:not(.ql-active),\n.ql-snow .ql-toolbar button:hover:not(.ql-active) {\n  color: #444;\n}\n.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-fill,\n.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-fill,\n.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke.ql-fill,\n.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke.ql-fill {\n  fill: #444;\n}\n.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke,\n.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke,\n.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke-miter,\n.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke-miter {\n  stroke: #444;\n}\n}\n.ql-snow {\nbox-sizing: border-box;\n}\n.ql-snow * {\nbox-sizing: border-box;\n}\n.ql-snow .ql-hidden {\ndisplay: none;\n}\n.ql-snow .ql-out-bottom,\n.ql-snow .ql-out-top {\nvisibility: hidden;\n}\n.ql-snow .ql-tooltip {\nposition: absolute;\ntransform: translateY(10px);\n}\n.ql-snow .ql-tooltip a {\ncursor: pointer;\ntext-decoration: none;\n}\n.ql-snow .ql-tooltip.ql-flip {\ntransform: translateY(-10px);\n}\n.ql-snow .ql-formats {\ndisplay: inline-block;\nvertical-align: middle;\n}\n.ql-snow .ql-formats:after {\nclear: both;\ncontent: '';\ndisplay: table;\n}\n.ql-snow .ql-stroke {\nfill: none;\nstroke: #444;\nstroke-linecap: round;\nstroke-linejoin: round;\nstroke-width: 2;\n}\n.ql-snow .ql-stroke-miter {\nfill: none;\nstroke: #444;\nstroke-miterlimit: 10;\nstroke-width: 2;\n}\n.ql-snow .ql-fill,\n.ql-snow .ql-stroke.ql-fill {\nfill: #444;\n}\n.ql-snow .ql-empty {\nfill: none;\n}\n.ql-snow .ql-even {\nfill-rule: evenodd;\n}\n.ql-snow .ql-thin,\n.ql-snow .ql-stroke.ql-thin {\nstroke-width: 1;\n}\n.ql-snow .ql-transparent {\nopacity: 0.4;\n}\n.ql-snow .ql-direction svg:last-child {\ndisplay: none;\n}\n.ql-snow .ql-direction.ql-active svg:last-child {\ndisplay: inline;\n}\n.ql-snow .ql-direction.ql-active svg:first-child {\ndisplay: none;\n}\n.ql-snow .ql-editor h1 {\nfont-size: 2em;\n}\n.ql-snow .ql-editor h2 {\nfont-size: 1.5em;\n}\n.ql-snow .ql-editor h3 {\nfont-size: 1.17em;\n}\n.ql-snow .ql-editor h4 {\nfont-size: 1em;\n}\n.ql-snow .ql-editor h5 {\nfont-size: 0.83em;\n}\n.ql-snow .ql-editor h6 {\nfont-size: 0.67em;\n}\n.ql-snow .ql-editor a {\ntext-decoration: underline;\n}\n.ql-snow .ql-editor blockquote {\nborder-left: 4px solid #ccc;\nmargin-bottom: 5px;\nmargin-top: 5px;\npadding-left: 16px;\n}\n.ql-snow .ql-editor code,\n.ql-snow .ql-editor pre {\nbackground-color: #f0f0f0;\nborder-radius: 3px;\n}\n.ql-snow .ql-editor pre {\nwhite-space: pre-wrap;\nmargin-bottom: 5px;\nmargin-top: 5px;\npadding: 5px 10px;\n}\n.ql-snow .ql-editor code {\nfont-size: 85%;\npadding: 2px 4px;\n}\n.ql-snow .ql-editor pre.ql-syntax {\nbackground-color: #23241f;\ncolor: #f8f8f2;\noverflow: visible;\n}\n.ql-snow .ql-editor img {\nmax-width: 100%;\n}\n.ql-snow .ql-picker {\ncolor: #444;\ndisplay: inline-block;\nfloat: left;\nfont-size: 14px;\nfont-weight: 500;\nheight: 24px;\nposition: relative;\nvertical-align: middle;\n}\n.ql-snow .ql-picker-label {\n  cursor: pointer;\n  display: inline-block;\n  height: 100%;\n  padding-left: 8px;\n  padding-right: 2px;\n  position: relative;\n  width: 100%;\n}\n.ql-snow .ql-picker-label::before {\n  display: inline-block;\n  line-height: 22px;\n}\n.ql-snow .ql-picker-options {\n  background-color: #fff;\n  display: none;\n  min-width: 100%;\n  padding: 4px 8px;\n  position: absolute;\n  white-space: nowrap;\n}\n.ql-snow .ql-picker-options .ql-picker-item {\n  cursor: pointer;\n  display: block;\n  padding-bottom: 5px;\n  padding-top: 5px;\n}\n.ql-snow .ql-picker.ql-expanded .ql-picker-label {\n  color: #ccc;\n  z-index: 2;\n}\n.ql-snow .ql-picker.ql-expanded .ql-picker-label .ql-fill {\n  fill: #ccc;\n}\n.ql-snow .ql-picker.ql-expanded .ql-picker-label .ql-stroke {\n  stroke: #ccc;\n}\n.ql-snow .ql-picker.ql-expanded .ql-picker-options {\n  display: block;\n  margin-top: -1px;\n  top: 100%;\n  z-index: 1;\n}\n.ql-snow .ql-color-picker,\n.ql-snow .ql-icon-picker {\n  width: 28px;\n}\n.ql-snow .ql-color-picker .ql-picker-label,\n.ql-snow .ql-icon-picker .ql-picker-label {\n  padding: 2px 4px;\n}\n.ql-snow .ql-color-picker .ql-picker-label svg,\n.ql-snow .ql-icon-picker .ql-picker-label svg {\n  right: 4px;\n}\n.ql-snow .ql-icon-picker .ql-picker-options {\n  padding: 4px 0px;\n}\n.ql-snow .ql-icon-picker .ql-picker-item {\n  height: 24px;\n  width: 24px;\n  padding: 2px 4px;\n}\n.ql-snow .ql-color-picker .ql-picker-options {\n  padding: 3px 5px;\n  width: 152px;\n}\n.ql-snow .ql-color-picker .ql-picker-item {\n  border: 1px solid transparent;\n  float: left;\n  height: 16px;\n  margin: 2px;\n  padding: 0px;\n  width: 16px;\n}\n.ql-snow .ql-picker:not(.ql-color-picker):not(.ql-icon-picker) svg {\n  position: absolute;\n  margin-top: -9px;\n  right: 0;\n  top: 50%;\n  width: 18px;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-label]:not([data-label=''])::before,\n.ql-snow .ql-picker.ql-font .ql-picker-label[data-label]:not([data-label=''])::before,\n.ql-snow .ql-picker.ql-size .ql-picker-label[data-label]:not([data-label=''])::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-label]:not([data-label=''])::before,\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-label]:not([data-label=''])::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-label]:not([data-label=''])::before {\n  content: attr(data-label);\n}\n.ql-snow .ql-picker.ql-header {\n  width: 98px;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item::before {\n  content: 'Normal';\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"1\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"1\"]::before {\n  content: 'Heading 1';\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"2\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"2\"]::before {\n  content: 'Heading 2';\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"3\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"3\"]::before {\n  content: 'Heading 3';\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"4\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"4\"]::before {\n  content: 'Heading 4';\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"5\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"5\"]::before {\n  content: 'Heading 5';\n}\n.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"6\"]::before,\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"6\"]::before {\n  content: 'Heading 6';\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"1\"]::before {\n  font-size: 2em;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"2\"]::before {\n  font-size: 1.5em;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"3\"]::before {\n  font-size: 1.17em;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"4\"]::before {\n  font-size: 1em;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"5\"]::before {\n  font-size: 0.83em;\n}\n.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"6\"]::before {\n  font-size: 0.67em;\n}\n.ql-snow .ql-picker.ql-font {\n  width: 108px;\n}\n.ql-snow .ql-picker.ql-font .ql-picker-label::before,\n.ql-snow .ql-picker.ql-font .ql-picker-item::before {\n  content: 'Sans Serif';\n}\n.ql-snow .ql-picker.ql-font .ql-picker-label[data-value=serif]::before,\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=serif]::before {\n  content: 'Serif';\n}\n.ql-snow .ql-picker.ql-font .ql-picker-label[data-value=monospace]::before,\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=monospace]::before {\n  content: 'Monospace';\n}\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=serif]::before {\n  font-family: Georgia, Times New Roman, serif;\n}\n.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=monospace]::before {\n  font-family: Monaco, Courier New, monospace;\n}\n.ql-snow .ql-picker.ql-size {\n  width: 98px;\n}\n.ql-snow .ql-picker.ql-size .ql-picker-label::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item::before {\n  content: 'Normal';\n}\n.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=small]::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=small]::before {\n  content: 'Small';\n}\n.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=large]::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=large]::before {\n  content: 'Large';\n}\n.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=huge]::before,\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=huge]::before {\n  content: 'Huge';\n}\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=small]::before {\n  font-size: 10px;\n}\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=large]::before {\n  font-size: 18px;\n}\n.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=huge]::before {\n  font-size: 32px;\n}\n.ql-snow .ql-color-picker.ql-background .ql-picker-item {\n  background-color: #fff;\n}\n.ql-snow .ql-color-picker.ql-color .ql-picker-item {\n  background-color: #000;\n}\n.ql-toolbar.ql-snow {\n  border: 1px solid #ccc;\n  box-sizing: border-box;\n  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;\n  padding: 8px;\n}\n.ql-toolbar.ql-snow .ql-formats {\n  margin-right: 15px;\n}\n.ql-toolbar.ql-snow .ql-picker-label {\n  border: 1px solid transparent;\n}\n.ql-toolbar.ql-snow .ql-picker-options {\n  border: 1px solid transparent;\n  box-shadow: rgba(0,0,0,0.2) 0 2px 8px;\n}\n.ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-label {\n  border-color: #ccc;\n}\n.ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-options {\n  border-color: #ccc;\n}\n.ql-toolbar.ql-snow .ql-color-picker .ql-picker-item.ql-selected,\n.ql-toolbar.ql-snow .ql-color-picker .ql-picker-item:hover {\n  border-color: #000;\n}\n.ql-toolbar.ql-snow + .ql-container.ql-snow {\n  border-top: 0px;\n}\n.ql-snow .ql-tooltip {\n  background-color: #fff;\n  border: 1px solid #ccc;\n  box-shadow: 0px 0px 5px #ddd;\n  color: #444;\n  padding: 5px 12px;\n  white-space: nowrap;\n}\n.ql-snow .ql-tooltip::before {\n  content: \"Visit URL:\";\n  line-height: 26px;\n  margin-right: 8px;\n}\n.ql-snow .ql-tooltip input[type=text] {\n  display: none;\n  border: 1px solid #ccc;\n  font-size: 13px;\n  height: 26px;\n  margin: 0px;\n  padding: 3px 5px;\n  width: 170px;\n}\n.ql-snow .ql-tooltip a.ql-preview {\n  display: inline-block;\n  max-width: 200px;\n  overflow-x: hidden;\n  text-overflow: ellipsis;\n  vertical-align: top;\n}\n.ql-snow .ql-tooltip a.ql-action::after {\n  border-right: 1px solid #ccc;\n  content: 'Edit';\n  margin-left: 16px;\n  padding-right: 8px;\n}\n.ql-snow .ql-tooltip a.ql-remove::before {\n  content: 'Remove';\n  margin-left: 8px;\n}\n.ql-snow .ql-tooltip a {\n  line-height: 26px;\n}\n.ql-snow .ql-tooltip.ql-editing a.ql-preview,\n.ql-snow .ql-tooltip.ql-editing a.ql-remove {\n  display: none;\n}\n.ql-snow .ql-tooltip.ql-editing input[type=text] {\n  display: inline-block;\n}\n.ql-snow .ql-tooltip.ql-editing a.ql-action::after {\n  border-right: 0px;\n  content: 'Save';\n  padding-right: 0px;\n}\n.ql-snow .ql-tooltip[data-mode=link]::before {\n  content: \"Enter link:\";\n}\n.ql-snow .ql-tooltip[data-mode=formula]::before {\n  content: \"Enter formula:\";\n}\n.ql-snow .ql-tooltip[data-mode=video]::before {\n  content: \"Enter video:\";\n}\n.ql-snow a {\n  color: #06c;\n}\n.ql-container.ql-snow {\n  border: 1px solid #ccc;\n}\n</style>\n"]}, media: undefined });
 
   };
   /* scoped */
-  const __vue_scope_id__$e = undefined;
+  const __vue_scope_id__$h = undefined;
   /* module identifier */
-  const __vue_module_identifier__$e = undefined;
+  const __vue_module_identifier__$h = undefined;
   /* functional template */
-  const __vue_is_functional_template__$e = false;
+  const __vue_is_functional_template__$h = false;
   /* style inject SSR */
   
   /* style inject shadow dom */
   
 
   
-  const __vue_component__$e = vueRuntimeHelpers.normalizeComponent(
-    { render: __vue_render__$e, staticRenderFns: __vue_staticRenderFns__$e },
-    __vue_inject_styles__$e,
-    __vue_script__$e,
-    __vue_scope_id__$e,
-    __vue_is_functional_template__$e,
-    __vue_module_identifier__$e,
+  const __vue_component__$h = vueRuntimeHelpers.normalizeComponent(
+    { render: __vue_render__$h, staticRenderFns: __vue_staticRenderFns__$h },
+    __vue_inject_styles__$h,
+    __vue_script__$h,
+    __vue_scope_id__$h,
+    __vue_is_functional_template__$h,
+    __vue_module_identifier__$h,
     false,
     vueRuntimeHelpers.createInjector,
+    undefined,
+    undefined
+  );
+
+//
+
+var script$i = {
+  props: {
+    formId: {
+      type: String,
+      required: true,
+    },
+  },
+
+  mixins: [
+    vuexFormInput,
+  ],
+
+  components: {
+    Draggable,
+    Icon: __vue_component__,
+    InputSelect: __vue_component__$d,
+  },
+
+  data() {
+    return {
+      items: [],
+      typeSelectId: getUniqueId(),
+    };
+  },
+
+  computed: {
+    ...vuex.mapState('forms', {
+      typeSelect(state) {
+        return state.fields[this.typeSelectId];
+      },
+    }),
+  },
+
+  methods: {
+    ...vuex.mapActions('forms', ['registerFields']),
+
+    ...vuex.mapMutations('forms', ['deregisterFields']),
+
+    addNewItem() {
+      if (this.typeSelect.value) {
+        const id = getUniqueId();
+        const field = {
+          ...this.field.fields[this.typeSelect.value],
+          id,
+        };
+        this.registerFields({ form: this.formId, fields: [field] });
+        this.items.push({
+          id,
+          component: field.component,
+        });
+        this.updateFieldValue({ id: this.reference, val: this.items.slice(0) });
+        // Wait for the component to be rendered before we access $refs
+        window.requestAnimationFrame(() => {
+          this.validateField();
+        });
+      }
+    },
+
+    deleteItem(index) {
+      // Deregister removed field
+      this.deregisterFields({
+        fields: [this.items[index].id],
+        form: this.formId,
+      });
+      // Update the field value
+      this.items.splice(index, 1);
+      this.updateFieldValue({ id: this.reference, val: this.items.slice(0) });
+      // Wait for the component to be rendered before we access $refs
+      window.requestAnimationFrame(() => {
+        this.validateField();
+      });
+    },
+
+    handleMove() {
+      this.debouncedUpdateFieldValue({ id: this.reference, val: this.items.slice(0) });
+    },
+  },
+
+  created() {
+    this.registerFields({
+      form: this.formId,
+      fields: [{
+        id: this.typeSelectId,
+        name: 'type_select',
+        label: 'Field to add',
+        computeValue: false,
+        options: Object.keys(this.field.fields)
+          .map((key) => ({
+            text: this.field.fields[key].label,
+            value: key,
+          })),
+      }],
+    });
+  },
+};
+
+/* script */
+const __vue_script__$i = script$i;
+
+/* template */
+var __vue_render__$i = function() {
+  var _vm = this;
+  var _h = _vm.$createElement;
+  var _c = _vm._self._c || _h;
+  return _c(
+    "fieldset",
+    {
+      directives: [
+        {
+          name: "show",
+          rawName: "v-show",
+          value: _vm.field.isVisible,
+          expression: "field.isVisible"
+        }
+      ],
+      staticClass: "c-field-repeater c-card c-card--outline"
+    },
+    [
+      _c("legend", { staticClass: "c-input__legend" }, [
+        _vm._v("\n    " + _vm._s(_vm.field.label)),
+        _vm.field.required ? _c("sup", [_vm._v("*")]) : _vm._e()
+      ]),
+      _vm._v(" "),
+      _vm.items.length === 0
+        ? _c(
+            "p",
+            {
+              staticClass: "u-font-xs u-font-center u-p u-c-theme-text-alt",
+              attrs: { id: _vm.reference + "__empty-text" }
+            },
+            [_vm._v("\n    No items currently added.\n  ")]
+          )
+        : _vm._e(),
+      _vm._v(" "),
+      _c(
+        "Draggable",
+        {
+          staticClass: "c-card__body",
+          on: { change: _vm.handleMove },
+          model: {
+            value: _vm.items,
+            callback: function($$v) {
+              _vm.items = $$v;
+            },
+            expression: "items"
+          }
+        },
+        _vm._l(_vm.items, function(item, index) {
+          return _c("div", { key: item.id, staticClass: "u-m-bot-xs" }, [
+            _c(
+              "div",
+              { staticClass: "u-p-vert-s u-p-right-s u-d-flex u-w-100" },
+              [
+                _c("div", { staticClass: "o-cover-link" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "c-btn--ui o-cover-link__item",
+                      attrs: { type: "button", name: "deleteField" },
+                      on: {
+                        click: function($event) {
+                          return _vm.deleteItem(index)
+                        }
+                      }
+                    },
+                    [
+                      _c("Icon", { attrs: { type: "close" } }),
+                      _vm._v(" "),
+                      _c("span", { staticClass: "u-visually-hidden" }, [
+                        _vm._v("Remove field")
+                      ])
+                    ],
+                    1
+                  )
+                ]),
+                _vm._v(" "),
+                _c(item.component, {
+                  ref: "fields",
+                  refInFor: true,
+                  tag: "component",
+                  staticClass: "u-f-1",
+                  attrs: { reference: item.id }
+                })
+              ],
+              1
+            )
+          ])
+        }),
+        0
+      ),
+      _vm._v(" "),
+      _c(
+        "div",
+        {
+          staticClass:
+            "o-grid o-grid--8-4@m o-grid--12 u-bg-theme-bg-alt u-p-s u-f-align-end"
+        },
+        [
+          _c(
+            "div",
+            { staticClass: "o-col" },
+            [_c("InputSelect", { attrs: { reference: _vm.typeSelectId } })],
+            1
+          ),
+          _vm._v(" "),
+          _c("div", { staticClass: "o-col" }, [
+            _c(
+              "button",
+              {
+                staticClass:
+                  "c-btn c-btn--s c-btn--secondary u-d-flex u-f-align-center",
+                attrs: { type: "button" },
+                on: { click: _vm.addNewItem }
+              },
+              [
+                _c("Icon", { attrs: { type: "add" } }),
+                _vm._v(" " + _vm._s(_vm.field.addNewText) + "\n      ")
+              ],
+              1
+            )
+          ])
+        ]
+      )
+    ],
+    1
+  )
+};
+var __vue_staticRenderFns__$i = [];
+__vue_render__$i._withStripped = true;
+
+  /* style */
+  const __vue_inject_styles__$i = undefined;
+  /* scoped */
+  const __vue_scope_id__$i = undefined;
+  /* module identifier */
+  const __vue_module_identifier__$i = undefined;
+  /* functional template */
+  const __vue_is_functional_template__$i = false;
+  /* style inject */
+  
+  /* style inject SSR */
+  
+  /* style inject shadow dom */
+  
+
+  
+  const __vue_component__$i = vueRuntimeHelpers.normalizeComponent(
+    { render: __vue_render__$i, staticRenderFns: __vue_staticRenderFns__$i },
+    __vue_inject_styles__$i,
+    __vue_script__$i,
+    __vue_scope_id__$i,
+    __vue_is_functional_template__$i,
+    __vue_module_identifier__$i,
+    false,
+    undefined,
     undefined,
     undefined
   );
@@ -2955,36 +3746,120 @@ var index$1 = {
   getMachineSafeStr,
   getUniqueId,
   isValidHeadingTag,
+  formValidations,
 };
+
+var filterResults = {
+  props: {
+    dataset: {
+      type: Array,
+      required: true,
+    },
+
+    maxSearchResults: {
+      type: Number,
+      default: NaN,
+    },
+
+    searchExact: {
+      type: Boolean,
+      default: false,
+    },
+
+    // Used when dataset is an Object[]
+    searchKey: {
+      type: String,
+      required: false,
+    },
+  },
+
+  data() {
+    return {
+      searchQuery: '',
+      searchResults: [],
+      debouncedFilterSearchResults: lodash.debounce(function () { // eslint-disable-line func-names
+        this.searchResults = this.filterSearchResults();
+      }, 250),
+    };
+  },
+
+  computed: {
+    isSearchFlat() {
+      return !this.searchKey;
+    },
+
+    searchMethod() {
+      return this.searchExact ? this.matchExact : this.matchLoose;
+    },
+  },
+
+  methods: {
+    matchExact(a, b) {
+      // NOTE: This is more performant than a "starts with" regex
+      return a.substr(0, b.length).toLowerCase() === b;
+    },
+
+    matchLoose(a, b) {
+      return a.toLowerCase().includes(b);
+    },
+
+    filterSearchResults() {
+      if (this.searchQuery === '') {
+        return [];
+      }
+
+      const results = [];
+      const query = this.query.toLowerCase();
+
+      for (let i = 0; i < this.dataset.length; i += 1) {
+        const item = this.dataset[i];
+        const key = this.isSearchFlat ? item : item[this.searchKey];
+        if (this.searchMethod(key, query)) {
+          results.push(item);
+
+          if (results.length === this.maxSearchResults) {
+            return results;
+          }
+        }
+      }
+      return results;
+    },
+  },
+};
+
+// Components
 
 var index$2 = {
   install(Vue, options = {
     prefix: '',
   }) {
+    // Layouts
+    Vue.component(`${options.prefix}SidebarLayout`, __vue_component__$5);
+    // Components
     Vue.component(`${options.prefix}ExternalLink`, __vue_component__$1);
     Vue.component(`${options.prefix}Icon`, __vue_component__);
     Vue.component(`${options.prefix}Modal`, __vue_component__$2);
-    Vue.component('Portal', portalVue.Portal);
-    Vue.component('PortalTarget', portalVue.PortalTarget);
-    Vue.component(`${options.prefix}SidebarLayout`, __vue_component__$5);
-    Vue.component(`${options.prefix}SmartSearch`, __vue_component__$6);
-    Vue.component(`${options.prefix}VuexForm`, __vue_component__$7);
-    Vue.component(`${options.prefix}InputCheckbox`, __vue_component__$8);
-    Vue.component(`${options.prefix}InputRadio`, __vue_component__$9);
-    Vue.component(`${options.prefix}InputSelect`, __vue_component__$a);
-    Vue.component(`${options.prefix}InputText`, __vue_component__$b);
-    Vue.component(`${options.prefix}InputTextarea`, __vue_component__$c);
-    Vue.component(`${options.prefix}KeyValuePair`, __vue_component__$d);
-    Vue.component(`${options.prefix}QuillRTE`, __vue_component__$e);
+    Vue.component(`${options.prefix}Alert`, __vue_component__$3);
+    Vue.component(`${options.prefix}AlertList`, __vue_component__$4);
+    Vue.component(`${options.prefix}SearchResult`, __vue_component__$6);
+    Vue.component(`${options.prefix}SearchAutocomplete`, __vue_component__$7);
+    // Forms
+    Vue.component(`${options.prefix}VuexForm`, __vue_component__$8);
+    Vue.component(`${options.prefix}InputCheckbox`, __vue_component__$9);
+    Vue.component(`${options.prefix}InputDate`, __vue_component__$a);
+    Vue.component(`${options.prefix}InputFile`, __vue_component__$b);
+    Vue.component(`${options.prefix}InputRadio`, __vue_component__$c);
+    Vue.component(`${options.prefix}InputSelect`, __vue_component__$d);
+    Vue.component(`${options.prefix}InputText`, __vue_component__$e);
+    Vue.component(`${options.prefix}InputTextarea`, __vue_component__$f);
+    Vue.component(`${options.prefix}KeyValuePair`, __vue_component__$g);
+    Vue.component(`${options.prefix}QuillRTE`, __vue_component__$h);
+    Vue.component(`${options.prefix}FieldRepeater`, __vue_component__$i);
   },
 };
 
-exports.ExternalLink = __vue_component__$1;
-exports.Icon = __vue_component__;
-exports.Modal = __vue_component__$2;
-exports.SidebarLayout = __vue_component__$5;
-exports.SmartSearch = __vue_component__$6;
-exports.VuexForm = __vue_component__$7;
 exports.constants = index;
 exports.default = index$2;
+exports.filterResults = filterResults;
 exports.utils = index$1;
+exports.vuexFormInput = vuexFormInput;

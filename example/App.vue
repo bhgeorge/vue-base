@@ -2,7 +2,12 @@
   <SidebarLayout
     :navItems="navItems"
   >
-    <p slot="navLogo">vue-base</p>
+    <p
+      slot="navLogo"
+      class="u-font-serif h4 u-p"
+    >
+      vue-base
+    </p>
   </SidebarLayout>
 </template>
 

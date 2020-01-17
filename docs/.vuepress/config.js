@@ -22,6 +22,7 @@ module.exports = {
           { text: 'Forms', link: '/components/forms/' },
           { text: 'Icon', link: '/components/icon' },
           { text: 'Modal', link: '/components/modal' },
+          { text: 'Search', link: '/components/search' },
         ],
       },
       {

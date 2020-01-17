@@ -10,6 +10,7 @@
 
 <script>
 import * as fieldTypes from '../../../src/components/forms/constants/fieldTypes';
+import { isValidDate, isValidImageFile } from '../../../src/components/forms/utils/validations';
 import { COMPARITOR_AND, EVAL_IS } from '../../../src/components/forms/constants/prereqs';
 
 export default {
@@ -80,6 +81,31 @@ export default {
             ],
           },
           {
+            component: fieldTypes.DATE,
+            id: 'date',
+            label: 'Input Date',
+            name: 'inputDate',
+            validation: [
+              isValidDate,
+            ],
+          },
+          {
+            component: fieldTypes.FILE,
+            id: 'file',
+            label: 'Input File',
+            name: 'inputFile',
+            validation: [
+              isValidImageFile,
+            ],
+            acceptFileTypes: ['.jpg', '.png'],
+          },
+          {
+            component: fieldTypes.QUILL_RTE,
+            id: 'quill-rte',
+            label: 'Quill RTE',
+            name: 'quillRTE',
+          },
+          {
             component: fieldTypes.TEXTAREA,
             id: 'textarea',
             label: 'Input Textarea',
@@ -94,7 +120,7 @@ export default {
             prereqs: [
               {
                 type: COMPARITOR_AND,
-                field: 'vf-radio',
+                field: 'radio',
                 eval: {
                   method: EVAL_IS,
                   match: 'red',
@@ -102,7 +128,42 @@ export default {
               },
             ],
           },
+          {
+            component: fieldTypes.REPEATER,
+            id: 'repeater',
+            label: 'Repeater',
+            name: 'repeater',
+            addNewText: 'Add new field',
+            fields: {
+              text: {
+                component: fieldTypes.TEXT,
+                id: 'repeater-text',
+                label: 'Input Text [Repeater]',
+                name: 'col',
+                required: true,
+                computeValue: false,
+              },
+              checkbox: {
+                component: fieldTypes.CHECKBOX,
+                id: 'repeater-checkbox',
+                label: 'Input Checkbox [Repeater]',
+                name: 'col',
+                computeValue: false,
+                options: [
+                  {
+                    value: 'sandwich',
+                    text: 'Sandwich',
+                  },
+                  {
+                    value: 'soup',
+                    text: 'Soup',
+                  },
+                ],
+              },
+            },
+          },
         ],
+        onSubmit: this.handleSubmit,
       },
     };
   },

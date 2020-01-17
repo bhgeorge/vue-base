@@ -6,15 +6,19 @@
       name="c-alert-trans"
       tag="div"
     >
-      <Alert
+      <div
         v-for="(alert, index) in alerts"
-        :hasClose="true"
         :key="alert.id"
-        :text="alert.text"
-        :title="alert.title"
-        :type="alert.type"
-        @emitClose="closeAlert(index)"
-      />
+        class="u-m-bot-xs"
+      >
+        <Alert
+          :hasClose="true"
+          :text="alert.text"
+          :title="alert.title"
+          :state="alert.state"
+          @emitClose="closeAlert(index)"
+        />
+      </div>
     </transition-group>
   </div>
 </template>
@@ -35,7 +39,9 @@ export default {
   },
 
   methods: {
-    ...mapMutations('alerts', [CLOSE]),
+    ...mapMutations('alerts', {
+      closeAlert: CLOSE,
+    }),
   },
 
   created() {

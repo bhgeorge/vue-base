@@ -1,11 +1,12 @@
-<template functional>
-  <div :class="['c-alert', `c-alert--${type}`]">
+<template>
+  <div :class="['c-alert', `c-alert--${state}`]">
     <!-- Close Button -->
     <button
       v-if="hasClose"
-      class="c-alert__close"
+      class="c-btn c-btn--s c-btn--icon c-btn--close"
       type="button"
       name="closeAlert"
+      @click="closeAlert"
     >
       <Icon type="close" />
       <span class="u-visually-hidden">
@@ -29,12 +30,12 @@
 </template>
 
 <script>
-import Icon from '@/components/icons/Icon';
+import Icon from '@/components/icons/Icon.vue';
 import isValidHeadingTag from '@/utils/isValidHeadingTag';
 
 export default {
   props: {
-    type: {
+    state: {
       type: String,
       default: 'neutral',
     },
@@ -50,6 +51,11 @@ export default {
       validator: (value) => isValidHeadingTag(value),
     },
 
+    text: {
+      type: String,
+      required: false,
+    },
+
     hasClose: {
       type: Boolean,
       default: false,
@@ -58,6 +64,32 @@ export default {
 
   components: {
     Icon,
+  },
+
+  data() {
+    return {
+      timer: null,
+    };
+  },
+
+  methods: {
+    closeAlert() {
+      this.$emit('emitClose');
+    },
+  },
+
+  created() {
+    if (this.hasClose) {
+      this.timer = setTimeout(() => {
+        this.closeAlert();
+      }, 2000);
+    }
+  },
+
+  beforeDestroy() {
+    if (this.timer) {
+      clearTimeout(this.timer);
+    }
   },
 };
 </script>

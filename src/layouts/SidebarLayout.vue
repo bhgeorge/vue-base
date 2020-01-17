@@ -3,19 +3,21 @@
     class="c-site"
     id="app"
   >
+    <!-- eslint-disable -->
     <!-- Skip Link -->
     <a
-      class="u-visually-hidden u-visually-hidden--focus u-bg-red-dark u-c-white u-p"
+      class="u-visually-hidden u-visually-hidden--focus u-bg-theme-interaction-accent u-c-theme-interaction u-p"
       href="#site-main"
       id="skip-link"
     >
       Skip to content
     </a>
+    <!-- eslint-enable -->
     <!-- Header -->
     <header :class="classNames">
       <!-- Mobile Nav Toggle -->
       <button
-        class="c-site-nav-toggle u-d-none@m"
+        class="c-site-nav-toggle c-btn c-btn--icon u-d-none@m"
         name="toggleNav"
         type="button"
         @click="toggleNav"
@@ -27,6 +29,7 @@
       <nav class="c-site-nav">
         <router-link
           :to="{ name: 'home' }"
+          class="u-bg-theme-nav-bg"
         >
           <!-- SLOT: navLogo -->
           <slot name="navLogo"></slot>
@@ -71,25 +74,30 @@
         <!-- SLOT: navActions -->
         <slot name="navActions"></slot>
         <!-- Nav Icon Links (Github etc...) -->
-        <hr>
-        <ul class="o-list-inline u-p-s">
-          <li
-            v-for="icon in navItems.icons"
-            :key="icon.type"
-            class="o-list-inline__item"
-          >
-            <a
-              :href="icon.href"
-              rel="noreferrer noopener"
-              target="_blank"
+        <div
+          v-if="navItems.icons"
+          class="u-bg-theme-nav-bg"
+        >
+          <hr class="u-w-100">
+          <ul class="o-list-inline u-p-s">
+            <li
+              v-for="icon in navItems.icons"
+              :key="icon.type"
+              class="o-list-inline__item"
             >
-              <Icon :type="icon.type" />
-              <span class="u-visually-hidden">
-                {{ icon.text }} (opens in a new tab)
-              </span>
-            </a>
-          </li>
-        </ul>
+              <a
+                :href="icon.href"
+                rel="noreferrer noopener"
+                target="_blank"
+              >
+                <Icon :type="icon.type" />
+                <span class="u-visually-hidden">
+                  {{ icon.text }} (opens in a new tab)
+                </span>
+              </a>
+            </li>
+          </ul>
+        </div>
         <!-- SLOT: misc -->
         <slot name="misc"></slot>
         <!-- Copyright -->
@@ -116,8 +124,8 @@
 </template>
 
 <script>
-import AlertList from '@/components/alerts/AlertList.vue';
 import { PortalTarget } from 'portal-vue';
+import AlertList from '@/components/alerts/AlertList.vue';
 
 export default {
   props: {
@@ -157,6 +165,14 @@ export default {
 
     navToggleIcon() {
       return this.isNavOpen ? 'close' : 'more';
+    },
+  },
+
+  watch: {
+    $route() {
+      if (this.isNavOpen) {
+        this.isNavOpen = false;
+      }
     },
   },
 

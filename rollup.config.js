@@ -31,5 +31,6 @@ module.exports = {
     'ally.js',
     'lodash',
     'vue-runtime-helpers',
+    'vuedraggable',
   ],
 };

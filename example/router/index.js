@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router'; // eslint-disable-line
-import Home from '../views/Home';
+import Home from '../views/Home.vue';
 
 Vue.use(VueRouter);
 

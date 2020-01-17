@@ -5,24 +5,20 @@
   >
     <p
       :id="`${formStructure.id}__required-msg`"
-      class="u-font-xs"
+      class="u-font-xs u-m-bot"
     >
       * Required Fields
     </p>
-    <div
+    <Alert
       v-show="!isValid"
       :aria-labelledby="`${formStructure.id}__error__title`"
       :id="`${formStructure.id}__error`"
-      class="c-alert c-alert--error"
       ref="errorBox"
+      state="error"
+      tabindex="-1"
+      title="There are issues with the following fields:"
+      titleTag="h3"
     >
-      <h3
-        :is="formStructure.errorHeadingTag || 'h3'"
-        :id="`${formStructure.id}__error__title`"
-        class="c-alert__title"
-      >
-        There are issues with the following fields:
-      </h3>
       <div class="c-typography">
         <ul class="u-font-xs">
           <li
@@ -31,7 +27,7 @@
           >
             <button
               type="button"
-              class="c-btn--text"
+              class="c-btn--text c-link--white"
               @click="focusField(error.id)"
             >
               {{ error.label }}
@@ -39,26 +35,45 @@
           </li>
         </ul>
       </div>
-    </div>
+    </Alert>
+    <!-- Groups -->
     <div
-      v-for="field in formStructure.fields"
-      :key="field.id"
-      class="u-m-bot"
+      v-for="(group, index) in groups"
+      :key="index"
+      :class="{ 'c-card--outline': group.title }"
+      class="c-card"
     >
-      <component
-        :is="field.component"
-        :reference="field.id"
-        :formId="formStructure.id"
-        ref="field"
-      />
+      <h4
+        v-if="group.title"
+        class="c-card__title"
+      >
+        {{ group.title }}
+      </h4>
+      <!-- Fields -->
+      <div class="c-card__body">
+        <div
+          v-for="field in group.fields"
+          :key="field.id"
+          class="u-m-bot"
+        >
+          <component
+            :is="field.component"
+            :reference="field.id"
+            :formId="formStructure.id"
+            ref="field"
+          />
+        </div>
+      </div>
     </div>
-    <button
-      class="c-btn c-btn--primary"
-      name="formSubmit"
-      type="submit"
-    >
-      {{ formStructure.submitText || 'Submit' }}
-    </button>
+    <div class="c-card__body">
+      <button
+        class="c-btn c-btn--primary"
+        name="formSubmit"
+        type="submit"
+      >
+        {{ formStructure.submitText || 'Submit' }}
+      </button>
+    </div>
   </form>
 </template>
 
@@ -103,6 +118,12 @@ export default {
       }
       return this.$store.getters['forms/compileFormErrors'](this.formStructure.id);
     },
+
+    groups() {
+      return this.formStructure.groups
+        ? this.formStructure.groups
+        : [{ fields: this.formStructure.fields }];
+    },
   },
 
   methods: {
@@ -114,19 +135,21 @@ export default {
 
     handleSubmit() {
       this.hasBeenValidated = true;
+      // Run validation on all non-validated fields
+      this.$refs.field.forEach((field) => {
+        // Revalidate each field to ensure that we hit child fields
+        field.validateField(true);
+      });
+
       if (this.isValid) {
         const data = this.$store.getters['forms/compileFormData'](this.formStructure.id);
         this.formStructure.onSubmit(data);
         return;
       }
 
-      // Run validation on all non-validated fields
-      this.$refs.field.forEach((field) => {
-        if (!field.field.hasValidated) {
-          field.validateField();
-        }
+      window.requestAnimationFrame(() => {
+        this.$refs.errorBox.$el.focus();
       });
-      this.$refs.errorBox.focus();
     },
   },
 

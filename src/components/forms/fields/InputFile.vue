@@ -9,36 +9,20 @@
     >
       {{ field.label }}<sup v-if="field.required">*</sup>
     </label>
-    <select
+    <input
+      :accept="field.acceptFileTypes ? field.acceptFileTypes.join(',') : false"
       :aria-describedby="showError ? `vf-${reference}__error` : false"
       :aria-required="field.required"
       :autocomplete="field.autocomplete || false"
       :id="`vf-${reference}`"
+      :multiple="!!field.multipleFiles"
       :name="field.name"
       @blur="validateField"
-      class="c-input__input c-input__input--select"
-      v-model="fieldVal"
-    >
-      <option
-        v-for="option in field.options"
-        :key="option.value"
-        :value="option.value"
-      >
-        {{ option.text }}
-      </option>
-      <optgroup
-        v-for="optgroup in field.optgroups"
-        :key="optgroup.text"
-      >
-        <option
-          v-for="option in optgroup.options"
-          :key="option.value"
-          :value="option.value"
-        >
-          {{ option.text }}
-        </option>
-      </optgroup>
-    </select>
+      @change="handleInputUpload"
+      class="c-input__input c-input__input--file"
+      ref="input"
+      type="file"
+    />
     <p
       :id="`vf-${reference}__error`"
       class="c-input__error"
@@ -57,14 +41,9 @@ export default {
     vuexFormInput,
   ],
 
-  computed: {
-    fieldVal: {
-      get() {
-        return this.field.value;
-      },
-      set(val) {
-        return this.debouncedUpdateFieldValue({ id: this.reference, val });
-      },
+  methods: {
+    handleInputUpload() {
+      this.debouncedUpdateFieldValue({ id: this.reference, val: this.$refs.input.files });
     },
   },
 };

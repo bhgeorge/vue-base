@@ -19,14 +19,17 @@
         @emitClose="showModal = false"
       >
         <!-- Content -->
-        <h2 id="modal-title">
+        <h2
+          id="modal-title"
+          class="h2 u-font-serif u-m-bot"
+        >
           Modal Title
         </h2>
         <p>{{ someLocalVariable }}</p>
         <button
           type="button"
           name="hideModalInText"
-          class="c-btn c-btn--secondary"
+          class="c-btn c-btn--secondary u-m-vert"
           @click="showModal = false"
         >
           Close modal

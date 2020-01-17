@@ -54,17 +54,25 @@ export default {
       setIsValid: SET_IS_VALID,
     }),
 
-    validateField() {
+    // TODO: Look at moving this to the store module
+    validateField(isFromSubmit = false) {
+      // Run validation on children
+      if (isFromSubmit && !!this.$refs.fields) {
+        this.$refs.fields.forEach((field) => {
+          field.validateField();
+        });
+      }
+      // Add required validation or skip if null
       const validators = this.field.validation ? this.field.validation.slice(0) : [];
       if (this.field.required) {
         validators.unshift(isNotEmpty);
-      } else if (!isNotEmpty.test(this.field.value)) {
-        // We are valid but this is empty.
-        // TODO: Reset the hasBeenValidated && isValid flag
+      } else if (!this.field.value) {
+        this.setIsValid({ id: this.reference, bool: true });
         return;
       }
       // Ensure that a value is populated
       this.debouncedUpdateFieldValue.flush();
+      // TODO: Handle async validation within a synchronous order
       for (let i = 0; i < validators.length; i += 1) {
         const validation = validators[i];
         if (!validation.test(this.field.value)) {

@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import { difference } from 'lodash';
 import getValueMethod from './utils/getValueMethod';
 import {
@@ -16,7 +15,7 @@ import * as types from '../constants/mutation-types';
  * @param {Object} field The field's pertinent data.
  */
 const createFieldData = (field) => ({
-  value: null,
+  value: field.defaultValue ? field.defaultValue : null,
   isValid: !field.required,
   hasValidated: false,
   getValue: getValueMethod(field.component),
@@ -122,6 +121,14 @@ const evalPrereq = (state, data) => {
   }
 };
 
+/**
+ * Sets the visibility of a field based on its prerequisites.
+ *
+ * @param {Object} state The current state.
+ * @param {String} id The id of the field to check visibility of.
+ *
+ * @returns {Boolean} Visibility state.
+ */
 const checkIfVisible = (state, id) => {
   const field = state.fields[id];
   let hasOr = false;

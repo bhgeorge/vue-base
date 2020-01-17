@@ -1,6 +1,6 @@
 // Forms
-import fieldTypes from '@/components/forms/constants/fieldTypes.js';
-import prereqs from '@/components/forms/constants/prereqs.js';
+import fieldTypes from '@/components/forms/constants/fieldTypes';
+import prereqs from '@/components/forms/constants/prereqs';
 
 export default {
   forms: {

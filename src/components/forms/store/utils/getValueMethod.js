@@ -1,7 +1,15 @@
-import { KEY_VALUE_PAIR } from '../../constants/fieldTypes';
-import getMachineSafeStr from '@/utils/getMachineSafeStr.js';
+import { KEY_VALUE_PAIR, REPEATER } from '../../constants/fieldTypes';
+import getMachineSafeStr from '@/utils/getMachineSafeStr';
 
-const baseValue = (field) => field.value;
+const baseValue = (field) => {
+  if (Array.isArray(field.value)) {
+    return field.value.slice(0);
+  }
+  if (typeof field.value === 'object') {
+    return { ...field.value };
+  }
+  return field.value;
+};
 
 const compileKeyValuePairs = (field, state) => {
   const pairs = [];
@@ -15,8 +23,22 @@ const compileKeyValuePairs = (field, state) => {
   return pairs;
 };
 
+const compileRepeater = (field, state) => {
+  if (!field.value || field.value.length === 0) {
+    return [];
+  }
+  return field.value.map((item) => {
+    const f = state.fields[item.id];
+    return {
+      name: f.name,
+      value: f.getValue(f, state),
+    };
+  });
+};
+
 const map = {
   [KEY_VALUE_PAIR]: compileKeyValuePairs,
+  [REPEATER]: compileRepeater,
 };
 
 export default (type) => map[type] || baseValue;

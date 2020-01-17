@@ -1,7 +1,9 @@
 import Vue from 'vue';
+import { findIndex } from 'lodash';
 import {
   CREATE_FORM,
   REGISTER_FIELDS,
+  DEREGISTER_FIELDS,
   RESET_FORM,
   SET_IS_VALID,
   SET_IS_VISIBLE,
@@ -64,9 +66,19 @@ export default {
   },
 
   [REGISTER_FIELDS](state, obj) {
-    obj.fields.forEach((f) => {
-      Vue.set(state.fields, f.id, f);
-      state.forms[obj.form].fields.push(f.id);
+    obj.fields.forEach((field) => {
+      Vue.set(state.fields, field.id, field);
+      state.forms[obj.form].fields.push(field.id);
+    });
+  },
+
+  [DEREGISTER_FIELDS](state, obj) {
+    obj.fields.forEach((field) => {
+      Vue.delete(state.fields, field);
+      const index = findIndex(state.forms[obj.form].fields, (item) => item.id === field);
+      if (index !== -1) {
+        state.forms[obj.form].fields.splice(index, 1);
+      }
     });
   },
 };

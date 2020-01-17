@@ -1,4 +1,4 @@
-<template functional>
+<template>
   <section class="o-section">
     <div class="o-container">
 
@@ -6,18 +6,47 @@
       <AlertList />
 
       <!-- Simple -->
-      <Alert
-        type="success"
-        title="Hooray!"
-        body="We made a simple alert"
-      />
+      <div class="u-m-vert">
+        <Alert
+          state="success"
+          title="Hooray!"
+          text="We made a simple alert"
+        />
+      </div>
 
       <!-- With Slot Content -->
-      <Alert>
+      <Alert state="error">
         <p>Slot content will be placed at the end of the alert.</p>
-        <button>I'm a button</button>
+        <button
+          class="c-btn c-btn--s c-btn--primary u-m-top-xs"
+          @click="triggerGlobalAlert"
+        >
+          Trigger Global Alert
+        </button>
       </Alert>
 
     </div>
   </section>
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      count: 0,
+    };
+  },
+
+  methods: {
+    triggerGlobalAlert() {
+      this.count += 1;
+
+      this.$store.dispatch('alerts/addAlert', {
+        state: 'warning',
+        title: 'Global alert here!',
+        text: `You've triggered ${this.count} alerts.`,
+      });
+    },
+  },
+};
+</script>

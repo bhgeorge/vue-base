@@ -42,6 +42,7 @@ VuexForm is a series of components that are meant to be used as a generic form g
       ],
       isVisible?: false
       modifiers: ['modifier-class-name'],
+      computeValue: false // Prevents value from appearing in final output
     },
   ],
   onSubmit: this.someMethod,

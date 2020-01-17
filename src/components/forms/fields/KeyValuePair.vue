@@ -6,11 +6,26 @@
     <div
       v-for="pair in pairs"
       :key="pair.key"
-      class="u-m-bot-xs"
+      class="u-m-bot-xs u-d-flex"
     >
+      <button
+        class="c-btn--ui o-cover-link__item"
+        type="button"
+        name="deleteField"
+        @click="deleteItem(index)"
+      >
+        <Icon type="close" />
+        <span class="u-visually-hidden">Remove pair</span>
+      </button>
       <div class="o-grid o-grid--6-6">
-        <InputText :reference="pair.key" />
-        <InputText :reference="pair.val" />
+        <InputText
+          :reference="pair.key"
+          ref="fields"
+        />
+        <InputText
+          :reference="pair.val"
+          ref="fields"
+        />
       </div>
     </div>
     <button
@@ -26,10 +41,10 @@
 <script>
 import { mapActions } from 'vuex';
 import Icon from '@/components/icons/Icon.vue';
-import getUniqueId from '@/utils/getUniqueId.js';
+import getUniqueId from '@/utils/getUniqueId';
 import InputText from './InputText.vue';
-import { isMachineSafeStr } from '../utils/validations.js';
-import vuexFormInput from '../mixins/vuexFormInput.js';
+import { isMachineSafeStr } from '../utils/validations';
+import vuexFormInput from '../mixins/vuexFormInput';
 
 export default {
   props: {
@@ -59,17 +74,19 @@ export default {
 
     addNewItem() {
       const idA = getUniqueId();
-      const fieldA = {
+      let fieldA = {
         id: idA,
         name: 'option_key',
         label: 'Option Name',
         required: true,
         computeValue: false,
-        ...this.field.fieldA,
       };
+      if (this.fields && this.fields.fieldA) {
+        fieldA = { ...fieldA, ...this.fields.fieldA };
+      }
 
       const idB = getUniqueId();
-      const fieldB = {
+      let fieldB = {
         id: idB,
         name: 'option_val',
         label: 'Option Value',
@@ -78,15 +95,32 @@ export default {
         validation: [
           isMachineSafeStr,
         ],
-        ...this.field.fieldB,
       };
+      if (this.fields && this.fields.fieldB) {
+        fieldB = { ...fieldB, ...this.fields.fieldB };
+      }
 
       this.registerFields({ form: this.formId, fields: [fieldA, fieldB] });
       this.pairs.push({ key: idA, val: idB });
       this.updateFieldValue({ id: this.reference, val: this.pairs.slice(0) });
       this.validateField();
     },
-    // TODO: Add a delete pair method that deregisters fields and potentially sets invalid
+
+    deleteItem(index) {
+      // Deregister the pair
+      const item = this.pairs[index];
+      this.deregisterFields({
+        fields: [item.key, item.val],
+        form: this.formId,
+      });
+      // Update the field value
+      this.paris.splice(index, 1);
+      this.updateFieldValue({ id: this.reference, val: this.pairs.slice(0) });
+      // Wait for the component to be rendered before we access $refs
+      window.requestAnimationFrame(() => {
+        this.validateField();
+      });
+    },
   },
 };
 </script>
