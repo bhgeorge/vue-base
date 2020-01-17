@@ -14,6 +14,7 @@ var Quill = _interopDefault(require('quill'));
 var Draggable = _interopDefault(require('vuedraggable'));
 
 var add = "M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z";
+var check = "M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z";
 var close = "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z";
 var code = "M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z";
 var color = "M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z";
@@ -38,6 +39,7 @@ var trash = "M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1
 var warning = "M4.47 21h15.06c1.54 0 2.5-1.67 1.73-3L13.73 4.99c-.77-1.33-2.69-1.33-3.46 0L2.74 18c-.77 1.33.19 3 1.73 3zM12 14c-.55 0-1-.45-1-1v-2c0-.55.45-1 1-1s1 .45 1 1v2c0 .55-.45 1-1 1zm1 4h-2v-2h2v2z";
 var paths = {
 	add: add,
+	check: check,
 	close: close,
 	code: code,
 	color: color,
@@ -1154,6 +1156,11 @@ var script$7 = {
       required: true,
     },
 
+    describedby: {
+      type: String,
+      required: false,
+    },
+
     label: {
       type: String,
       required: true,
@@ -1283,6 +1290,7 @@ var __vue_render__$7 = function() {
       staticClass: "c-input__input",
       attrs: {
         id: _vm.id,
+        "aria-describedby": _vm.describedby || false,
         autocomplete: "off",
         name: "search",
         type: "search"
@@ -1558,15 +1566,19 @@ const registerForm = ({ commit, state }, data) => {
       fields.push(createFieldData(field));
     };
 
-    data.groups.forEach((group) => {
-      group.fields.forEach((field) => {
+    if (data.groups) {
+      data.groups.forEach((group) => {
+        group.fields.forEach((field) => {
+          registerField(field);
+        });
+      });
+    }
+
+    if (data.fields) {
+      data.fields.forEach((field) => {
         registerField(field);
       });
-    });
-
-    data.fields.forEach((field) => {
-      registerField(field);
-    });
+    }
 
     const form = {
       id: data.id,
@@ -3516,6 +3528,10 @@ var script$i = {
         return state.fields[this.typeSelectId];
       },
     }),
+
+    fieldKeys() {
+      return Object.keys(this.field.fields);
+    },
   },
 
   methods: {
@@ -3571,11 +3587,11 @@ var script$i = {
         name: 'type_select',
         label: 'Field to add',
         computeValue: false,
-        options: Object.keys(this.field.fields)
-          .map((key) => ({
-            text: this.field.fields[key].label,
-            value: key,
-          })),
+        options: this.fieldKeys.map((key) => ({
+          text: this.field.fields[key].label,
+          value: key,
+        })),
+        value: this.fieldKeys[0],
       }],
     });
   },
@@ -3600,7 +3616,7 @@ var __vue_render__$i = function() {
           expression: "field.isVisible"
         }
       ],
-      staticClass: "c-field-repeater c-card c-card--outline"
+      staticClass: "c-field-repeater c-card c-card--outline u-m-top-0"
     },
     [
       _c("legend", { staticClass: "c-input__legend" }, [
@@ -3680,12 +3696,22 @@ var __vue_render__$i = function() {
         "div",
         {
           staticClass:
-            "o-grid o-grid--8-4@m o-grid--12 u-bg-theme-bg-alt u-p-s u-f-align-end"
+            "c-card__footer o-grid o-grid--8-4@m o-grid--12 u-bg-theme-bg-alt u-p-s u-f-align-end"
         },
         [
           _c(
             "div",
-            { staticClass: "o-col" },
+            {
+              directives: [
+                {
+                  name: "show",
+                  rawName: "v-show",
+                  value: _vm.fieldKeys.length > 1,
+                  expression: "fieldKeys.length > 1"
+                }
+              ],
+              staticClass: "o-col"
+            },
             [_c("InputSelect", { attrs: { reference: _vm.typeSelectId } })],
             1
           ),

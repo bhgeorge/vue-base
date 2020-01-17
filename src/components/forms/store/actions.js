@@ -73,15 +73,19 @@ export const registerForm = ({ commit, state }, data) => {
       fields.push(createFieldData(field));
     };
 
-    data.groups.forEach((group) => {
-      group.fields.forEach((field) => {
+    if (data.groups) {
+      data.groups.forEach((group) => {
+        group.fields.forEach((field) => {
+          registerField(field);
+        });
+      });
+    }
+
+    if (data.fields) {
+      data.fields.forEach((field) => {
         registerField(field);
       });
-    });
-
-    data.fields.forEach((field) => {
-      registerField(field);
-    });
+    }
 
     const form = {
       id: data.id,

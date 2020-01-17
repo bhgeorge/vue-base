@@ -2,7 +2,7 @@
 <template>
   <fieldset
     v-show="field.isVisible"
-    class="c-field-repeater c-card c-card--outline"
+    class="c-field-repeater c-card c-card--outline u-m-top-0"
   >
     <legend class="c-input__legend">
       {{ field.label }}<sup v-if="field.required">*</sup>
@@ -45,8 +45,11 @@
         </div>
       </div>
     </Draggable>
-    <div class="o-grid o-grid--8-4@m o-grid--12 u-bg-theme-bg-alt u-p-s u-f-align-end">
-      <div class="o-col">
+    <div class="c-card__footer o-grid o-grid--8-4@m o-grid--12 u-bg-theme-bg-alt u-p-s u-f-align-end">
+      <div
+        v-show="fieldKeys.length > 1"
+        class="o-col"
+      >
         <InputSelect :reference="typeSelectId" />
       </div>
       <div class="o-col">
@@ -102,6 +105,10 @@ export default {
         return state.fields[this.typeSelectId];
       },
     }),
+
+    fieldKeys() {
+      return Object.keys(this.field.fields);
+    },
   },
 
   methods: {
@@ -157,11 +164,11 @@ export default {
         name: 'type_select',
         label: 'Field to add',
         computeValue: false,
-        options: Object.keys(this.field.fields)
-          .map((key) => ({
-            text: this.field.fields[key].label,
-            value: key,
-          })),
+        options: this.fieldKeys.map((key) => ({
+          text: this.field.fields[key].label,
+          value: key,
+        })),
+        value: this.fieldKeys[0],
       }],
     });
   },

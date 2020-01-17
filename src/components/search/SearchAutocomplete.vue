@@ -8,6 +8,7 @@
     </label>
     <input
       :id="id"
+      :aria-describedby="describedby || false"
       autocomplete="off"
       class="c-input__input"
       name="search"
@@ -50,6 +51,11 @@ export default {
     dataset: {
       type: Array,
       required: true,
+    },
+
+    describedby: {
+      type: String,
+      required: false,
     },
 
     label: {
