@@ -1540,7 +1540,8 @@ const registerForm = ({ commit, state }, data) => {
     // Initialize field data
     const fields = [];
     const prereqMap = {};
-    data.fields.forEach((field) => {
+
+    const registerField = (field) => {
       // Store references for visibility
       if (field.prereqs) {
         field.prereqs.forEach((prereq) => {
@@ -1555,6 +1556,16 @@ const registerForm = ({ commit, state }, data) => {
       }
       // Store the base field data
       fields.push(createFieldData(field));
+    };
+
+    data.groups.forEach((group) => {
+      group.fields.forEach((field) => {
+        registerField(field);
+      });
+    });
+
+    data.fields.forEach((field) => {
+      registerField(field);
     });
 
     const form = {
