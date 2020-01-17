@@ -39,6 +39,7 @@
           <component
             :is="item.component"
             :reference="item.id"
+            :formId="formId"
             class="u-f-1"
             ref="fields"
           />

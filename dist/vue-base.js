@@ -3682,7 +3682,7 @@ var __vue_render__$i = function() {
                   refInFor: true,
                   tag: "component",
                   staticClass: "u-f-1",
-                  attrs: { reference: item.id }
+                  attrs: { reference: item.id, formId: _vm.formId }
                 })
               ],
               1
