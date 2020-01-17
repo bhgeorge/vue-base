@@ -1817,7 +1817,7 @@ var script$8 = {
         if (!value.id || typeof value.id !== 'string') {
           return false;
         }
-        if (!value.fields || !Array.isArray(value.fields) || value.fields.length === 0) {
+        if (!value.fields || !value.groups) {
           return false;
         }
         return true;

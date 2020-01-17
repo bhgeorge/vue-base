@@ -3,14 +3,9 @@ A companion to [scss-base](https://github.com/bhgeorge/scss-base) for shared Vue
 
 ## Installation
 ```
-import PortalVue from 'portal-vue';
+import VueBase from 'vue-base';
 
 ...
 
-Vue.use(PortalVue)
-```
-
-## Use
-```
-import Modal from 'vue-base/components/Modal';
+Vue.use(VueBase)
 ```
