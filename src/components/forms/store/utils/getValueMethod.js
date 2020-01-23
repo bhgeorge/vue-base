@@ -5,7 +5,7 @@ const baseValue = (field) => {
   if (Array.isArray(field.value)) {
     return field.value.slice(0);
   }
-  if (typeof field.value === 'object') {
+  if (typeof field.value === 'object' && field.value !== null) {
     return { ...field.value };
   }
   return field.value;

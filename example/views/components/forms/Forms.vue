@@ -9,9 +9,9 @@
 </template>
 
 <script>
-import * as fieldTypes from '../../../src/components/forms/constants/fieldTypes';
-import { isValidDate, isValidImageFile } from '../../../src/components/forms/utils/validations';
-import { COMPARITOR_AND, EVAL_IS } from '../../../src/components/forms/constants/prereqs';
+import * as fieldTypes from '../../../../src/components/forms/constants/fieldTypes';
+import { isValidDate, isValidImageFile } from '../../../../src/components/forms/utils/validations';
+import { COMPARITOR_AND, EVAL_IS } from '../../../../src/components/forms/constants/prereqs';
 
 export default {
   data() {
@@ -79,6 +79,12 @@ export default {
                 text: 'Soup',
               },
             ],
+          },
+          {
+            component: fieldTypes.TRUE_FALSE,
+            id: 'true-false',
+            label: 'Check if true',
+            name: 'inputTrueFalse',
           },
           {
             component: fieldTypes.DATE,

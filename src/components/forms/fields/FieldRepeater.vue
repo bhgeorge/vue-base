@@ -138,6 +138,7 @@ export default {
     },
 
     deleteItem(index) {
+      // TODO: Deregister children of the field as well
       // Deregister removed field
       this.deregisterFields({
         fields: [this.items[index].id],

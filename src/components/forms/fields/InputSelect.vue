@@ -29,6 +29,7 @@
       <optgroup
         v-for="optgroup in field.optgroups"
         :key="optgroup.text"
+        :label="optgroup.text"
       >
         <option
           v-for="option in optgroup.options"

@@ -8,6 +8,7 @@ export const REPEATER = 'FieldRepeater';
 export const SELECT = 'InputSelect';
 export const TEXT = 'InputText';
 export const TEXTAREA = 'InputTextarea';
+export const TRUE_FALSE = 'InputTrueFalse';
 
 export default {
   CHECKBOX,
@@ -20,4 +21,5 @@ export default {
   SELECT,
   TEXT,
   TEXTAREA,
+  TRUE_FALSE,
 };

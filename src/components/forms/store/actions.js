@@ -15,7 +15,7 @@ import * as types from '../constants/mutation-types';
  * @param {Object} field The field's pertinent data.
  */
 const createFieldData = (field) => ({
-  value: field.defaultValue ? field.defaultValue : null,
+  value: field.value || null,
   isValid: !field.required,
   hasValidated: false,
   getValue: getValueMethod(field.component),

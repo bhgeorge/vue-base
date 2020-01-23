@@ -18,7 +18,12 @@ const routes = [
   {
     path: '/forms',
     name: 'forms',
-    component: () => import(/* webpackChunkName: "forms" */ '../views/components/Forms'),
+    component: () => import(/* webpackChunkName: "forms" */ '../views/components/forms/Forms'),
+  },
+  {
+    path: '/forms/complex',
+    name: 'forms.complex',
+    component: () => import('../views/components/forms/NestedForms'),
   },
   {
     path: '/modal',

@@ -19,6 +19,7 @@ import InputTextarea from './components/forms/fields/InputTextarea.vue';
 import KeyValuePair from './components/forms/fields/KeyValuePair.vue';
 import QuillRTE from './components/forms/fields/QuillRTE.vue';
 import FieldRepeater from './components/forms/fields/FieldRepeater.vue';
+import InputTrueFalse from './components/forms/fields/InputTrueFalse.vue';
 
 // JS goodies
 import constants from './constants';
@@ -53,6 +54,7 @@ export default {
     Vue.component(`${options.prefix}KeyValuePair`, KeyValuePair);
     Vue.component(`${options.prefix}QuillRTE`, QuillRTE);
     Vue.component(`${options.prefix}FieldRepeater`, FieldRepeater);
+    Vue.component(`${options.prefix}InputTrueFalse`, InputTrueFalse);
   },
 };
 
