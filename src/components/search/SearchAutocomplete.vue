@@ -48,6 +48,7 @@ const MAX_RESULTS = 8;
 
 export default {
   props: {
+    // TODO: Make this a trie
     dataset: {
       type: Array,
       required: true,

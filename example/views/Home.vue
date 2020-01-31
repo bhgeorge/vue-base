@@ -42,6 +42,36 @@
           </div>
         </div>
         <hr class="u-m-vert-xxl">
+        <!--  -->
+        <div class="o-section">
+          <div class="u-p-xs u-c-theme-code-header-text u-bg-theme-code-header-bg">
+            <h4>SampleScript.cs</h4>
+          </div>
+            <pre><code class="u-font-s"><span class="token keyword">using</span> UnityEngine<span class="token punctuation">;</span>
+
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">SkillAttack</span> <span class="token punctuation">:</span> <span class="token class-name">Skill</span>
+<span class="token punctuation">{</span>
+  <span class="token keyword">public</span> <span class="token keyword">float</span> freezeTime <span class="token operator">=</span> <span class="token number">0.1f</span><span class="token punctuation">;</span>
+  <span class="token keyword">public</span> <span class="token keyword">float</span> invincibleTime <span class="token operator">=</span> <span class="token number">0.2f</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// I am a comment</span>
+  <span class="token keyword">protected</span> <span class="token class-name">HitData</span> <span class="token function">getHitData</span><span class="token punctuation">(</span><span class="token class-name">Collider2D</span> col<span class="token punctuation">,</span> <span class="token class-name">Vector2</span> force<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">HitData</span><span class="token punctuation">(</span>
+      gameObject<span class="token punctuation">,</span>
+      col<span class="token punctuation">.</span>gameObject<span class="token punctuation">,</span>
+      force<span class="token punctuation">,</span>
+      col<span class="token punctuation">.</span>offset<span class="token punctuation">,</span>
+      freezeTime<span class="token punctuation">,</span>
+      invincibleTime
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">public</span> <span class="token keyword">override</span> <span class="token keyword">void</span> <span class="token function">OnHit</span><span class="token punctuation">(</span><span class="token class-name">Collider2D</span> col<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    Debug<span class="token punctuation">.</span><span class="token function">Log</span><span class="token punctuation">(</span><span class="token string">"Default SkillAttack.OnHit() called"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+        </div>
+        <hr class="u-m-vert-xxl">
         <!-- Sample Thought -->
         <div class="o-section c-typography u-w-m800">
           <h1 class="u-m-bot-l">The Last Remnant had some good ideas</h1>
@@ -143,6 +173,26 @@ export default {
             'dark',
             'black',
           ],
+        },
+        {
+          name: 'gold',
+          id: 'gold',
+          shades: [],
+        },
+        {
+          name: 'orange',
+          id: 'orange',
+          shades: [],
+        },
+        {
+          name: 'teal',
+          id: 'teal',
+          shades: [],
+        },
+        {
+          name: 'blue',
+          id: 'blue',
+          shades: [],
         },
       ],
     };

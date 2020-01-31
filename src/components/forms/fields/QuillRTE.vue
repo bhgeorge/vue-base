@@ -57,11 +57,16 @@ export default {
     this.quill = new Quill(`#vf-${this.reference}`, {
       toolbar: [
         [{ header: [2, 3, 4, false] }],
-        ['bold', 'italic', 'underline'],
+        ['bold', 'italic', 'underline', 'strike'],
       ],
       scrollingContainer: `#vf-${this.reference}__quill-container`,
       theme: 'snow',
     });
+
+    // TODO: Ensure this is a delta
+    if (this.field.value) {
+      this.quill.setContents({ delta: this.field.value, source: 'api' });
+    }
 
     // Update stored value on debounced text change
     this.quill.on('text-change', () => {
