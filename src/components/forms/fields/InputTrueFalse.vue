@@ -12,7 +12,7 @@
       class="c-input__checkbox"
       type="checkbox"
       value="true"
-      v-model="localValue"
+      v-model="fieldVal"
     >
     <label
       :for="`vf-${reference}`"
@@ -38,20 +38,15 @@ export default {
     vuexFormInput,
   ],
 
-  data() {
-    return {
-      localValue: false,
-    };
-  },
-
-  watch: {
-    localValue(val) {
-      this.updateFieldValue({ id: this.reference, val: val[0] === 'true' });
+  computed: {
+    fieldVal: {
+      get() {
+        return this.field.value;
+      },
+      set(val) {
+        this.updateFieldValue({ id: this.reference, val });
+      },
     },
-  },
-
-  created() {
-    this.localValue = this.field.value || [];
   },
 };
 </script>

@@ -65,7 +65,7 @@ export default {
 
     // TODO: Ensure this is a delta
     if (this.field.value) {
-      this.quill.setContents({ delta: this.field.value, source: 'api' });
+      this.quill.setContents(this.field.value.ops, 'api');
     }
 
     // Update stored value on debounced text change

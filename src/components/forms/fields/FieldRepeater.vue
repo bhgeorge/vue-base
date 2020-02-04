@@ -16,14 +16,14 @@
     </p>
     <Draggable
       v-model="fieldValue"
-      class="c-card__body"
+      class="c-card__body u-p-left-0"
     >
       <div
         v-for="(item, index) in fieldValue"
         :key="item.id"
         class="u-m-bot-xs"
       >
-        <div class="u-p-vert-s u-p-right-s u-d-flex u-w-100"><!-- eslint-disable-line -->
+        <div class="u-p-vert-s u-d-flex u-w-100"><!-- eslint-disable-line -->
           <div class="o-cover-link">
             <button
               class="c-btn--ui o-cover-link__item"
