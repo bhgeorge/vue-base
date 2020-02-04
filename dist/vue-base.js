@@ -3527,7 +3527,6 @@ var script$i = {
 
   data() {
     return {
-      items: [],
       typeSelectId: getUniqueId(),
     };
   },
@@ -3541,6 +3540,18 @@ var script$i = {
 
     fieldKeys() {
       return Object.keys(this.field.fields);
+    },
+
+    fieldValue: {
+      get() {
+        return this.field.value;
+      },
+      set(val) {
+        this.updateFieldValue({
+          id: this.reference,
+          val,
+        });
+      },
     },
   },
 
@@ -3557,11 +3568,14 @@ var script$i = {
           id,
         };
         this.registerFields({ form: this.formId, fields: [field] });
-        this.items.push({
-          id,
-          component: field.component,
+        const val = this.field.value || [];
+        this.updateFieldValue({
+          id: this.reference,
+          val: [
+            ...val,
+            { id, component: field.component },
+          ],
         });
-        this.updateFieldValue({ id: this.reference, val: this.items.slice(0) });
         // Wait for the component to be rendered before we access $refs
         window.requestAnimationFrame(() => {
           this.validateField();
@@ -3573,20 +3587,20 @@ var script$i = {
       // TODO: Deregister children of the field as well
       // Deregister removed field
       this.deregisterFields({
-        fields: [this.items[index].id],
+        fields: [this.field.value[index].id],
         form: this.formId,
       });
       // Update the field value
-      this.items.splice(index, 1);
-      this.updateFieldValue({ id: this.reference, val: this.items.slice(0) });
+      const val = this.field.value.slice(0);
+      val.splice(index, 1);
+      this.updateFieldValue({
+        id: this.reference,
+        val,
+      });
       // Wait for the component to be rendered before we access $refs
       window.requestAnimationFrame(() => {
         this.validateField();
       });
-    },
-
-    handleMove() {
-      this.debouncedUpdateFieldValue({ id: this.reference, val: this.items.slice(0) });
     },
   },
 
@@ -3635,7 +3649,7 @@ var __vue_render__$i = function() {
         _vm.field.required ? _c("sup", [_vm._v("*")]) : _vm._e()
       ]),
       _vm._v(" "),
-      _vm.items.length === 0
+      !_vm.fieldValue || _vm.fieldValue.length === 0
         ? _c(
             "p",
             {
@@ -3650,16 +3664,15 @@ var __vue_render__$i = function() {
         "Draggable",
         {
           staticClass: "c-card__body",
-          on: { change: _vm.handleMove },
           model: {
-            value: _vm.items,
+            value: _vm.fieldValue,
             callback: function($$v) {
-              _vm.items = $$v;
+              _vm.fieldValue = $$v;
             },
-            expression: "items"
+            expression: "fieldValue"
           }
         },
-        _vm._l(_vm.items, function(item, index) {
+        _vm._l(_vm.fieldValue, function(item, index) {
           return _c("div", { key: item.id, staticClass: "u-m-bot-xs" }, [
             _c(
               "div",
