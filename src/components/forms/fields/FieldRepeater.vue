@@ -8,19 +8,18 @@
       {{ field.label }}<sup v-if="field.required">*</sup>
     </legend>
     <p
-      v-if="items.length === 0"
+      v-if="!fieldValue || fieldValue.length === 0"
       :id="`${reference}__empty-text`"
       class="u-font-xs u-font-center u-p u-c-theme-text-alt"
     >
       No items currently added.
     </p>
     <Draggable
-      v-model="items"
+      v-model="fieldValue"
       class="c-card__body"
-      @change="handleMove"
     >
       <div
-        v-for="(item, index) in items"
+        v-for="(item, index) in fieldValue"
         :key="item.id"
         class="u-m-bot-xs"
       >
@@ -95,7 +94,6 @@ export default {
 
   data() {
     return {
-      items: [],
       typeSelectId: getUniqueId(),
     };
   },
@@ -109,6 +107,18 @@ export default {
 
     fieldKeys() {
       return Object.keys(this.field.fields);
+    },
+
+    fieldValue: {
+      get() {
+        return this.field.value;
+      },
+      set(val) {
+        this.updateFieldValue({
+          id: this.reference,
+          val,
+        });
+      },
     },
   },
 
@@ -125,11 +135,14 @@ export default {
           id,
         };
         this.registerFields({ form: this.formId, fields: [field] });
-        this.items.push({
-          id,
-          component: field.component,
+        const val = this.field.value || [];
+        this.updateFieldValue({
+          id: this.reference,
+          val: [
+            ...val,
+            { id, component: field.component },
+          ],
         });
-        this.updateFieldValue({ id: this.reference, val: this.items.slice(0) });
         // Wait for the component to be rendered before we access $refs
         window.requestAnimationFrame(() => {
           this.validateField();
@@ -141,20 +154,20 @@ export default {
       // TODO: Deregister children of the field as well
       // Deregister removed field
       this.deregisterFields({
-        fields: [this.items[index].id],
+        fields: [this.field.value[index].id],
         form: this.formId,
       });
       // Update the field value
-      this.items.splice(index, 1);
-      this.updateFieldValue({ id: this.reference, val: this.items.slice(0) });
+      const val = this.field.value.slice(0);
+      val.splice(index, 1);
+      this.updateFieldValue({
+        id: this.reference,
+        val,
+      });
       // Wait for the component to be rendered before we access $refs
       window.requestAnimationFrame(() => {
         this.validateField();
       });
-    },
-
-    handleMove() {
-      this.debouncedUpdateFieldValue({ id: this.reference, val: this.items.slice(0) });
     },
   },
 
