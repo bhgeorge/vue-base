@@ -1,6 +1,6 @@
 <template>
   <div
-    v-show="field.isVisible"
+    v-show="field.state !== states.HIDDEN"
     :class="classNames"
   >
     <label
@@ -10,20 +10,20 @@
       {{ field.label }}<sup v-if="field.required">*</sup>
     </label>
     <textarea
-      :aria-describedby="showError ? `vf-${reference}__error` : false"
+      :aria-describedby="field.state === states.ERROR ? `vf-${reference}__error` : false"
       :aria-required="field.required"
       :id="`vf-${reference}`"
       :name="field.name"
-      @blur="validateField"
+      @blur="validateField()"
       class="c-input__input c-input__input--textarea"
       v-model="fieldText"
     />
     <p
       :id="`vf-${reference}__error`"
       class="c-input__error"
-      v-if="showError"
+      v-if="field.state === states.ERROR"
     >
-      {{ errorText }}
+      {{ field.errorText }}
     </p>
   </div>
 </template>

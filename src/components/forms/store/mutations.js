@@ -2,11 +2,11 @@ import Vue from 'vue';
 import { findIndex } from 'lodash';
 import {
   CREATE_FORM,
-  REGISTER_FIELDS,
   DEREGISTER_FIELDS,
+  REGISTER_FIELDS,
   RESET_FORM,
-  SET_IS_VALID,
-  SET_IS_VISIBLE,
+  SET_ERROR_TEXT,
+  SET_STATE,
   UPDATE_FIELD_VALUE,
 } from '../constants/mutation-types';
 
@@ -52,13 +52,12 @@ export default {
     });
   },
 
-  [SET_IS_VALID](state, obj) {
-    state.fields[obj.id].hasValidated = true;
-    state.fields[obj.id].isValid = obj.bool;
+  [SET_STATE](state, obj) {
+    state[obj.type][obj.id].state = obj.state;
   },
 
-  [SET_IS_VISIBLE](state, obj) {
-    state.fields[obj.id].isVisible = obj.bool;
+  [SET_ERROR_TEXT](state, obj) {
+    state.fields[obj.id].errorText = obj.text;
   },
 
   [UPDATE_FIELD_VALUE](state, obj) {

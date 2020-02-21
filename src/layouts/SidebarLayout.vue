@@ -99,10 +99,12 @@
           </ul>
         </div>
         <!-- SLOT: misc -->
-        <slot name="misc"></slot>
+        <div class="u-bg-theme-nav-bg u-p-s">
+          <slot name="misc"></slot>
+        </div>
         <!-- Copyright -->
         <div class="c-site-nav__copyright">
-          <p class="u-font-xs">
+          <p class="u-font-xs u-c-theme-text-alt">
             <!-- TODO: Pull from author and lastUpdated -->
             &copy; Brian George 2019
           </p>

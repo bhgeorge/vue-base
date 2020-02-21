@@ -1,42 +1,62 @@
 export const isNotEmpty = {
-  test(val) { return val !== null && val.length > 0; },
+  test(val) {
+    return new Promise((resolve) => {
+      if (val !== null) {
+        if (typeof val === 'object') {
+          if (Array.isArray(val)) {
+            resolve(val.length > 0);
+          }
+          resolve(Object.keys(val).length > 0);
+        }
+        resolve(val.length > 0);
+      }
+      resolve(false);
+    });
+  },
   errorText(label) { return `${label} must not be empty.`; },
 };
 
 export const isEmail = {
   test(val) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+    return new Promise((resolve) => {
+      resolve(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val));
+    });
   },
   errorText() { return 'Enter a valid email address in the format username@domain.com'; },
 };
 
 export const isMachineSafeStr = {
   test(val) {
-    const re = /^[A-Za-z0-9_]*$/g;
-    return re.test(val);
+    return new Promise((resolve) => {
+      resolve(/^[A-Za-z0-9_]*$/g.test(val));
+    });
   },
   errorText() { return 'Enter a machine safe string that contains only letters, numbers, and underscores (_).'; },
 };
 
 export const isValidDate = {
   test(val) {
-    return typeof new Date(val).getMonth === 'function';
+    return new Promise((resolve) => {
+      resolve(typeof new Date(val).getMonth === 'function');
+    });
   },
   errorText() { return 'Enter a valid date.'; },
 };
 
 export const isValidImageFile = {
   test(val) {
-    if (val instanceof FileList === false) {
-      return false;
-    }
-    const acceptableFormats = ['image/jpeg', 'image/pjpeg', 'image/png'];
-    for (let i = 0; i < val.length; i += 1) {
-      if (!acceptableFormats.includes(val[i].type)) {
-        return false;
+    return new Promise((resolve) => {
+      if (val instanceof FileList === false) {
+        resolve(false);
       }
-    }
-    return true;
+      const acceptableFormats = ['image/jpeg', 'image/pjpeg', 'image/png'];
+      for (let i = 0; i < val.length; i += 1) {
+        if (!acceptableFormats.includes(val[i].type)) {
+          resolve(false);
+        }
+      }
+      resolve(true);
+    });
   },
   errorText() { return 'Upload an image file in one of the following formats: jpg, jpeg, png.'; },
 };

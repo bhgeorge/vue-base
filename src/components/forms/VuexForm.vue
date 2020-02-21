@@ -10,7 +10,7 @@
       * Required Fields
     </p>
     <Alert
-      v-show="!isValid"
+      v-show="state === ERROR"
       :aria-labelledby="`${formStructure.id}__error__title`"
       :id="`${formStructure.id}__error`"
       ref="errorBox"
@@ -80,6 +80,7 @@
 <script>
 import { mapActions } from 'vuex';
 import formsStore from './store';
+import { ERROR, SUCCESS } from './constants/states';
 
 export default {
   props: {
@@ -100,20 +101,17 @@ export default {
 
   data() {
     return {
-      hasBeenValidated: false,
+      ERROR,
     };
   },
 
   computed: {
-    isValid() {
-      if (!this.hasBeenValidated) {
-        return true;
-      }
-      return this.$store.getters['forms/isFormValid'](this.formStructure.id);
+    state() {
+      return this.$store.getters['forms/formState'](this.formStructure.id);
     },
 
     formErrors() {
-      if (this.isValid) {
+      if (this.state === SUCCESS) {
         return [];
       }
       return this.$store.getters['forms/compileFormErrors'](this.formStructure.id);
@@ -127,29 +125,37 @@ export default {
   },
 
   methods: {
-    ...mapActions('forms', ['registerForm']),
+    ...mapActions('forms', ['registerForm', 'validateField']),
 
     focusField(id) {
       document.getElementById(`vf-${id}`).focus();
     },
 
     handleSubmit() {
-      this.hasBeenValidated = true;
-      // Run validation on all non-validated fields
-      this.$refs.field.forEach((field) => {
-        // Revalidate each field to ensure that we hit child fields
-        field.validateField(true);
-      });
-
-      if (this.isValid) {
-        const data = this.$store.getters['forms/compileFormData'](this.formStructure.id);
-        this.formStructure.onSubmit(data);
-        return;
-      }
-
-      window.requestAnimationFrame(() => {
-        this.$refs.errorBox.$el.focus();
-      });
+      const { fields } = this.$store.state.forms.forms[this.formStructure.id];
+      // Run validation on all fields
+      Promise.all(fields.map(
+        (field) => new Promise((resolve) => {
+          this.validateField({ id: field, onlyPristine: true })
+            .then(() => {
+              resolve();
+            });
+        }),
+      ))
+        .then(() => {
+          if (this.state === ERROR) {
+            window.requestAnimationFrame(() => {
+              this.$refs.errorBox.$el.focus();
+            });
+            return;
+          }
+          // TODO: Ensure this is being properly updated, should be SUCCESS
+          const data = this.$store.getters['forms/compileFormData'](this.formStructure.id);
+          this.formStructure.onSubmit(data);
+        })
+        .catch((err) => {
+          console.error(err); // eslint-disable-line no-console
+        });
     },
   },
 

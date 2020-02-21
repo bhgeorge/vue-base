@@ -12,6 +12,9 @@ const baseValue = (field) => {
 };
 
 const compileKeyValuePairs = (field, state) => {
+  if (!field.value) {
+    return [];
+  }
   const pairs = [];
   field.value.forEach((pair) => {
     pairs.push({

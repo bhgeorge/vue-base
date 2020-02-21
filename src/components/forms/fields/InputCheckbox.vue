@@ -1,7 +1,8 @@
 <template>
   <fieldset
-    v-show="field.isVisible"
+    v-show="field.state !== states.HIDDEN"
     :class="classNames"
+    :id="`vf-${reference}`"
   >
     <legend class="c-input__label">{{ field.label }}<sup v-if="field.required">*</sup></legend>
     <!-- Repeat Inputs -->
@@ -11,12 +12,12 @@
       class="c-input__group"
     >
       <input
-        :aria-describedby="showError ? `vf-${reference}__error` : false"
+        :aria-describedby="field.state === states.ERROR ? `vf-${reference}__error` : false"
         :aria-required="field.required"
         :id="`vf-${reference}__${option.value}`"
         :name="field.name"
         :value="option.value"
-        @blur="validateField"
+        @blur="validateField()"
         class="c-input__checkbox"
         type="checkbox"
         v-model="localValue"
@@ -31,9 +32,9 @@
     <p
       :id="`vf-${reference}__error`"
       class="c-input__error"
-      v-if="showError"
+      v-if="field.state === states.ERROR"
     >
-      {{ errorText }}
+      {{ field.errorText }}
     </p>
   </fieldset>
 </template>

@@ -1,6 +1,9 @@
 <template>
-  <fieldset v-show="field.isVisible">
-    <legend class="c-input__legend u-m-bot-xs">
+  <fieldset v-show="field.state !== states.HIDDEN">
+    <legend
+      class="c-input__legend u-m-bot-xs"
+      :id="`vf-${reference}`"
+    >
       {{ field.label }}<sup v-if="field.required">*</sup>
     </legend>
     <div
@@ -90,7 +93,6 @@ export default {
         id: idB,
         name: 'option_val',
         label: 'Option Value',
-        isValid: true,
         computeValue: false,
         validation: [
           isMachineSafeStr,

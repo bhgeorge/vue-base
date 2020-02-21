@@ -1,6 +1,6 @@
 <template>
   <div
-    v-show="field.isVisible"
+    v-show="field.state !== states.HIDDEN"
     :class="classNames"
   >
     <label
@@ -11,13 +11,13 @@
     </label>
     <input
       :accept="field.acceptFileTypes ? field.acceptFileTypes.join(',') : false"
-      :aria-describedby="showError ? `vf-${reference}__error` : false"
+      :aria-describedby="field.state === states.ERROR ? `vf-${reference}__error` : false"
       :aria-required="field.required"
       :autocomplete="field.autocomplete || false"
       :id="`vf-${reference}`"
       :multiple="!!field.multipleFiles"
       :name="field.name"
-      @blur="validateField"
+      @blur="validateField()"
       @change="handleInputUpload"
       class="c-input__input c-input__input--file"
       ref="input"
@@ -26,9 +26,9 @@
     <p
       :id="`vf-${reference}__error`"
       class="c-input__error"
-      v-if="showError"
+      v-if="field.state === states.ERROR"
     >
-      {{ errorText }}
+      {{ field.errorText }}
     </p>
   </div>
 </template>

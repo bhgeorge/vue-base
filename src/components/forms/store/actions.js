@@ -7,7 +7,10 @@ import {
   EVAL_IS_ONE_OF,
   EVAL_NOT,
 } from '../constants/prereqs';
+import * as states from '../constants/states';
+import { FIELDS } from '../constants/dataTypes';
 import * as types from '../constants/mutation-types';
+import { isNotEmpty } from '../utils/validations';
 
 /**
  * Normalizes field data.
@@ -16,11 +19,10 @@ import * as types from '../constants/mutation-types';
  */
 const createFieldData = (field) => ({
   value: field.value || null,
-  isValid: !field.required,
-  hasValidated: false,
+  state: states.PRISTINE,
   getValue: getValueMethod(field.component),
-  isVisible: field.prereqs ? field.isVisible : true,
   computeValue: true,
+  errorText: '',
   ...field,
 });
 
@@ -176,15 +178,65 @@ const checkIfVisible = (state, id) => {
  */
 export const updateFieldValue = ({ commit, state }, data) => {
   commit(types.UPDATE_FIELD_VALUE, data);
+  // Handle visibility of related fields
   if (state.prereqMap[data.id]) {
     state.prereqMap[data.id].forEach((id) => {
-      commit(types.SET_IS_VISIBLE, { id, bool: checkIfVisible(state, id) });
+      const isVisible = checkIfVisible(state, id);
+      if (!isVisible) {
+        commit(types.SET_STATE, { id, type: FIELDS, state: states.HIDDEN });
+      } else if (state.fields[id].state === states.HIDDEN) {
+        // TODO: See if we can trigger validation to be run here
+        commit(types.SET_STATE, { id, type: FIELDS, state: states.PRISTINE });
+      }
     });
   }
+};
+
+export const validateField = ({ commit, state }, opts) => {
+  const field = state.fields[opts.id];
+  if (opts.onlyPristine && field.state !== states.PRISTINE) {
+    return;
+  }
+
+  const validators = field.validation ? field.validation.slice(0) : [];
+  if (field.required) {
+    validators.unshift(isNotEmpty);
+  } else if (!field.value) {
+    commit(types.SET_STATE, { id: opts.id, type: FIELDS, state: states.SUCCESS });
+    return;
+  }
+
+  commit(types.SET_STATE, { id: opts.id, type: FIELDS, state: states.PENDING });
+  Promise.all(validators.map((validator) => new Promise((resolve, reject) => {
+    validator.test(field.value)
+      .then((isValid) => {
+        resolve({
+          ...validator,
+          isValid,
+        });
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  })))
+    .then((values) => {
+      for (let i = 0; i < values.length; i += 1) {
+        if (!values[i].isValid) {
+          commit(types.SET_ERROR_TEXT, { id: opts.id, text: values[i].errorText(field.label) });
+          commit(types.SET_STATE, { id: opts.id, type: FIELDS, state: states.ERROR });
+          return;
+        }
+      }
+      commit(types.SET_STATE, { id: opts.id, type: FIELDS, state: states.SUCCESS });
+    })
+    .catch((err) => {
+      console.error(err); // eslint-disable-line no-console
+    });
 };
 
 export default {
   registerForm,
   registerFields,
   updateFieldValue,
+  validateField,
 };

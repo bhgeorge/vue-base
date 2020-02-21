@@ -1,6 +1,6 @@
 <template>
   <div
-    v-show="field.isVisible"
+    v-show="field.state !== states.HIDDEN"
     :class="classNames"
   >
     <label
@@ -13,16 +13,19 @@
       :id="`vf-${reference}__quill-container`"
       class="c-quill"
     >
-      <div :id="`vf-${reference}`">
+      <div
+        :id="`vf-${reference}`"
+        tabindex="-1"
+      >
         <!-- Quill.js -->
       </div>
     </div>
     <p
       :id="`vf-${reference}__error`"
       class="c-input__error"
-      v-if="showError"
+      v-if="field.state === states.ERROR"
     >
-      {{ errorText }}
+      {{ field.errorText }}
     </p>
   </div>
 </template>
@@ -53,6 +56,7 @@ export default {
     },
   },
 
+  // TODO: Add on blur to the RTE
   mounted() {
     this.quill = new Quill(`#vf-${this.reference}`, {
       toolbar: [

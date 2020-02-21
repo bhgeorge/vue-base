@@ -110,6 +110,7 @@ export default {
             id: 'quill-rte',
             label: 'Quill RTE',
             name: 'quillRTE',
+            required: true,
           },
           {
             component: fieldTypes.TEXTAREA,

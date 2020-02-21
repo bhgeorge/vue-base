@@ -1,19 +1,27 @@
+import { ERROR, SUCCESS, PENDING } from '../constants/states';
+
 export default {
   /**
-   * Loops associated fields to determine validity.
+   * Returns form state by looping fields.
+   * State Hierarchy ERROR -> PENDING -> SUCCESS
    *
    * @param {String} id The form's ID.
    *
-   * @returns {Boolean} isValid.
+   * @returns {String} The form's state.
    */
-  isFormValid: (state) => (id) => {
+  formState: (state) => (id) => {
+    let isPending = false;
     for (let i = 0; i < state.forms[id].fields.length; i += 1) {
       const fieldId = state.forms[id].fields[i];
-      if (state.fields[fieldId].isVisible && !state.fields[fieldId].isValid) {
-        return false;
+      const fieldState = state.fields[fieldId].state;
+      if (fieldState === ERROR) {
+        return ERROR;
+      }
+      if (fieldState === PENDING) {
+        isPending = true;
       }
     }
-    return true;
+    return isPending ? PENDING : SUCCESS;
   },
 
   /**
@@ -27,7 +35,7 @@ export default {
     const errors = [];
     state.forms[id].fields.forEach((fieldId) => {
       const field = state.fields[fieldId];
-      if (field.isVisible && !field.isValid) {
+      if (field.state === ERROR) {
         errors.push({
           id: fieldId,
           label: field.label,
@@ -46,12 +54,10 @@ export default {
    */
   compileFormData: (state) => (id) => {
     const data = {};
-    state.forms[id].fields.forEach((field) => {
-      const f = state.fields[field];
-      if (f.computeValue) {
-        if (f.isVisible) {
-          data[f.name] = f.getValue(f, state);
-        }
+    state.forms[id].fields.forEach((fieldId) => {
+      const field = state.fields[fieldId];
+      if (field.computeValue && field.state === SUCCESS) {
+        data[field.name] = field.getValue(field, state);
       }
     });
     return data;

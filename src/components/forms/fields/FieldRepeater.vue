@@ -1,8 +1,10 @@
 <!-- eslint-disable -->
 <template>
   <fieldset
-    v-show="field.isVisible"
+    v-show="field.state !== states.HIDDEN"
     class="c-field-repeater c-card c-card--outline u-m-top-0"
+    :id="`vf-${reference}`"
+    tabindex="-1"
   >
     <legend class="c-input__legend">
       {{ field.label }}<sup v-if="field.required">*</sup>
