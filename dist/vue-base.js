@@ -4054,6 +4054,7 @@ var index = {
   forms: {
     fieldTypes,
     prereqs,
+    states,
   },
 };
 
