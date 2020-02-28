@@ -15,13 +15,13 @@
         class="c-input__input"
       >
     </div>
-    <ul class="o-list-inline">
+    <ul class="o-grid o-grid--2">
       <li
         v-for="icon in filteredIcons"
         :key="icon"
         class="o-list-inline__item"
       >
-        <div>
+        <div class="icon-item">
           <Icon :type="icon" />
         </div>
         <p>{{ icon }}</p>
@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import icons from '../../../components/icons/icons.json';
+import icons from '../../../src/components/icons/constants/icons.json';
 
 export default {
   data() {
@@ -51,3 +51,18 @@ export default {
   },
 };
 </script>
+
+<style lang="scss">
+.o-grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 20% 20% 20% 20% 20%;
+  grid-column-gap: 1rem;
+}
+
+.icon-item {
+  border: 1px solid gray;
+  height: 2rem;
+  width: 2rem;
+}
+</style>

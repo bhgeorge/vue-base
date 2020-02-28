@@ -8,6 +8,17 @@
     >
       vue-base
     </p>
+    <div slot="navActions">
+      <div class="c-site-nav__item">
+        <button
+          class="c-site-nav__link"
+          type="button"
+          name="showContactModal"
+        >
+          Contact
+        </button>
+      </div>
+    </div>
   </SidebarLayout>
 </template>
 
