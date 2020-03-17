@@ -764,7 +764,7 @@ var script$5 = {
     },
 
     navToggleIcon() {
-      return this.isNavOpen ? 'close' : 'more';
+      return this.isNavOpen ? 'close' : 'menu';
     },
   },
 
@@ -777,9 +777,9 @@ var script$5 = {
   },
 
   methods: {
-    getNavItemClasses(item) {
-      const classes = ['o-list-bare__item', 'c-site-nav__item'];
-      if (this.activeSubdir === item.route) {
+    getNavLinkClasses(item) {
+      const classes = ['o-cover-link', 'c-nav-link'];
+      if (this.activeSubdir === item.name) {
         classes.push('active');
       }
       return classes;
@@ -813,24 +813,26 @@ var __vue_render__$5 = function() {
         [_vm._v("\n    Skip to content\n  ")]
       ),
       _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "o-circle c-mobile-nav-toggle u-d-none@m",
+          attrs: { name: "toggleNav", type: "button" },
+          on: { click: _vm.toggleNav }
+        },
+        [
+          _c("Icon", {
+            attrs: { type: _vm.navToggleIcon, modifiers: ["o-icon--l"] }
+          }),
+          _vm._v(" "),
+          _c("span", { staticClass: "u-visually-hidden" }, [
+            _vm._v("Toggle navigation")
+          ])
+        ],
+        1
+      ),
+      _vm._v(" "),
       _c("header", { class: _vm.classNames }, [
-        _c(
-          "button",
-          {
-            staticClass: "c-site-nav-toggle c-btn c-btn--icon u-d-none@m",
-            attrs: { name: "toggleNav", type: "button" },
-            on: { click: _vm.toggleNav }
-          },
-          [
-            _c("Icon", { attrs: { type: _vm.navToggleIcon } }),
-            _vm._v(" "),
-            _c("span", { staticClass: "u-visually-hidden" }, [
-              _vm._v("Toggle navigation")
-            ])
-          ],
-          1
-        ),
-        _vm._v(" "),
         _c(
           "nav",
           { staticClass: "c-site-nav" },
@@ -845,35 +847,59 @@ var __vue_render__$5 = function() {
               2
             ),
             _vm._v(" "),
-            _vm.navItems.text
+            _vm.navItems.primary
               ? _c(
                   "ul",
                   { staticClass: "o-list-bare" },
-                  _vm._l(_vm.navItems.text, function(item) {
+                  _vm._l(_vm.navItems.primary, function(item) {
                     return _c(
                       "li",
-                      { key: item.text, class: _vm.getNavItemClasses(item) },
+                      { key: item.text, class: _vm.getNavLinkClasses(item) },
                       [
                         _c(
-                          "router-link",
-                          {
-                            staticClass:
-                              "c-site-nav__link u-p-vert-xs u-p-horiz-s",
-                            attrs: {
-                              to: {
-                                name: item.name,
-                                params: Object.assign({}, item.params)
-                              }
-                            }
-                          },
+                          "div",
+                          { staticClass: "c-nav-link__content" },
                           [
-                            _vm._v(
-                              "\n            " +
-                                _vm._s(item.text) +
-                                "\n          "
+                            item.icon
+                              ? _c("Icon", {
+                                  attrs: {
+                                    type: item.icon,
+                                    modifiers: [
+                                      "c-nav-link__icon",
+                                      "u-m-right-xs",
+                                      "u-f-1-0"
+                                    ]
+                                  }
+                                })
+                              : _vm._e(),
+                            _vm._v(" "),
+                            _c(
+                              "router-link",
+                              {
+                                staticClass:
+                                  "o-cover-link__item c-nav-link__link",
+                                attrs: {
+                                  to: {
+                                    name: item.name,
+                                    params: Object.assign({}, item.params)
+                                  }
+                                }
+                              },
+                              [
+                                _vm._v(
+                                  "\n              " +
+                                    _vm._s(item.text) +
+                                    "\n            "
+                                )
+                              ]
                             )
-                          ]
+                          ],
+                          1
                         ),
+                        _vm._v(" "),
+                        _c("div", {
+                          staticClass: "c-nav-link__item-active-bg"
+                        }),
                         _vm._v(" "),
                         _vm.activeSubdir === item.name && item.sub
                           ? _c(
@@ -918,8 +944,7 @@ var __vue_render__$5 = function() {
                               0
                             )
                           : _vm._e()
-                      ],
-                      1
+                      ]
                     )
                   }),
                   0
@@ -928,39 +953,53 @@ var __vue_render__$5 = function() {
             _vm._v(" "),
             _vm._t("navActions"),
             _vm._v(" "),
-            _vm.navItems.icons
-              ? _c("div", { staticClass: "u-bg-theme-nav-bg" }, [
-                  _c("hr", { staticClass: "u-w-100" }),
+            _vm.navItems.social
+              ? _c("div", [
+                  _c("hr", { staticClass: "u-m-horiz-s" }),
                   _vm._v(" "),
                   _c(
                     "ul",
                     { staticClass: "o-list-inline u-p-s" },
-                    _vm._l(_vm.navItems.icons, function(icon) {
+                    _vm._l(_vm.navItems.social, function(icon) {
                       return _c(
                         "li",
                         { key: icon.type, staticClass: "o-list-inline__item" },
                         [
                           _c(
-                            "a",
+                            "div",
                             {
-                              attrs: {
-                                href: icon.href,
-                                rel: "noreferrer noopener",
-                                target: "_blank"
-                              }
+                              staticClass: "o-circle o-cover-link c-social-link"
                             },
                             [
-                              _c("Icon", { attrs: { type: icon.type } }),
-                              _vm._v(" "),
-                              _c("span", { staticClass: "u-visually-hidden" }, [
-                                _vm._v(
-                                  "\n                " +
-                                    _vm._s(icon.text) +
-                                    " (opens in a new tab)\n              "
-                                )
-                              ])
-                            ],
-                            1
+                              _c(
+                                "a",
+                                {
+                                  staticClass:
+                                    "o-cover-link__item c-social-link__link",
+                                  attrs: {
+                                    href: icon.href,
+                                    rel: "noreferrer noopener",
+                                    target: "_blank"
+                                  }
+                                },
+                                [
+                                  _c("Icon", { attrs: { type: icon.type } }),
+                                  _vm._v(" "),
+                                  _c(
+                                    "span",
+                                    { staticClass: "u-visually-hidden" },
+                                    [
+                                      _vm._v(
+                                        "\n                  " +
+                                          _vm._s(icon.text) +
+                                          " (Opens in a new tab)\n                "
+                                      )
+                                    ]
+                                  )
+                                ],
+                                1
+                              )
+                            ]
                           )
                         ]
                       )
@@ -1004,7 +1043,7 @@ var __vue_staticRenderFns__$5 = [
     var _c = _vm._self._c || _h;
     return _c("div", { staticClass: "c-site-nav__copyright" }, [
       _c("p", { staticClass: "u-font-xs u-c-theme-text-alt" }, [
-        _vm._v("\n          © Brian George 2019\n        ")
+        _vm._v("\n          © Brian George 2020\n        ")
       ])
     ])
   }

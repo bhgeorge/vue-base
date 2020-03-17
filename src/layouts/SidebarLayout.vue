@@ -13,18 +13,21 @@
       Skip to content
     </a>
     <!-- eslint-enable -->
+    <!-- Mobile Nav Toggle -->
+    <button
+      class="o-circle c-mobile-nav-toggle u-d-none@m"
+      name="toggleNav"
+      type="button"
+      @click="toggleNav"
+    >
+      <Icon
+        :type="navToggleIcon"
+        :modifiers="['o-icon--l']"
+      />
+      <span class="u-visually-hidden">Toggle navigation</span>
+    </button>
     <!-- Header -->
     <header :class="classNames">
-      <!-- Mobile Nav Toggle -->
-      <button
-        class="c-site-nav-toggle c-btn c-btn--icon u-d-none@m"
-        name="toggleNav"
-        type="button"
-        @click="toggleNav"
-      >
-        <Icon :type="navToggleIcon" />
-        <span class="u-visually-hidden">Toggle navigation</span>
-      </button>
       <!-- Navigation -->
       <nav class="c-site-nav">
         <router-link
@@ -34,22 +37,30 @@
           <!-- SLOT: navLogo -->
           <slot name="navLogo"></slot>
         </router-link>
-        <!-- Nav Text Links -->
+        <!-- Nav Primary Links -->
         <ul
-          v-if="navItems.text"
+          v-if="navItems.primary"
           class="o-list-bare"
         >
           <li
-            v-for="item in navItems.text"
+            v-for="item in navItems.primary"
             :key="item.text"
-            :class="getNavItemClasses(item)"
+            :class="getNavLinkClasses(item)"
           >
-            <router-link
-              :to="{ name: item.name, params: { ...item.params } }"
-              class="c-site-nav__link u-p-vert-xs u-p-horiz-s"
-            >
-              {{ item.text }}
-            </router-link>
+            <div class="c-nav-link__content">
+              <Icon
+                v-if="item.icon"
+                :type="item.icon"
+                :modifiers="['c-nav-link__icon', 'u-m-right-xs', 'u-f-1-0']"
+              />
+              <router-link
+                class="o-cover-link__item c-nav-link__link"
+                :to="{ name: item.name, params: { ...item.params } }"
+              >
+                {{ item.text }}
+              </router-link>
+            </div>
+            <div class="c-nav-link__item-active-bg"></div>
             <!-- Active Dir Sub Nav -->
             <ul
               v-if="activeSubdir === item.name && item.sub"
@@ -73,28 +84,28 @@
         <!-- TODO: Check if navActions exists and add this + an <hr> -->
         <!-- SLOT: navActions -->
         <slot name="navActions"></slot>
-        <!-- Nav Icon Links (Github etc...) -->
-        <div
-          v-if="navItems.icons"
-          class="u-bg-theme-nav-bg"
-        >
-          <hr class="u-w-100">
+        <!-- Nav Social Links (Github etc...) -->
+        <div v-if="navItems.social">
+          <hr class="u-m-horiz-s">
           <ul class="o-list-inline u-p-s">
             <li
-              v-for="icon in navItems.icons"
+              v-for="icon in navItems.social"
               :key="icon.type"
               class="o-list-inline__item"
             >
-              <a
-                :href="icon.href"
-                rel="noreferrer noopener"
-                target="_blank"
-              >
-                <Icon :type="icon.type" />
-                <span class="u-visually-hidden">
-                  {{ icon.text }} (opens in a new tab)
-                </span>
-              </a>
+              <div class="o-circle o-cover-link c-social-link">
+                <a
+                  :href="icon.href"
+                  class="o-cover-link__item c-social-link__link"
+                  rel="noreferrer noopener"
+                  target="_blank"
+                >
+                  <Icon :type="icon.type" />
+                  <span class="u-visually-hidden">
+                    {{ icon.text }} (Opens in a new tab)
+                  </span>
+                </a>
+              </div>
             </li>
           </ul>
         </div>
@@ -106,7 +117,7 @@
         <div class="c-site-nav__copyright">
           <p class="u-font-xs u-c-theme-text-alt">
             <!-- TODO: Pull from author and lastUpdated -->
-            &copy; Brian George 2019
+            &copy; Brian George 2020
           </p>
         </div>
       </nav>
@@ -166,7 +177,7 @@ export default {
     },
 
     navToggleIcon() {
-      return this.isNavOpen ? 'close' : 'more';
+      return this.isNavOpen ? 'close' : 'menu';
     },
   },
 
@@ -179,9 +190,9 @@ export default {
   },
 
   methods: {
-    getNavItemClasses(item) {
-      const classes = ['o-list-bare__item', 'c-site-nav__item'];
-      if (this.activeSubdir === item.route) {
+    getNavLinkClasses(item) {
+      const classes = ['o-cover-link', 'c-nav-link'];
+      if (this.activeSubdir === item.name) {
         classes.push('active');
       }
       return classes;

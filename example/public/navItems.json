@@ -1,8 +1,9 @@
 {
-  "text": [
+  "primary": [
     {
       "text": "Alert",
-      "name": "alert"
+      "name": "alert",
+      "icon": "component"
     },
     {
       "text": "Forms",
@@ -19,7 +20,7 @@
       "name": "modal"
     }
   ],
-  "icons": [
+  "social": [
     {
       "href": "https://github.com/bhgeorge/vue-base",
       "text": "View this repository on Github",
