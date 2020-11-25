@@ -42,25 +42,14 @@
           v-if="navItems.primary"
           class="o-list-bare"
         >
-          <li
+          <SidebarNavLink
             v-for="item in navItems.primary"
             :key="item.text"
-            :class="getNavLinkClasses(item)"
+            :icon="item.icon"
+            :isActive="activeSubdir === item.name"
+            :route="{ name: item.name, params: { ...item.params } }"
+            :text="item.text"
           >
-            <div class="c-nav-link__content">
-              <Icon
-                v-if="item.icon"
-                :type="item.icon"
-                :modifiers="['c-nav-link__icon', 'u-m-right-xs', 'u-f-1-0']"
-              />
-              <router-link
-                class="o-cover-link__item c-nav-link__link"
-                :to="{ name: item.name, params: { ...item.params } }"
-              >
-                {{ item.text }}
-              </router-link>
-            </div>
-            <div class="c-nav-link__item-active-bg"></div>
             <!-- Active Dir Sub Nav -->
             <ul
               v-if="activeSubdir === item.name && item.sub"
@@ -79,7 +68,7 @@
                 </router-link>
               </li>
             </ul>
-          </li>
+          </SidebarNavLink>
         </ul>
         <!-- TODO: Check if navActions exists and add this + an <hr> -->
         <!-- SLOT: navActions -->
@@ -190,14 +179,6 @@ export default {
   },
 
   methods: {
-    getNavLinkClasses(item) {
-      const classes = ['o-cover-link', 'c-nav-link'];
-      if (this.activeSubdir === item.name) {
-        classes.push('active');
-      }
-      return classes;
-    },
-
     toggleNav() {
       this.isNavOpen = !this.isNavOpen;
     },

@@ -153,8 +153,8 @@ export default {
           shades: [],
         },
         {
-          name: 'salmon',
-          id: 'salmon',
+          name: 'red',
+          id: 'red',
           shades: [
             'hover',
             'white',
@@ -164,12 +164,23 @@ export default {
           ],
         },
         {
-          name: 'indigo',
-          id: 'indigo',
+          name: 'blue',
+          id: 'blue',
           shades: [
             'hover',
             'white',
             'light',
+            'dark',
+            'black',
+          ],
+        },
+        {
+          name: 'teal',
+          id: 'teal',
+          shades: [
+            'white',
+            'light',
+            'hover',
             'dark',
             'black',
           ],
@@ -182,16 +193,6 @@ export default {
         {
           name: 'orange',
           id: 'orange',
-          shades: [],
-        },
-        {
-          name: 'teal',
-          id: 'teal',
-          shades: [],
-        },
-        {
-          name: 'blue',
-          id: 'blue',
           shades: [],
         },
       ],

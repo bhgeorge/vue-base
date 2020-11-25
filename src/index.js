@@ -5,6 +5,7 @@ import Modal from './components/Modal.vue';
 import Alert from './components/alerts/Alert.vue';
 import AlertList from './components/alerts/AlertList.vue';
 import SidebarLayout from './layouts/SidebarLayout.vue';
+import SidebarNavLink from './layouts/components/SidebarNavLink.vue';
 import SearchResult from './components/search/SearchResult.vue';
 import SearchAutocomplete from './components/search/SearchAutocomplete.vue';
 // Forms
@@ -34,6 +35,7 @@ export default {
   }) {
     // Layouts
     Vue.component(`${options.prefix}SidebarLayout`, SidebarLayout);
+    Vue.component(`${options.prefix}SidebarNavLink`, SidebarNavLink);
     // Components
     Vue.component(`${options.prefix}ExternalLink`, ExternalLink);
     Vue.component(`${options.prefix}Icon`, Icon);
